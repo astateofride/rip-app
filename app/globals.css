@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+
+@theme inline {
+  --color-black:   #0a0a12;
+  --color-dark:    #13131f;
+  --color-surf:    #1a1a2e;
+  --color-surf2:   #202035;
+  --color-bord:    #2a2a45;
+  --color-dim:     #7070a0;
+  --color-dim2:    #4a4a70;
+  --color-inp:     #0d0d1a;
+  --color-white:   #f0f0eb;
+  --color-gold:    #e8c547;
+  --color-green:   #2ecc71;
+  --color-teal:    #4ecdc4;
+  --color-pink:    #ff6b9d;
+
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-sans:    'DM Sans', sans-serif;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+html { background: #0a0a12; scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #0a0a12;
+  color: #f0f0eb;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.font-display { font-family: 'Bebas Neue', sans-serif; }
+
+/* Shared input style */
+.inp {
+  background: #0d0d1a;
+  border: 1px solid #2a2a45;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #f0f0eb;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+  width: 100%;
+  -webkit-appearance: none;
+  transition: border-color 0.15s;
+}
+.inp:focus { border-color: #e8c547; }
+.inp::placeholder { color: #4a4a70; }
+textarea.inp { resize: none; min-height: 72px; }
