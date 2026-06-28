@@ -40,16 +40,16 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
           >
             {initials ?? '?'}
           </button>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-0.5 rounded-full flex-shrink-0" style={{ background: '#e8c547', height: 40 }} />
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-0.5 rounded-full flex-shrink-0" style={{ background: '#e8c547', height: 32 }} />
             <div className="leading-none min-w-0">
-              <div className="font-display" style={{ fontSize: 11, color: '#e8c547', letterSpacing: '0.18em', marginBottom: 3 }}>
-                {mode === 'coach' ? 'COACH PORTAL' : `BETA · ${process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}`}
-              </div>
-              <div className="font-display" style={{ fontSize: 22, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1 }}>
+              {mode === 'coach' && (
+                <div className="font-display" style={{ fontSize: 10, color: '#e8c547', letterSpacing: '0.18em', marginBottom: 2 }}>COACH PORTAL</div>
+              )}
+              <div className="font-display" style={{ fontSize: 17, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1.1 }}>
                 RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span>
               </div>
-              <div className="font-display" style={{ fontSize: 22, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1 }}>
+              <div className="font-display" style={{ fontSize: 17, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1.1 }}>
                 PATHWAY
               </div>
             </div>
