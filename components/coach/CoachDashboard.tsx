@@ -377,31 +377,39 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#3a3a5c' }}>MESSAGES</div>
               {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length} UNREAD</span>}
             </div>
-            {localStudents.length === 0 ? (
-              <div className="rounded-2xl px-4 py-5 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#4a4a70' }}>No students yet</div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {localStudents.map(s => {
-                  const lastMsg = messages.filter(m => m.student_id === s.id).slice(-1)[0]
-                  const unread = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
-                  return (
-                    <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
-                      className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl text-left active:scale-[0.98] transition-all"
-                      style={{ background: '#111120', border: `1px solid ${unread ? 'rgba(255,107,157,0.3)' : 'rgba(255,255,255,0.06)'}`, borderLeft: `4px solid ${unread ? '#ff6b9d' : '#e8c547'}` }}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
-                        style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
-                        {s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
-                        <div className="text-xs truncate mt-0.5" style={{ color: '#4a4a70' }}>{lastMsg ? lastMsg.text : 'No messages yet'}</div>
-                      </div>
-                      {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+            {(() => {
+              const studentsWithMessages = localStudents.filter(s => messages.some(m => m.student_id === s.id))
+              if (studentsWithMessages.length === 0) {
+                return (
+                  <div className="rounded-2xl px-4 py-5 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#4a4a70' }}>
+                    No messages yet
+                  </div>
+                )
+              }
+              return (
+                <div className="flex flex-col gap-2">
+                  {studentsWithMessages.map(s => {
+                    const lastMsg = messages.filter(m => m.student_id === s.id).slice(-1)[0]
+                    const unread = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
+                    return (
+                      <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
+                        className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl text-left active:scale-[0.98] transition-all"
+                        style={{ background: '#111120', border: `1px solid ${unread ? 'rgba(255,107,157,0.3)' : 'rgba(255,255,255,0.06)'}`, borderLeft: `4px solid ${unread ? '#ff6b9d' : '#e8c547'}` }}>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
+                          style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
+                          {s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
+                          <div className="text-xs truncate mt-0.5" style={{ color: '#4a4a70' }}>{lastMsg.text}</div>
+                        </div>
+                        {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </div>
 
           {/* ③ Student overview — one card per student */}
