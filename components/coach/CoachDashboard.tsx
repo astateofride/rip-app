@@ -731,26 +731,43 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                   return (
                     <div key={s.id} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${hasReview ? 'rgba(255,107,157,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
                       {/* Main row — tap for profile */}
-                      <button className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-white/[0.02]" onClick={() => openProfile(s.id)}>
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
-                          style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
-                          {initials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-base leading-none" style={{ color: '#f0f0eb' }}>{s.name}</span>
-                            {hasReview && <button onClick={e => { e.stopPropagation(); setStudentReviewSheet(s.id); setSheetNotes({}) }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full active:scale-95 transition-all" style={{ background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }}>{toReview} to review →</button>}
-                            {unreadMsgs > 0 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs}</span>}
+                      <button className="w-full px-4 pt-3 pb-3 text-left active:bg-white/[0.02]" onClick={() => openProfile(s.id)}>
+                        {/* Name row */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center font-display text-sm flex-shrink-0"
+                            style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
+                            {initials}
                           </div>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
-                              <div className="h-full rounded-full transition-all" style={{ width: `${overallPct}%`, background: overallPct === 100 ? '#2ecc71' : '#e8c547' }} />
-                            </div>
-                            <span className="text-[10px] font-bold flex-shrink-0" style={{ color: '#7878a8' }}>{overallPct}%</span>
-                            <span className="text-[10px] flex-shrink-0" style={{ color: '#8888b0' }}>{timeAgo(sLastSession?.started_at)}</span>
-                          </div>
+                          <span className="font-bold text-base leading-none flex-1 min-w-0 truncate" style={{ color: '#f0f0eb' }}>{s.name}</span>
+                          {hasReview && (
+                            <button onClick={e => { e.stopPropagation(); setStudentReviewSheet(s.id); setSheetNotes({}) }}
+                              className="text-[10px] font-bold px-2 py-1 rounded-full active:scale-95 transition-all flex-shrink-0"
+                              style={{ background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }}>
+                              {toReview} to review →
+                            </button>
+                          )}
+                          {unreadMsgs > 0 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs}</span>}
                         </div>
-                        <span style={{ color: '#3a3a5a', fontSize: 14 }}>›</span>
+                        {/* Stage progress boxes */}
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {stageStats.map((st, si) => {
+                            const c = colours[si]
+                            const stageName = ['Foundations', 'Advanced', 'Mastery'][si]
+                            const signed = !!getSignoff(s.id, si)
+                            const pctVal = st.total ? Math.round(st.done / st.total * 100) : 0
+                            return (
+                              <div key={si} className="rounded-xl px-2 py-2"
+                                style={{ background: signed ? 'rgba(46,204,113,0.07)' : `rgba(${si===0?'232,197,71':si===1?'78,205,196':'255,107,157'},0.06)`, border: `1px solid ${signed ? 'rgba(46,204,113,0.25)' : `rgba(${si===0?'232,197,71':si===1?'78,205,196':'255,107,157'},0.18)`}` }}>
+                                <div className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: signed ? '#2ecc71' : c }}>{signed ? '✓ ' : ''}{stageName}</div>
+                                <div className="font-display" style={{ fontSize: 20, color: signed ? '#2ecc71' : c, lineHeight: 1 }}>{pctVal}%</div>
+                                <div className="h-1 rounded-full mt-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                                  <div className="h-full rounded-full transition-all" style={{ width: `${pctVal}%`, background: signed ? '#2ecc71' : c }} />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                        <div className="text-[10px] mt-2 text-right" style={{ color: '#8888b0' }}>{timeAgo(sLastSession?.started_at)}</div>
                       </button>
                       {/* Quick actions */}
                       <div className="flex border-t" style={{ borderColor: '#1a1a2e' }}>
