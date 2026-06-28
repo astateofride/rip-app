@@ -46,6 +46,29 @@ function selfAssess(answer: string, manualNote: string, taskText: string): { hit
   return { hits: hits.slice(0, 6), misses, score }
 }
 
+interface ManualPopup {
+  ref: string
+  note: string
+  pageRef: string
+}
+
+// Render task text with §X.X references as tappable chips
+function renderWithSectionLinks(text: string, onSection: (match: string) => void) {
+  const parts = text.split(/(§[\d.]+(?:\s*\([^)]+\))?)/g)
+  return parts.map((part, i) => {
+    if (/^§/.test(part)) {
+      return (
+        <button key={i} type="button" onClick={() => onSection(part)}
+          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-bold text-xs align-baseline mx-0.5 transition-all active:scale-95"
+          style={{ background: 'rgba(232,197,71,0.15)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.35)', lineHeight: 1.4 }}>
+          {part} ↗
+        </button>
+      )
+    }
+    return <span key={i}>{part}</span>
+  })
+}
+
 export default function StageView({ stageIdx, userId, tasks, dayData, remarks, signoffs, unreadCount }: Props) {
   const router = useRouter()
   const supabase = createClient()
@@ -55,6 +78,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   const [localDayData, setLocalDayData] = useState<DayData[]>(dayData)
   const [assessments, setAssessments] = useState<Record<string, { hits: string[]; misses: string[]; score: number }>>({})
   const [saving, setSaving] = useState<string | null>(null)
+  const [manualPopup, setManualPopup] = useState<ManualPopup | null>(null)
 
   const colour = stage.colour
   const signoff = signoffs.find(s => s.stage_idx === stageIdx)
@@ -250,7 +274,9 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                 </div>
 
                                 {/* Task text */}
-                                <p className="text-sm leading-relaxed mb-1" style={{ color: done ? '#7070a0' : '#f0f0eb' }}>{task.text}</p>
+                                <p className="text-sm leading-relaxed mb-1" style={{ color: done ? '#7070a0' : '#f0f0eb' }}>
+                                  {renderWithSectionLinks(task.text, () => setManualPopup({ ref: task.ref, note: day.manualNote, pageRef: task.ref }))}
+                                </p>
                                 <div className="text-xs font-bold" style={{ color: '#4a4a70' }}>{task.ref}</div>
                               </div>
 
@@ -370,6 +396,30 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
           })}
         </div>
       </div>
+
+      {/* Manual section popup */}
+      {manualPopup && (
+        <div className="fixed inset-0 z-[300] flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setManualPopup(null)}>
+          <div className="w-full rounded-t-3xl p-6 pb-10" style={{ background: '#111120', border: '1px solid #2a2a45', maxHeight: '70vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}>
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: '#2a2a45' }} />
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>Manual Reference</div>
+                <div className="font-display text-2xl leading-none" style={{ color: '#e8c547', letterSpacing: '0.04em' }}>{manualPopup.ref}</div>
+              </div>
+              <button onClick={() => setManualPopup(null)}
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
+                style={{ background: '#2a2a45', color: '#7070a0' }}>✕</button>
+            </div>
+            <div className="rounded-2xl p-4" style={{ background: '#0d0d1a', borderLeft: '3px solid #e8c547' }}>
+              <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{manualPopup.note}</p>
+            </div>
+            <p className="text-xs mt-4 text-center" style={{ color: '#3a3a5c' }}>Open your physical manual to {manualPopup.pageRef}</p>
+          </div>
+        </div>
+      )}
 
       {/* Floating chat */}
       <button onClick={() => router.push('/pathway/chat')} className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center"
