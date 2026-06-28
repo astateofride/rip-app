@@ -653,38 +653,78 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                     {/* Overall progress */}
                     <div>
                       <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#9898c0' }}>TRAINING PROGRESS — {totalAll ? Math.round(totalDone / totalAll * 100) : 0}% OVERALL</div>
-                      {stageStats.map((s, si) => (
-                        <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                          <div className="font-display text-xl flex-shrink-0 w-8 text-center" style={{ color: colours[si] }}>S{si + 1}</div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#9898c0' }}>
-                              <span className="truncate mr-2">{stageNames[si]}</span>
-                              <span style={{ color: colours[si], flexShrink: 0 }}>{s.done}/{s.total}</span>
+                      {stageStats.map((s, si) => {
+                        const signoff = getSignoff(profileSheet, si)
+                        const unlocked = si === 0 || !!getSignoff(profileSheet, si - 1)
+                        const stageComplete = s.done === s.total && s.total > 0
+                        const { completed } = countTasks(profileSheet, si)
+                        const hasReview = completed > s.done && !s.signed
+                        return (
+                          <div key={si} className="py-3 flex flex-col gap-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                            <div className="flex items-center gap-3">
+                              <div className="font-display text-xl flex-shrink-0 w-8 text-center" style={{ color: colours[si] }}>S{si + 1}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#9898c0' }}>
+                                  <span className="truncate mr-2">{stageNames[si]}</span>
+                                  <span style={{ color: hasReview ? '#ff6b9d' : colours[si], flexShrink: 0 }}>
+                                    {s.done}/{s.total}{hasReview ? ` · ${completed - s.done} to review` : ''}
+                                  </span>
+                                </div>
+                                <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+                                  <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.signed ? '#2ecc71' : colours[si] }} />
+                                </div>
+                              </div>
+                              {s.signed ? (
+                                <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>✓ SIGNED</span>
+                              ) : unlocked && stageComplete ? (
+                                <button onClick={() => { setProfileSheet(null); setSignoffModal({ stageIdx: si, studentId: profileSheet }) }}
+                                  className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0 active:scale-95 transition-all"
+                                  style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547' }}>
+                                  SIGN OFF
+                                </button>
+                              ) : (
+                                <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ color: '#8888b0', border: '1px solid #1a1a2e' }}>
+                                  {unlocked ? 'IN PROGRESS' : 'LOCKED'}
+                                </span>
+                              )}
                             </div>
-                            <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
-                              <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: colours[si] }} />
-                            </div>
+                            {s.signed && signoff && (
+                              <div className="flex flex-col gap-1.5 pl-11">
+                                <div className="text-xs font-semibold" style={{ color: '#8888b0' }}>
+                                  Signed {formatDate(signoff.signed_at ?? null)}
+                                </div>
+                                <button onClick={() => revokeSignoff(profileSheet, si)}
+                                  className="self-start text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all"
+                                  style={{ color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.25)', background: 'rgba(255,107,157,0.06)' }}>
+                                  UNDO SIGN-OFF
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          {s.signed
-                            ? <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71' }}>✓ SIGNED</span>
-                            : <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ color: '#60608a', border: '1px solid #1a1a2e' }}>{s.pct}%</span>}
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
 
                     {/* Quick actions */}
-                    <div className="flex gap-3 pb-2">
-                      <button onClick={() => { setProfileSheet(null); setTab('messages') }}
-                        className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
-                        style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547', letterSpacing: '0.06em' }}>
-                        💬 MESSAGE
-                      </button>
-                      <button onClick={() => { setProfileSheet(null); setTab('tasks') }}
-                        className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
-                        style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.3)', color: '#4ecdc4', letterSpacing: '0.06em' }}>
-                        📋 TASKS
-                      </button>
-                    </div>
+                    {(() => {
+                      const profileToReview = [0,1,2].some(si => { const { done, completed } = countTasks(profileSheet, si); return completed > done && !getSignoff(profileSheet, si) })
+                      return (
+                        <div className="flex gap-3 pb-2">
+                          <button onClick={() => { setProfileSheet(null); setSelectedStudentId(profileSheet); setTab('messages') }}
+                            className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
+                            style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547', letterSpacing: '0.06em' }}>
+                            💬 MESSAGE
+                          </button>
+                          {profileToReview && (
+                            <button onClick={() => { setProfileSheet(null); setSelectedStudentId(profileSheet); setTab('tasks') }}
+                              className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
+                              style={{ background: 'rgba(255,107,157,0.08)', border: '1px solid rgba(255,107,157,0.3)', color: '#ff6b9d', letterSpacing: '0.06em' }}>
+                              📋 REVIEW
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </>
                 )}
               </div>
