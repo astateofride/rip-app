@@ -27,7 +27,7 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
   return (
     <div
       className="sticky top-0 z-50 flex items-center justify-between px-4 gap-2"
-      style={{ background: '#0a0a12', borderBottom: '1px solid #2a2a45', height: 52 }}
+      style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.08)', height: 52 }}
     >
       <div className="flex items-center gap-2">
         <button
@@ -51,8 +51,8 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
         <span
           className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
           style={mode === 'coach'
-            ? { background: '#e8c547', color: '#0a0a12', border: '1px solid #e8c547' }
-            : { background: 'transparent', color: '#7070a0', border: '1px solid #2a2a45' }
+            ? { background: '#e8c547', color: '#080810', border: '1px solid #e8c547' }
+            : { background: 'transparent', color: '#7070a0', border: '1px solid rgba(255,255,255,0.08)' }
           }
         >
           {mode}
@@ -61,12 +61,12 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
         {/* Progress segments */}
         {mode === 'student' && (
           <div className="flex items-center gap-1">
-            <div className="flex rounded-full overflow-hidden gap-px" style={{ width: 80, height: 5, background: '#2a2a45' }}>
+            <div className="flex rounded-full overflow-hidden gap-px" style={{ width: 80, height: 5, background: 'rgba(255,255,255,0.08)' }}>
               {segs.map(i => (
                 <div
                   key={i}
                   className="flex-1 h-full transition-all duration-300"
-                  style={{ background: pct >= (i + 1) * 20 ? '#e8c547' : (pct > i * 20 ? 'rgba(232,197,71,0.45)' : '#2a2a45') }}
+                  style={{ background: pct >= (i + 1) * 20 ? '#e8c547' : (pct > i * 20 ? 'rgba(232,197,71,0.45)' : 'rgba(255,255,255,0.08)') }}
                 />
               ))}
             </div>

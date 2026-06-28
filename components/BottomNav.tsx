@@ -62,7 +62,7 @@ export default function BottomNav({ unreadCoach = 0 }: Props) {
   return (
     <div
       className="fixed bottom-0 left-0 right-0 flex z-50"
-      style={{ background: '#0a0a12', borderTop: '1px solid #2a2a45', height: 60 }}
+      style={{ background: '#080810', borderTop: '1px solid rgba(255,255,255,0.08)', height: 60 }}
     >
       {tabs.map(tab => {
         const active = isActive(tab.href)
@@ -88,7 +88,7 @@ export default function BottomNav({ unreadCoach = 0 }: Props) {
             {tab.badge ? (
               <span
                 className="absolute top-2 right-1/4 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                style={{ background: '#e8c547', color: '#0a0a12' }}
+                style={{ background: '#e8c547', color: '#080810' }}
               >
                 {tab.badge > 9 ? '9+' : tab.badge}
               </span>
@@ -96,6 +96,30 @@ export default function BottomNav({ unreadCoach = 0 }: Props) {
           </button>
         )
       })}
+
+      {/* ASOR Academy external link */}
+      <a
+        href="https://www.astateofride.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex-1 flex flex-col items-center justify-center gap-0.5"
+        style={{
+          color: '#4ecdc4',
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 8,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          textDecoration: 'none',
+          borderLeft: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        ASOR
+      </a>
     </div>
   )
 }

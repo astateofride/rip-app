@@ -185,18 +185,18 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   }
 
   return (
-    <div style={{ background: '#0a0a12', minHeight: '100vh', paddingBottom: 80 }}>
+    <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 80 }}>
       <Topbar progress={overallPct()} mode="student" />
 
       <div style={{ maxWidth: 480, margin: '0 auto' }}>
 
         {/* Back */}
-        <button onClick={() => router.push('/pathway')} className="flex items-center gap-2 px-4 py-3 text-sm w-full" style={{ color: '#7070a0', borderBottom: '1px solid #2a2a45' }}>
+        <button onClick={() => router.push('/pathway')} className="flex items-center gap-2 px-4 py-3 text-sm w-full" style={{ color: '#7070a0', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <span style={{ color: '#f0f0eb', fontSize: 18 }}>←</span> All Stages
         </button>
 
         {/* Stage hero */}
-        <div className="px-4 py-5" style={{ borderBottom: '1px solid #2a2a45' }}>
+        <div className="px-4 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>{stage.eyebrow}</div>
           <div className="font-display whitespace-pre-line leading-none" style={{ fontSize: 56, color: colour, letterSpacing: '0.02em' }}>{stage.name}</div>
           <p className="text-sm mt-2 leading-relaxed" style={{ color: '#7070a0' }}>{stage.desc}</p>
@@ -208,7 +208,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
           <div className="mx-4 mt-3 px-4 py-3 rounded-xl text-sm font-medium"
             style={signoffs.some(s => s.stage_idx === stageIdx - 1)
               ? { border: '1px solid rgba(46,204,113,0.3)', background: 'rgba(46,204,113,0.07)', color: '#2ecc71' }
-              : { border: '1px solid rgba(255,255,255,0.08)', background: '#1a1a2e', color: '#7070a0' }}>
+              : { border: '1px solid rgba(255,255,255,0.08)', background: '#111120', color: '#7070a0' }}>
             {signoffs.some(s => s.stage_idx === stageIdx - 1)
               ? `✓ Stage ${stageIdx} complete — unlocked`
               : `Stage ${stageIdx} in progress — coach sign-off required to unlock`}
@@ -227,7 +227,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             const coachSigned = isLastDay && !!signoff
 
             return (
-              <div key={di} className="rounded-2xl overflow-hidden" style={{ background: '#1a1a2e', border: `1px solid ${allDone ? 'rgba(46,204,113,0.3)' : '#2a2a45'}` }}>
+              <div key={di} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${allDone ? 'rgba(46,204,113,0.3)' : 'rgba(255,255,255,0.07)'}` }}>
 
                 {/* Day header */}
                 <button onClick={() => toggleDay(di)} className="flex items-center gap-3 w-full px-4 py-4 text-left" style={{ minHeight: 60 }}>
@@ -241,21 +241,21 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                     </div>
                   </div>
                   <div className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs flex-shrink-0 transition-all"
-                    style={allDone ? { background: '#2ecc71', borderColor: '#2ecc71', color: '#0a0a12', fontWeight: 700 } : { borderColor: '#2a2a45' }}>
+                    style={allDone ? { background: '#2ecc71', borderColor: '#2ecc71', color: '#080810', fontWeight: 700 } : { borderColor: 'rgba(255,255,255,0.07)' }}>
                     {allDone ? '✓' : ''}
                   </div>
                   <span style={{ color: '#7070a0', fontSize: 16, transform: isOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>▾</span>
                 </button>
 
                 {isOpen && (
-                  <div style={{ borderTop: '1px solid #2a2a45' }}>
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
 
                     {/* Manual reference — tap to expand, logs read silently */}
                     <div className="mx-4 mt-4">
                       <button
                         onClick={() => manualExpanded.has(di) ? setManualExpanded(prev => { const n = new Set(prev); n.delete(di); return n }) : expandManual(di)}
                         className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
-                        style={{ background: '#0d0d1a', border: `1px solid ${manualExpanded.has(di) ? 'rgba(232,197,71,0.4)' : 'rgba(232,197,71,0.15)'}`, borderLeft: '3px solid #e8c547' }}>
+                        style={{ background: '#0c0c18', border: `1px solid ${manualExpanded.has(di) ? 'rgba(232,197,71,0.4)' : 'rgba(232,197,71,0.15)'}`, borderLeft: '3px solid #e8c547' }}>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>📖 Manual Reference</span>
                           <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-widest" style={{ background: 'rgba(232,197,71,0.1)', color: '#e8c547' }}>{day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ?? stage.ref}</span>
@@ -290,7 +290,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                           const savedAnswer = prog?.answer ?? ''
 
                           return (
-                            <div key={ti} className="rounded-xl overflow-hidden" style={{ background: '#0d0d1a', border: `1px solid ${done ? 'rgba(46,204,113,0.25)' : '#2a2a45'}` }}>
+                            <div key={ti} className="rounded-xl overflow-hidden" style={{ background: '#0c0c18', border: `1px solid ${done ? 'rgba(46,204,113,0.25)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="p-4">
                                 {/* Task number + type badge */}
                                 <div className="flex items-center gap-2 mb-2">
@@ -298,7 +298,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                   <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                                     style={written
                                       ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.25)' }
-                                      : { background: 'rgba(255,255,255,0.05)', color: '#7070a0', border: '1px solid #2a2a45' }}>
+                                      : { background: 'rgba(255,255,255,0.05)', color: '#7070a0', border: '1px solid rgba(255,255,255,0.07)' }}>
                                     {written ? '✍ Written' : '✓ Practical'}
                                   </span>
                                   {done && <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>Done</span>}
@@ -312,12 +312,12 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                               </div>
 
                               {written ? (
-                                <div className="px-4 pb-4" style={{ borderTop: '1px solid #2a2a45' }}>
+                                <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
                                   {/* Show saved answer if done */}
                                   {done && savedAnswer ? (
                                     <div className="mt-3">
                                       <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7070a0' }}>Your answer</div>
-                                      <div className="text-sm leading-relaxed px-3 py-3 rounded-xl italic" style={{ background: '#1a1a2e', color: '#f0f0eb', borderLeft: '2px solid #2ecc71' }}>{savedAnswer}</div>
+                                      <div className="text-sm leading-relaxed px-3 py-3 rounded-xl italic" style={{ background: '#111120', color: '#f0f0eb', borderLeft: '2px solid #2ecc71' }}>{savedAnswer}</div>
                                     </div>
                                   ) : (
                                     <div className="mt-3">
@@ -336,7 +336,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                         }}
                                         disabled={saving === key}
                                         className="w-full mt-2 py-3 rounded-xl font-display text-xl tracking-wide disabled:opacity-40"
-                                        style={{ background: '#4ecdc4', color: '#0a0a12', letterSpacing: '0.04em' }}>
+                                        style={{ background: '#4ecdc4', color: '#080810', letterSpacing: '0.04em' }}>
                                         {saving === key ? 'CHECKING…' : 'SUBMIT ANSWER'}
                                       </button>
                                     </div>
@@ -344,7 +344,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
                                   {/* Self-assessment result */}
                                   {assessment && (
-                                    <div className="mt-3 rounded-xl p-4" style={{ background: '#1a1a2e', border: '1px solid #2a2a45' }}>
+                                    <div className="mt-3 rounded-xl p-4" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
                                       <div className="flex items-center justify-between mb-3">
                                         <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7070a0' }}>Self-Assessment</div>
                                         <div className="font-display text-2xl" style={{ color: assessment.score >= 60 ? '#2ecc71' : assessment.score >= 30 ? '#e8c547' : '#ff6b9d' }}>
@@ -379,13 +379,13 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                 </div>
                               ) : (
                                 /* Practical task — tap to mark done */
-                                <div className="px-4 pb-4" style={{ borderTop: '1px solid #2a2a45' }}>
+                                <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
                                   <button
                                     onClick={() => toggleCheckbox(di, ti)}
                                     className="w-full mt-3 py-3 rounded-xl font-display text-xl tracking-wide transition-all"
                                     style={done
                                       ? { background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71', letterSpacing: '0.04em' }
-                                      : { background: 'rgba(255,255,255,0.04)', border: '1px solid #2a2a45', color: '#7070a0', letterSpacing: '0.04em' }}>
+                                      : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#7070a0', letterSpacing: '0.04em' }}>
                                     {done ? '✓ DONE' : 'MARK DONE'}
                                   </button>
                                 </div>
@@ -415,7 +415,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                         <div className="mt-3 px-4 py-3 rounded-xl text-sm font-medium"
                           style={coachSigned
                             ? { border: '1px solid rgba(46,204,113,0.3)', background: 'rgba(46,204,113,0.07)', color: '#2ecc71' }
-                            : { border: '1px solid #2a2a45', background: '#0d0d1a', color: '#7070a0' }}>
+                            : { border: '1px solid rgba(255,255,255,0.07)', background: '#0c0c18', color: '#7070a0' }}>
                           {coachSigned ? `✓ Stage ${stageIdx + 1} signed off by your coach` : 'Awaiting coach sign-off to unlock the next stage'}
                         </div>
                       )}
@@ -431,10 +431,10 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       {/* Manual section popup */}
       {manualPopup && (
         <div className="fixed inset-0 z-[300] flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setManualPopup(null)}>
-          <div className="w-full rounded-t-3xl p-6 pb-10" style={{ background: '#111120', border: '1px solid #2a2a45', maxHeight: '70vh', overflowY: 'auto' }}
+          <div className="w-full rounded-t-3xl p-6 pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '70vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
             {/* Handle */}
-            <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: '#2a2a45' }} />
+            <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>Manual Reference</div>
@@ -442,9 +442,9 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
               </div>
               <button onClick={() => setManualPopup(null)}
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                style={{ background: '#2a2a45', color: '#7070a0' }}>✕</button>
+                style={{ background: 'rgba(255,255,255,0.07)', color: '#7070a0' }}>✕</button>
             </div>
-            <div className="rounded-2xl p-4" style={{ background: '#0d0d1a', borderLeft: '3px solid #e8c547' }}>
+            <div className="rounded-2xl p-4" style={{ background: '#0c0c18', borderLeft: '3px solid #e8c547' }}>
               <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{manualPopup.note}</p>
             </div>
             <p className="text-xs mt-4 text-center" style={{ color: '#3a3a5c' }}>Open your physical manual to {manualPopup.pageRef}</p>
@@ -455,7 +455,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       {/* Floating chat */}
       <button onClick={() => router.push('/pathway/chat')} className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center"
         style={{ background: '#e8c547', boxShadow: '0 4px 20px rgba(232,197,71,0.35)', zIndex: 200 }}>
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#0a0a12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#080810" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
         {unreadCount > 0 && (
