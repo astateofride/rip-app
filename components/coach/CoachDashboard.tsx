@@ -344,7 +344,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
 
       {tab === 'messages' && student ? (
         /* ── MESSAGES FULL SCREEN ── */
-        <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px)' }}>
+        <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px)', position: 'fixed', top: 60, left: 0, right: 0, bottom: 0, zIndex: 40, background: '#080810' }}>
           <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid #1a1a2e', flexShrink: 0 }}>
             <button onClick={() => setTab('overview')}
               className="flex items-center justify-center rounded-xl flex-shrink-0 font-bold active:scale-95 transition-all"
@@ -868,8 +868,15 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
         const totalAll = stageStats.reduce((a, s) => a + s.total, 0)
         return (
           <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => { setProfileSheet(null); setEditMode(false) }}>
-            <div className="w-full max-w-lg rounded-t-3xl overflow-y-auto" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '90dvh' }} onClick={e => e.stopPropagation()}>
-              <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-2" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <div className="w-full max-w-lg rounded-t-3xl flex flex-col" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '90dvh' }} onClick={e => e.stopPropagation()}>
+              {/* Sticky top handle + close */}
+              <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">
+                <div className="w-10 h-1 rounded-full mx-auto" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                <button onClick={() => { setProfileSheet(null); setEditMode(false) }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: '#9898c0' }}>✕</button>
+              </div>
+              <div className="overflow-y-auto flex-1">
 
               {/* Header */}
               <div className="px-6 pt-3 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -1008,6 +1015,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
                   </>
                 )}
               </div>
+              </div>{/* end overflow-y-auto */}
             </div>
           </div>
         )
