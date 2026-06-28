@@ -306,6 +306,23 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           )}
         </button>
 
+        {/* ASOR Academy link */}
+        <a href="https://www.astateofride.com" target="_blank" rel="noopener noreferrer"
+          className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3 active:scale-[0.98] transition-all"
+          style={{ background: '#111120', border: '1px solid rgba(78,205,196,0.15)', borderLeft: '4px solid #4ecdc4', textDecoration: 'none' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(78,205,196,0.1)', border: '1px solid rgba(78,205,196,0.25)' }}>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-sm font-bold" style={{ color: '#4ecdc4' }}>RIDE Academy · A State of Ride</div>
+            <div className="text-xs mt-0.5" style={{ color: '#4a4a70' }}>Instructor resources, login & more ↗</div>
+          </div>
+        </a>
+
       </div>
 
       <BottomNav unreadCoach={unreadFromCoach} />

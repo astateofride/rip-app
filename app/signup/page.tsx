@@ -83,7 +83,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ background: '#0a0a12' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ background: '#080810' }}>
       <div className="w-full max-w-sm">
         <div className="mb-6">
           <h1 className="font-display text-5xl tracking-wide" style={{ color: '#e8c547', lineHeight: 0.92 }}>
@@ -94,7 +94,7 @@ export default function SignupPage() {
           </p>
 
           {/* Instruction set */}
-          <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: '#1a1a2e', border: '1px solid #2a2a45' }}>
+          <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>Before you start</div>
 
             <div className="flex gap-3">
@@ -154,9 +154,9 @@ export default function SignupPage() {
                 onClick={() => update('role', r)}
                 className="flex-1 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all"
                 style={{
-                  background: form.role === r ? '#e8c547' : '#1a1a2e',
-                  color: form.role === r ? '#0a0a12' : '#7070a0',
-                  border: form.role === r ? '1px solid #e8c547' : '1px solid #2a2a45',
+                  background: form.role === r ? '#e8c547' : '#111120',
+                  color: form.role === r ? '#080810' : '#7070a0',
+                  border: form.role === r ? '1px solid #e8c547' : '1px solid rgba(255,255,255,0.1)',
                 }}
               >
                 {r === 'student' ? '🎓 Student' : '🏆 Coach'}
@@ -201,7 +201,7 @@ export default function SignupPage() {
             type="submit"
             disabled={loading}
             className="font-display text-xl tracking-widest py-4 rounded-xl mt-2 transition-opacity disabled:opacity-40"
-            style={{ background: '#f0f0eb', color: '#0a0a12', letterSpacing: '0.06em' }}
+            style={{ background: '#f0f0eb', color: '#080810', letterSpacing: '0.06em' }}
           >
             {loading ? 'CREATING…' : 'CREATE ACCOUNT'}
           </button>

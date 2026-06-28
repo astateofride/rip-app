@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-black:   #0a0a12;
-  --color-dark:    #13131f;
-  --color-surf:    #1a1a2e;
-  --color-surf2:   #202035;
-  --color-bord:    #2a2a45;
+  --color-black:   #080810;
+  --color-dark:    #0f0f1a;
+  --color-surf:    #111120;
+  --color-surf2:   #1a1a2e;
+  --color-bord:    rgba(255,255,255,0.07);
   --color-dim:     #7070a0;
   --color-dim2:    #4a4a70;
-  --color-inp:     #0d0d1a;
+  --color-inp:     #0c0c18;
   --color-white:   #f0f0eb;
   --color-gold:    #e8c547;
   --color-green:   #2ecc71;
@@ -21,12 +21,12 @@
 
 * { -webkit-tap-highlight-color: transparent; }
 
-html { background: #0a0a12; scroll-behavior: smooth; }
+html { background: #080810; scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-dmsans), 'DM Sans', sans-serif;
   font-size: 16px;
-  background: #0a0a12;
+  background: #080810;
   color: #f0f0eb;
   min-height: 100vh;
   overflow-x: hidden;
@@ -36,13 +36,13 @@ body {
 
 /* Shared input style */
 .inp {
-  background: #0d0d1a;
-  border: 1px solid #2a2a45;
-  border-radius: 8px;
-  padding: 10px 12px;
+  background: #0c0c18;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
   color: #f0f0eb;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   outline: none;
   width: 100%;
@@ -50,5 +50,5 @@ body {
   transition: border-color 0.15s;
 }
 .inp:focus { border-color: #e8c547; }
-.inp::placeholder { color: #4a4a70; }
-textarea.inp { resize: none; min-height: 72px; }
+.inp::placeholder { color: #3a3a5c; }
+textarea.inp { resize: none; min-height: 80px; }
