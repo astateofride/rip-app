@@ -28,7 +28,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-12" style={{ background: '#080810' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12" style={{ background: '#080810' }}>
+      <div className="w-full flex flex-col" style={{ maxWidth: 420 }}>
 
       {/* Top brand mark */}
       <div className="mb-auto">
@@ -107,6 +108,7 @@ export default function LoginPage() {
         <p className="text-[10px] mt-4 uppercase tracking-widest" style={{ color: '#2a2a3c' }}>BETA · VER 1.0</p>
       </div>
 
+      </div>
     </div>
   )
 }
