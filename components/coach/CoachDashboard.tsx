@@ -444,7 +444,12 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
       {/* ── MESSAGES ── */}
       {tab === 'messages' && student && (
         <div className="flex flex-col mt-4" style={{ height: 'calc(100dvh - 300px)' }}>
-          <div className="px-4 mb-3">
+          <div className="px-4 mb-3 flex items-center gap-3">
+            <button onClick={() => setTab('overview')}
+              className="flex items-center justify-center rounded-xl flex-shrink-0 font-bold active:scale-95 transition-all"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#7070a0', minWidth: 44, minHeight: 44, fontSize: 20 }}>
+              ←
+            </button>
             <div className="font-display tracking-wide" style={{ fontSize: 28, color: '#f0f0eb', letterSpacing: '0.06em' }}>
               MESSAGES — <span style={{ color: '#e8c547' }}>{student.name.split(' ')[0].toUpperCase()}</span>
             </div>
