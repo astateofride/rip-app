@@ -133,15 +133,15 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       const idx = prev.findIndex(t => t.stage_idx === stageIdx && t.day_idx === di && t.task_idx === ti)
       if (idx >= 0) {
         const next = [...prev]
-        next[idx] = { ...next[idx], completed: true, answer, completed_at: new Date().toISOString() }
+        next[idx] = { ...next[idx], completed: true, answer, score: result.score, completed_at: new Date().toISOString() }
         return next
       }
-      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: new Date().toISOString(), answer }]
+      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: new Date().toISOString(), answer, score: result.score }]
     })
 
     await supabase.from('task_progress').upsert({
       student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti,
-      completed: true, completed_at: new Date().toISOString(), answer,
+      completed: true, completed_at: new Date().toISOString(), answer, score: result.score,
     }, { onConflict: 'student_id,stage_idx,day_idx,task_idx' })
 
     setSaving(null)
