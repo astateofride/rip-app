@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import CoachDashboard from '@/components/coach/CoachDashboard'
 import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message, SessionLog } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CoachPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
