@@ -9,6 +9,7 @@ import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message
 interface Props {
   coach: Profile
   students: Profile[]
+  pendingStudents: Profile[]
   allTasks: TaskProgress[]
   allDayData: DayData[]
   allRemarks: CoachRemark[]
@@ -59,7 +60,7 @@ function useClock() {
 const colours = ['#e8c547', '#4ecdc4', '#ff6b9d']
 const stageNames = ['Mastering Music', 'Magic in Movement', 'Finding Your Voice']
 
-export default function CoachDashboard({ coach, students, allTasks, allDayData, allRemarks, allSignoffs, allMessages, lastSessions, coachId }: Props) {
+export default function CoachDashboard({ coach, students, pendingStudents, allTasks, allDayData, allRemarks, allSignoffs, allMessages, lastSessions, coachId }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const time = useClock()
@@ -85,6 +86,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   const [studentReviewSheet, setStudentReviewSheet] = useState<string | null>(null)
   const [sheetNotes, setSheetNotes] = useState<Record<string, string>>({})
   const [newStudentToast, setNewStudentToast] = useState<string | null>(null)
+  const [localPending, setLocalPending] = useState<Profile[]>(pendingStudents)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const student = localStudents.find(s => s.id === selectedStudentId)
@@ -104,6 +106,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
         payload => {
           const p = payload.new as Profile
           setNewStudentToast(p.name || 'A new student')
+          setLocalPending(prev => prev.some(x => x.id === p.id) ? prev : [...prev, p])
           setTimeout(() => setNewStudentToast(null), 6000)
         })
       .subscribe()
@@ -206,6 +209,14 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   async function signOut() {
     await supabase.auth.signOut()
     router.push('/login')
+    router.refresh()
+  }
+
+  async function acceptStudent(studentId: string) {
+    await supabase.from('profiles').update({ pending: false, coach_id: coachId }).eq('id', studentId)
+    setLocalPending(prev => prev.filter(p => p.id !== studentId))
+    const accepted = localPending.find(p => p.id === studentId)
+    if (accepted) setLocalStudents(prev => [...prev, accepted])
     router.refresh()
   }
 
@@ -727,6 +738,35 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               </button>
             )
           })()}
+
+          {/* Pending students banner */}
+          {localPending.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #4ecdc4' }}>
+                <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#4ecdc4' }}>NEW STUDENTS AWAITING ACCEPTANCE</div>
+              </div>
+              <div className="flex flex-col gap-2">
+                {localPending.map(p => (
+                  <div key={p.id} className="rounded-2xl px-4 py-3 flex items-center gap-3"
+                    style={{ background: 'rgba(78,205,196,0.07)', border: '1px solid rgba(78,205,196,0.3)' }}>
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center font-display text-sm flex-shrink-0"
+                      style={{ background: 'rgba(78,205,196,0.15)', border: '1px solid rgba(78,205,196,0.4)', color: '#4ecdc4' }}>
+                      {p.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-sm" style={{ color: '#f0f0eb' }}>{p.name}</div>
+                      <div className="text-[11px]" style={{ color: '#7878a8' }}>{p.email}</div>
+                    </div>
+                    <button onClick={() => acceptStudent(p.id)}
+                      className="px-3 py-2 rounded-xl font-bold text-xs uppercase tracking-widest active:scale-95 transition-all flex-shrink-0"
+                      style={{ background: '#4ecdc4', color: '#080810' }}>
+                      Accept
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ③ Student overview — compact rows */}
           <div>

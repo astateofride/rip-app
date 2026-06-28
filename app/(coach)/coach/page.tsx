@@ -20,6 +20,13 @@ export default async function CoachPage() {
     .eq('coach_id', user.id)
     .eq('role', 'student')
 
+  // Get pending students not yet assigned to any coach
+  const { data: pendingStudents } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'student')
+    .eq('pending', true)
+
   const studentIds = (students ?? []).map((s: Profile) => s.id)
 
   if (studentIds.length === 0) {
@@ -27,6 +34,7 @@ export default async function CoachPage() {
       <CoachDashboard
         coach={coachProfile as Profile}
         students={[]}
+        pendingStudents={(pendingStudents ?? []) as Profile[]}
         allTasks={[]}
         allDayData={[]}
         allRemarks={[]}
@@ -58,6 +66,7 @@ export default async function CoachPage() {
     <CoachDashboard
       coach={coachProfile as Profile}
       students={(students ?? []) as Profile[]}
+      pendingStudents={(pendingStudents ?? []) as Profile[]}
       allTasks={(allTasks ?? []) as TaskProgress[]}
       allDayData={(allDayData ?? []) as DayData[]}
       allRemarks={(allRemarks ?? []) as CoachRemark[]}
