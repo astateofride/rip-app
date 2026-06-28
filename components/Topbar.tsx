@@ -8,10 +8,9 @@ interface Props {
   initials?: string
   progress?: number
   mode?: 'student' | 'coach'
-  onSave?: () => void
 }
 
-export default function Topbar({ name, initials, progress, mode = 'student', onSave }: Props) {
+export default function Topbar({ name, initials, progress, mode = 'student' }: Props) {
   const router = useRouter()
   const supabase = createClient()
 
@@ -34,7 +33,7 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
           onClick={signOut}
           className="w-8 h-8 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
           style={{ background: 'rgba(232,197,71,0.1)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547' }}
-          title={name}
+          title={`Sign out ${name ?? ''}`}
         >
           {initials ?? '?'}
         </button>
@@ -47,7 +46,6 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
       </div>
 
       <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Mode pill */}
         <span
           className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
           style={mode === 'coach'
@@ -58,7 +56,6 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
           {mode}
         </span>
 
-        {/* Progress segments */}
         {mode === 'student' && (
           <div className="flex items-center gap-1">
             <div className="flex rounded-full overflow-hidden gap-px" style={{ width: 80, height: 5, background: 'rgba(255,255,255,0.08)' }}>
@@ -75,14 +72,6 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
             </span>
           </div>
         )}
-
-        <button
-          onClick={onSave ?? (() => {})}
-          className="text-[11px] flex items-center gap-1 px-3 py-1.5 rounded transition-all"
-          style={{ border: '1px solid rgba(255,255,255,0.2)', color: '#f0f0eb', background: 'none' }}
-        >
-          ⇩ Save
-        </button>
       </div>
     </div>
   )
