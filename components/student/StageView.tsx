@@ -313,41 +313,51 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
                               {written ? (
                                 <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-                                  {/* Show saved answer if done */}
-                                  {done && savedAnswer ? (
-                                    <div className="mt-3">
-                                      <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7070a0' }}>Your answer</div>
-                                      <div className="text-sm leading-relaxed px-3 py-3 rounded-xl italic" style={{ background: '#111120', color: '#f0f0eb', borderLeft: '2px solid #2ecc71' }}>{savedAnswer}</div>
-                                    </div>
-                                  ) : (
-                                    <div className="mt-3">
-                                      <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7070a0' }}>Your answer</div>
-                                      <textarea
-                                        id={`answer-${key}`}
-                                        className="inp"
-                                        placeholder="Write your answer here…"
-                                        defaultValue={savedAnswer}
-                                        style={{ minHeight: 90, fontSize: 14 }}
-                                      />
-                                      <button
-                                        onClick={() => {
-                                          const el = document.getElementById(`answer-${key}`) as HTMLTextAreaElement
-                                          if (el?.value.trim()) submitAnswer(di, ti, el.value.trim())
-                                        }}
-                                        disabled={saving === key}
-                                        className="w-full mt-2 py-3 rounded-xl font-display text-xl tracking-wide disabled:opacity-40"
-                                        style={{ background: '#4ecdc4', color: '#080810', letterSpacing: '0.04em' }}>
-                                        {saving === key ? 'CHECKING…' : 'SUBMIT ANSWER'}
-                                      </button>
+
+                                  {/* Coaching nudge — only shown when there's a low-scoring saved answer */}
+                                  {done && savedAnswer && assessment && assessment.score < 70 && (
+                                    <div className="mt-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
+                                      <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#e8c547' }}>💬 Coach says</div>
+                                      <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>
+                                        {assessment.score < 30
+                                          ? `Good attempt — let's build on this. Can you write a bit more and try to explain ${assessment.misses[0] ?? 'the concept'} in your own words?`
+                                          : `You're on the right track! Can you expand your answer a little? Try to say a bit more about ${assessment.misses[0] ?? 'the key ideas'} — even one extra sentence makes a difference.`}
+                                      </p>
                                     </div>
                                   )}
+
+                                  {/* Always-editable answer textarea */}
+                                  <div className="mt-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7070a0' }}>Your answer</div>
+                                      {done && savedAnswer && <div className="text-xs font-bold" style={{ color: '#3a3a5c' }}>Edit and resubmit anytime</div>}
+                                    </div>
+                                    <textarea
+                                      key={`answer-${key}-${savedAnswer}`}
+                                      id={`answer-${key}`}
+                                      className="inp"
+                                      placeholder="Write your answer here…"
+                                      defaultValue={savedAnswer}
+                                      style={{ minHeight: savedAnswer ? 110 : 90, fontSize: 15 }}
+                                    />
+                                    <button
+                                      onClick={() => {
+                                        const el = document.getElementById(`answer-${key}`) as HTMLTextAreaElement
+                                        if (el?.value.trim()) submitAnswer(di, ti, el.value.trim())
+                                      }}
+                                      disabled={saving === key}
+                                      className="w-full mt-2 py-3 rounded-xl font-display text-xl tracking-wide disabled:opacity-40"
+                                      style={{ background: '#4ecdc4', color: '#080810', letterSpacing: '0.04em' }}>
+                                      {saving === key ? 'CHECKING…' : done && savedAnswer ? 'RESUBMIT ANSWER' : 'SUBMIT ANSWER'}
+                                    </button>
+                                  </div>
 
                                   {/* Self-assessment result */}
                                   {assessment && (
                                     <div className="mt-3 rounded-xl p-4" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
                                       <div className="flex items-center justify-between mb-3">
                                         <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7070a0' }}>Self-Assessment</div>
-                                        <div className="font-display text-2xl" style={{ color: assessment.score >= 60 ? '#2ecc71' : assessment.score >= 30 ? '#e8c547' : '#ff6b9d' }}>
+                                        <div className="font-display text-2xl" style={{ color: assessment.score >= 70 ? '#2ecc71' : assessment.score >= 40 ? '#e8c547' : '#ff6b9d' }}>
                                           {assessment.score}%
                                         </div>
                                       </div>
@@ -372,7 +382,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                         </div>
                                       )}
                                       <p className="text-xs mt-3 leading-relaxed" style={{ color: '#7070a0' }}>
-                                        {assessment.score >= 60 ? 'Strong answer — your coach can see this.' : assessment.score >= 30 ? 'Good start — review the manual section and consider the terms above.' : 'Go back to the manual reference and try again when ready.'}
+                                        {assessment.score >= 70 ? 'Strong answer — your coach can see this. ✓' : assessment.score >= 40 ? 'Good start — expand your answer above and resubmit.' : 'Have another go — read the manual reference, then try again.'}
                                       </p>
                                     </div>
                                   )}
