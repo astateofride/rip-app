@@ -82,6 +82,8 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   const [reviewQueue, setReviewQueue] = useState<QueueItem[]>([])
   const [queueIdx, setQueueIdx] = useState(0)
   const [queueNote, setQueueNote] = useState('')
+  const [studentReviewSheet, setStudentReviewSheet] = useState<string | null>(null)
+  const [sheetNotes, setSheetNotes] = useState<Record<string, string>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const student = localStudents.find(s => s.id === selectedStudentId)
@@ -146,6 +148,16 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     }
     setSaving(null)
     setExpandedDays(prev => { const n = new Set(prev); n.delete(`${studentId}-${si}-${di}`); return n })
+  }
+
+  async function saveAllSheetNotes(studentId: string) {
+    const entries = Object.entries(sheetNotes).filter(([, v]) => v.trim())
+    for (const [key, remark] of entries) {
+      const [siStr, diStr] = key.split('-')
+      await saveRemark(studentId, Number(siStr), Number(diStr), remark)
+    }
+    setStudentReviewSheet(null)
+    setSheetNotes({})
   }
 
   async function confirmSignoff() {
@@ -724,7 +736,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-base leading-none" style={{ color: '#f0f0eb' }}>{s.name}</span>
-                            {hasReview && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }}>{toReview} to review</span>}
+                            {hasReview && <button onClick={e => { e.stopPropagation(); setStudentReviewSheet(s.id); setSheetNotes({}) }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full active:scale-95 transition-all" style={{ background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }}>{toReview} to review →</button>}
                             {unreadMsgs > 0 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs}</span>}
                           </div>
                           <div className="flex items-center gap-2 mt-1.5">
@@ -745,10 +757,10 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                           💬 Message{unreadMsgs > 0 ? ` (${unreadMsgs})` : ''}
                         </button>
                         {hasReview && (
-                          <button onClick={() => startReview(s.id)}
+                          <button onClick={() => { setStudentReviewSheet(s.id); setSheetNotes({}) }}
                             className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
                             style={{ color: '#ff6b9d' }}>
-                            📋 Review ({toReview})
+                            📋 REVIEW ({toReview})
                           </button>
                         )}
                       </div>
@@ -898,7 +910,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                             💬 MESSAGE
                           </button>
                           {profileToReview && (
-                            <button onClick={() => { setProfileSheet(null); startReview(profileSheet) }}
+                            <button onClick={() => { setProfileSheet(null); setStudentReviewSheet(profileSheet); setSheetNotes({}) }}
                               className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
                               style={{ background: 'rgba(255,107,157,0.08)', border: '1px solid rgba(255,107,157,0.3)', color: '#ff6b9d', letterSpacing: '0.06em' }}>
                               📋 REVIEW
@@ -910,6 +922,153 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                   </>
                 )}
               </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Student review sheet — all pending answers for one student */}
+      {studentReviewSheet && (() => {
+        const srs = localStudents.find(s => s.id === studentReviewSheet)!
+        if (!srs) return null
+        const pendingDays: { si: number; di: number }[] = []
+        for (let si = 0; si < 3; si++) {
+          for (let di = 0; di < STAGES[si].days.length; di++) {
+            const hasCompleted = allTasks.some(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.completed)
+            const alreadyReviewed = remarks.some(r => r.student_id === srs.id && r.stage_idx === si && r.day_idx === di)
+            if (hasCompleted && !alreadyReviewed && !getSignoff(srs.id, si)) pendingDays.push({ si, di })
+          }
+        }
+        const totalAnswers = pendingDays.reduce((acc, { si, di }) =>
+          acc + STAGES[si].days[di].tasks.filter((_, ti) => allTasks.find(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti && t.answer)).length, 0)
+        return (
+          <div className="fixed inset-0 z-[200] flex flex-col" style={{ background: '#080810' }}>
+            {/* Sheet header */}
+            <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: '#080810' }}>
+              <button onClick={() => { setStudentReviewSheet(null); setSheetNotes({}) }}
+                className="flex items-center gap-2 font-bold text-sm active:scale-95 transition-all"
+                style={{ color: '#9898c0' }}>
+                ← Back
+              </button>
+              <div className="text-center">
+                <div className="font-display text-xl" style={{ color: '#f0f0eb', letterSpacing: '0.06em' }}>{srs.name.split(' ')[0].toUpperCase()}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#ff6b9d' }}>{totalAnswers} answer{totalAnswers !== 1 ? 's' : ''} to review</div>
+              </div>
+              <button
+                onClick={() => saveAllSheetNotes(srs.id)}
+                disabled={saving !== null}
+                className="font-bold text-sm px-3 py-2 rounded-xl active:scale-95 transition-all disabled:opacity-50"
+                style={{ background: '#e8c547', color: '#080810' }}>
+                Save all
+              </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-6 pb-8">
+              {pendingDays.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
+                  <div className="font-display text-4xl mb-3" style={{ color: '#2ecc71' }}>ALL CLEAR</div>
+                  <p style={{ color: '#9898c0' }}>Nothing pending for {srs.name.split(' ')[0]}.</p>
+                </div>
+              ) : pendingDays.map(({ si, di }) => {
+                const day = STAGES[si].days[di]
+                const dayNum = String(si * 10 + di + 1).padStart(2, '0')
+                const colour = colours[si]
+                const dayDataRow = allDayData.find(d => d.student_id === srs.id && d.stage_idx === si && d.day_idx === di)
+                const noteKey = `${si}-${di}`
+                const existingRemark = remarks.find(r => r.student_id === srs.id && r.stage_idx === si && r.day_idx === di)
+                const writtenAnswers = day.tasks.map((task, ti) => {
+                  const prog = allTasks.find(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
+                  if (!prog?.answer) return null
+                  return { ti, task, prog, needsWork: (prog.score ?? 0) < 60 }
+                }).filter(Boolean)
+                return (
+                  <div key={`${si}-${di}`} className="flex flex-col gap-3">
+                    {/* Day header */}
+                    <div className="rounded-2xl px-4 py-3" style={{ borderLeft: `4px solid ${colour}`, background: '#111120' }}>
+                      <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: colour }}>Stage {si + 1} · Day {dayNum}</div>
+                      <div className="font-display text-xl leading-tight" style={{ color: '#f0f0eb', letterSpacing: '0.04em' }}>{day.title}</div>
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={dayDataRow?.manual_read_at ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.3)' } : { background: 'rgba(255,255,255,0.04)', color: '#5a5a7a', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          📖 {dayDataRow?.manual_read_at ? 'Manual read ✓' : 'NOT read'}
+                        </span>
+                        {writtenAnswers.length > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,157,0.1)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.25)' }}>
+                            {writtenAnswers.length} written answer{writtenAnswers.length !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Written answers */}
+                    {writtenAnswers.map(item => {
+                      if (!item) return null
+                      const { ti, task, prog, needsWork } = item
+                      return (
+                        <div key={ti} className="rounded-2xl overflow-hidden" style={{ background: '#0c0c18', border: `1px solid ${needsWork ? 'rgba(255,107,157,0.35)' : 'rgba(46,204,113,0.25)'}` }}>
+                          <div className="px-4 pt-3 pb-2" style={{ borderBottom: `1px solid ${needsWork ? 'rgba(255,107,157,0.1)' : 'rgba(46,204,113,0.08)'}` }}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>Task {ti + 1}</span>
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={needsWork
+                                ? { background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }
+                                : { background: 'rgba(46,204,113,0.12)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.3)' }}>
+                                {prog.score ?? 0}% {needsWork ? '· needs work' : '· passed'}
+                              </span>
+                            </div>
+                            <p className="text-sm leading-snug font-medium" style={{ color: '#c0c0d8' }}>{task.text}</p>
+                          </div>
+                          <div className="px-4 py-3">
+                            <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: needsWork ? '#ff6b9d' : '#2ecc71' }}>Student's Answer</div>
+                            <p className="text-base leading-relaxed" style={{ color: '#f0f0eb' }}>{prog.answer}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Video */}
+                    {dayDataRow?.video_url && (
+                      <div className="rounded-xl px-4 py-3" style={{ background: '#0c0c18', border: '1px solid rgba(78,205,196,0.25)' }}>
+                        <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#4ecdc4' }}>▶ VIDEO</div>
+                        <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold underline truncate block" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
+                      </div>
+                    )}
+
+                    {/* Reflection */}
+                    {dayDataRow?.reflection && (
+                      <div className="rounded-xl px-4 py-3" style={{ background: '#0c0c18', borderLeft: '3px solid rgba(255,255,255,0.12)' }}>
+                        <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#9898c0' }}>REFLECTION</div>
+                        <p className="text-sm italic leading-relaxed" style={{ color: '#d4d4ea' }}>{dayDataRow.reflection}</p>
+                      </div>
+                    )}
+
+                    {/* Coach note for this day */}
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: existingRemark ? '#2ecc71' : '#9898c0' }}>
+                        {existingRemark ? '✓ Note saved — edit to update' : 'Your coaching note'}
+                      </div>
+                      <textarea
+                        className="inp"
+                        value={sheetNotes[noteKey] ?? existingRemark?.remark ?? ''}
+                        onChange={e => setSheetNotes(prev => ({ ...prev, [noteKey]: e.target.value }))}
+                        placeholder="Feedback for this day…"
+                        style={{ minHeight: 72, fontSize: 15 }}
+                      />
+                    </div>
+                    <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+                  </div>
+                )
+              })}
+
+              {/* Save all button at bottom */}
+              {pendingDays.length > 0 && (
+                <button
+                  onClick={() => saveAllSheetNotes(srs.id)}
+                  disabled={saving !== null}
+                  className="w-full font-display text-2xl tracking-wide py-5 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-50 mt-2"
+                  style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.05em' }}>
+                  {saving ? 'SAVING…' : 'SAVE NOTES & DONE ✓'}
+                </button>
+              )}
             </div>
           </div>
         )
