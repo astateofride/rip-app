@@ -159,7 +159,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
         {/* ── HERO ── */}
         <div className="pt-5 pb-2 flex items-start justify-between">
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>STUDENT DASHBOARD</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>YOUR DASHBOARD</div>
             <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
               HELLO,<br /><span style={{ color: '#e8c547' }}>{profile.name.split(' ')[0].toUpperCase()}.</span>
             </h1>
