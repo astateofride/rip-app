@@ -90,7 +90,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     if (!selectedStudentId) return
     const channel = supabase.channel('coach-messages')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `student_id=eq.${selectedStudentId}` },
-        payload => setMessages(prev => [...prev, payload.new as Message]))
+        payload => setMessages(prev => prev.some(m => m.id === (payload.new as Message).id) ? prev : [...prev, payload.new as Message]))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [selectedStudentId])
@@ -155,11 +155,6 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
       student_id: selectedStudentId, sender_id: coachId, from_role: 'coach', text: trimmed,
     }).select().single()
     if (data) setMessages(prev => [...prev, data as Message])
-    if (student?.email) {
-      const subject = encodeURIComponent(`RIP — Message from your coach`)
-      const body = encodeURIComponent(`${trimmed.substring(0, 200)}\n\n— ${coach.name}`)
-      window.open(`mailto:${student.email}?subject=${subject}&body=${body}`, '_blank')
-    }
     setSending(false)
   }
 
@@ -385,7 +380,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length} UNREAD</span>}
             </div>
             {(() => {
-              const studentsWithMessages = localStudents.filter(s => messages.some(m => m.student_id === s.id))
+              const studentsWithMessages = localStudents.filter(s => messages.some(m => m.student_id === s.id && m.from_role === 'student' && !m.read))
               if (studentsWithMessages.length === 0) {
                 return (
                   <div className="rounded-2xl px-4 py-5 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#4a4a70' }}>
