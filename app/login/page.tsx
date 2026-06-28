@@ -51,7 +51,8 @@ export default function LoginPage() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleLogin} className="flex flex-col gap-4 mb-6">
+      <form onSubmit={handleLogin} className="flex flex-col gap-4 mb-6 rounded-3xl p-5"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <div>
           <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email</label>
           <input
