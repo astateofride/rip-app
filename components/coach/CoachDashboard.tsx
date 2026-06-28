@@ -481,7 +481,30 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
             })()}
           </div>
 
-          {/* ③ Student overview — one card per student */}
+          {/* ③ Review CTA — shown when any student has tasks needing review */}
+          {(() => {
+            const reviewable = localStudents.filter(s =>
+              [0,1,2].some(si => { const { done, completed } = countTasks(s.id, si); return completed > done && !getSignoff(s.id, si) })
+            )
+            if (reviewable.length === 0) return null
+            const totalToReview = localStudents.reduce((acc, s) =>
+              acc + [0,1,2].reduce((a, si) => { const { done, completed } = countTasks(s.id, si); return a + Math.max(0, completed - done) }, 0), 0)
+            return (
+              <button
+                onClick={() => { setSelectedStudentId(reviewable[0].id); setTab('tasks') }}
+                className="w-full flex items-center justify-between px-5 py-4 rounded-2xl active:scale-[0.98] transition-all"
+                style={{ background: 'rgba(255,107,157,0.08)', border: '2px solid rgba(255,107,157,0.4)' }}
+              >
+                <div className="text-left">
+                  <div className="font-display text-2xl tracking-wide" style={{ color: '#ff6b9d', letterSpacing: '0.06em' }}>REVIEW COMPLETED TASKS</div>
+                  <div className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#7878a8' }}>{totalToReview} task{totalToReview !== 1 ? 's' : ''} across {reviewable.length} student{reviewable.length !== 1 ? 's' : ''} need your eyes</div>
+                </div>
+                <span style={{ color: '#ff6b9d', fontSize: 22 }}>→</span>
+              </button>
+            )
+          })()}
+
+          {/* ③ Student overview — compact rows */}
           <div>
             <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#9898c0' }}>STUDENT OVERVIEW</div>
             {localStudents.length === 0 ? (
@@ -494,96 +517,52 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 {localStudents.map(s => {
                   const sLastSession = lastSessions.find(x => x.user_id === s.id)
+                  const stageStats = [0,1,2].map(si => countTasks(s.id, si))
+                  const totalDone = stageStats.reduce((a, x) => a + x.done, 0)
+                  const totalAll = stageStats.reduce((a, x) => a + x.total, 0)
+                  const overallPct = totalAll ? Math.round(totalDone / totalAll * 100) : 0
+                  const toReview = stageStats.reduce((a, x) => a + Math.max(0, x.completed - x.done), 0)
+                  const hasReview = toReview > 0 && [0,1,2].some(si => !getSignoff(s.id, si))
+                  const initials = s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()
+                  const unreadMsgs = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
                   return (
-                    <div key={s.id} className="rounded-2xl p-5" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      {/* Student header */}
-                      <div className="flex items-start justify-between mb-4 cursor-pointer" onClick={() => openProfile(s.id)}>
-                        <div>
-                          <div className="font-display tracking-wide leading-none" style={{ fontSize: 32, color: '#f0f0eb' }}>{s.name.toUpperCase()}</div>
-                          <div className="text-sm mt-1.5 font-semibold" style={{ color: '#7878a8' }}>
-                            {s.location ?? 'No location'} · Started {formatDate(s.start_date)}
+                    <div key={s.id} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${hasReview ? 'rgba(255,107,157,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
+                      {/* Main row — tap for profile */}
+                      <button className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-white/[0.02]" onClick={() => openProfile(s.id)}>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
+                          style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
+                          {initials}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-base leading-none" style={{ color: '#f0f0eb' }}>{s.name}</span>
+                            {hasReview && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }}>{toReview} to review</span>}
+                            {unreadMsgs > 0 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs}</span>}
                           </div>
-                          <div className="text-sm mt-1.5 font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>TAP TO VIEW PROFILE →</div>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-3">
-                          <div className="text-[10px] uppercase tracking-widest font-bold" style={{ color: '#60608a' }}>Last active</div>
-                          <div className="text-base font-bold mt-1" style={{ color: '#4ecdc4' }}>{timeAgo(sLastSession?.started_at)}</div>
-                        </div>
-                      </div>
-
-                      {/* Stage rows */}
-                      {[0,1,2].map(si => {
-                        const { total, done, completed, pct } = countTasks(s.id, si)
-                        const signed = !!getSignoff(s.id, si)
-                        const unlocked = si === 0 || !!getSignoff(s.id, si - 1)
-                        const stageComplete = done === total && total > 0
-                        return (
-                          <div key={si} className="flex flex-col gap-2 py-3" style={{ borderTop: '1px solid #1a1a2e' }}>
-                            <div className="flex items-center gap-3">
-                              <div className="font-display flex-shrink-0 text-center" style={{ color: colours[si], width: 32, fontSize: 18 }}>S{si + 1}</div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#9898c0' }}>
-                                  <span className="truncate mr-2">{stageNames[si]}</span>
-                                  <button
-                                    onClick={() => { setSelectedStudentId(s.id); setTab('tasks') }}
-                                    className="active:scale-95 transition-all flex-shrink-0 rounded-lg px-1.5 py-0.5 -mr-1"
-                                    style={{
-                                      color: stageComplete ? '#2ecc71' : completed < total ? colours[si] : '#ff6b9d',
-                                      background: !signed && completed > done ? 'rgba(255,107,157,0.08)' : 'transparent',
-                                      border: !signed && completed > done ? '1px solid rgba(255,107,157,0.25)' : '1px solid transparent',
-                                    }}
-                                  >
-                                    {done}/{total}{!signed && completed > done ? ` · ${completed - done} to review ↗` : ''}
-                                  </button>
-                                </div>
-                                <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
-                                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: stageComplete ? '#2ecc71' : colours[si] }} />
-                                </div>
-                              </div>
-                              {signed ? (
-                                <span className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71' }}>✓ SIGNED</span>
-                              ) : unlocked && stageComplete ? (
-                                <button onClick={() => setSignoffModal({ stageIdx: si, studentId: s.id })}
-                                  className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0 transition-all active:scale-95"
-                                  style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547', minHeight: 36 }}>
-                                  SIGN OFF
-                                </button>
-                              ) : unlocked && !stageComplete ? (
-                                <span className="text-xs px-2 py-1.5 rounded-lg flex-shrink-0 font-bold" style={{ color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.2)' }}>IN PROGRESS</span>
-                              ) : (
-                                <span className="text-xs px-2 py-1.5 rounded-lg flex-shrink-0 font-bold" style={{ color: '#60608a', border: '1px solid #1a1a2e' }}>LOCKED</span>
-                              )}
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+                              <div className="h-full rounded-full transition-all" style={{ width: `${overallPct}%`, background: overallPct === 100 ? '#2ecc71' : '#e8c547' }} />
                             </div>
-                            {signed && (
-                              <div className="flex items-center justify-between pl-10">
-                                <div className="text-xs" style={{ color: '#60608a' }}>
-                                  Signed {formatDate(getSignoff(s.id, si)?.signed_at ?? null)}
-                                </div>
-                                <button onClick={() => revokeSignoff(s.id, si)}
-                                  className="text-xs font-bold px-2 py-1 rounded-lg transition-all active:scale-95"
-                                  style={{ color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.2)', background: 'rgba(255,107,157,0.05)' }}>
-                                  UNDO
-                                </button>
-                              </div>
-                            )}
+                            <span className="text-[10px] font-bold flex-shrink-0" style={{ color: '#7878a8' }}>{overallPct}%</span>
+                            <span className="text-[10px] flex-shrink-0" style={{ color: '#60608a' }}>{timeAgo(sLastSession?.started_at)}</span>
                           </div>
-                        )
-                      })}
-
+                        </div>
+                        <span style={{ color: '#3a3a5a', fontSize: 14 }}>›</span>
+                      </button>
                       {/* Quick actions */}
-                      <div className="flex gap-2 mt-4 pt-4" style={{ borderTop: '1px solid #1a1a2e' }}>
+                      <div className="flex border-t" style={{ borderColor: '#1a1a2e' }}>
                         <button onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
-                          className="flex-1 py-3 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
-                          style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.25)', color: '#e8c547', letterSpacing: '0.04em' }}>
-                          💬 MSG
+                          className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
+                          style={{ color: unreadMsgs > 0 ? '#e8c547' : '#60608a', borderRight: '1px solid #1a1a2e' }}>
+                          💬 Message{unreadMsgs > 0 ? ` (${unreadMsgs})` : ''}
                         </button>
                         <button onClick={() => { setSelectedStudentId(s.id); setTab('tasks') }}
-                          className="flex-1 py-3 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
-                          style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.25)', color: '#4ecdc4', letterSpacing: '0.04em' }}>
-                          📋 TASKS
+                          className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
+                          style={{ color: hasReview ? '#ff6b9d' : '#60608a' }}>
+                          {hasReview ? `📋 Review (${toReview})` : '📋 Tasks'}
                         </button>
                       </div>
                     </div>
