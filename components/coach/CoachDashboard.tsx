@@ -1032,8 +1032,8 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
         const totalDone = stageStats.reduce((a, s) => a + s.done, 0)
         const totalAll = stageStats.reduce((a, s) => a + s.total, 0)
         return (
-          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => { setProfileSheet(null); setEditMode(false) }}>
-            <div className="w-full max-w-lg rounded-3xl flex flex-col" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '88dvh' }} onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50" style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => { setProfileSheet(null); setEditMode(false) }}>
+            <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 32px)', maxWidth: 480, maxHeight: '86vh', background: '#111120', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Sticky top handle + close */}
               <div className="flex-shrink-0 relative flex items-center justify-center px-4 pt-3 pb-2">
                 <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }} />
