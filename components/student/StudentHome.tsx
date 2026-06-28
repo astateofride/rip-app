@@ -98,7 +98,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
     : { done: 0, total: 0 }
 
   const unreadFromCoach = messages.filter(m => m.from_role === 'coach' && !m.read).length
-  const latestCoachMsg = [...messages].reverse().find(m => m.from_role === 'coach')
+  const latestCoachMsg = [...messages].reverse().find(m => m.from_role === 'coach' && !m.read)
   const totalTasks = STAGES.reduce((a, s) => a + s.days.reduce((b, d) => b + d.tasks.length, 0), 0)
   const doneTasks = tasks.filter(t => t.completed).length
 
