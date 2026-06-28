@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -32,7 +32,6 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && isAuthPage) {
-    // Get role and redirect appropriately
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
