@@ -114,6 +114,20 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
   else if (s2c) stageLine = STAGE_LINES[2]
   else if (s1c) stageLine = STAGE_LINES[1]
 
+  const welcomeLines = [
+    'Great to have you here. Let\'s get to work.',
+    'Good to see you. Your next step is waiting.',
+    'Welcome back. Every session counts.',
+    'You showed up. That\'s already half the battle.',
+    'Ready when you are. Let\'s keep moving.',
+    'Back at it — love to see it.',
+    'Your future riders will thank you for this.',
+    'Consistency is what separates good from great.',
+    'Here we go. Make today\'s session count.',
+    'Progress happens one session at a time.',
+  ]
+  const welcomeLine = welcomeLines[new Date().getDate() % welcomeLines.length]
+
   useEffect(() => {
     supabase.from('session_logs').insert({ user_id: userId }).then(() => {})
     const handleEnd = () => {
@@ -150,7 +164,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
               HELLO<br /><span style={{ color: '#e8c547' }}>{profile.name.split(' ')[0].toUpperCase()}.</span>
             </h1>
             <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
-              {allComplete ? '🏆 ALL STAGES COMPLETE' : stageLine}
+              {allComplete ? '🏆 ALL STAGES COMPLETE' : welcomeLine}
             </p>
           </div>
           <div className="text-right flex-shrink-0 pt-1">
