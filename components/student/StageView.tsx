@@ -92,6 +92,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
     return flatTasks.length - 1
   })
   const [taskExiting, setTaskExiting] = useState(false)
+  const [selfAssessModal, setSelfAssessModal] = useState<{ di: number; score: number; hits: string[]; misses: string[]; pendingPrompt: { di: number; done: number; total: number } | null } | null>(null)
   const [coachPrompt, setCoachPrompt] = useState<{ di: number; done: number; total: number } | null>(null)
   const [promptDismissed, setPromptDismissed] = useState<Set<number>>(new Set())
   const [pingSending, setPingSending] = useState(false)
@@ -202,7 +203,11 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       }
       return [...localTasks, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: new Date().toISOString(), answer, score: result.score }]
     })()
-    checkPrompt(di, nextTasks)
+    // compute pending prompt to show after self-assess
+    const total = stage.days[di].tasks.length
+    const done = nextTasks.filter(t => t.stage_idx === stageIdx && t.day_idx === di && t.completed).length
+    const pending = (!promptDismissed.has(di) && done > 0 && done < total) ? { di, done, total } : null
+    setSelfAssessModal({ di, score: result.score, hits: result.hits, misses: result.misses, pendingPrompt: pending })
   }
 
   async function toggleCheckbox(di: number, ti: number) {
@@ -567,6 +572,75 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
               <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{manualPopup.note}</p>
             </div>
             <p className="text-xs mt-4 text-center" style={{ color: '#8888b0' }}>Open your physical manual to {manualPopup.pageRef}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Self-assess modal */}
+      {selfAssessModal && (
+        <div className="fixed inset-0 z-[360] flex items-end" style={{ background: 'rgba(0,0,0,0.75)' }}>
+          <div className="w-full rounded-t-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <div className="px-6">
+              {/* Score */}
+              <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>Self Assessment</div>
+              <div className="font-display leading-none mb-1" style={{ fontSize: 52, color: selfAssessModal.score >= 50 ? '#2ecc71' : selfAssessModal.score >= 30 ? '#e8c547' : '#ff6b9d', letterSpacing: '0.03em' }}>
+                {selfAssessModal.score}%
+              </div>
+              <p className="text-sm mb-4" style={{ color: '#9898c0' }}>
+                {selfAssessModal.score >= 50
+                  ? 'Solid — you covered the key concepts.'
+                  : selfAssessModal.score >= 30
+                  ? 'Getting there — a few things to tighten up.'
+                  : 'Needs more depth — review the manual and try again.'}
+              </p>
+              {/* Keywords */}
+              {selfAssessModal.hits.length > 0 && (
+                <div className="mb-2">
+                  <div className="text-[9px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#2ecc71' }}>Covered ✓</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selfAssessModal.hits.map(k => (
+                      <span key={k} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>{k}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selfAssessModal.misses.length > 0 && (
+                <div className="mb-5">
+                  <div className="text-[9px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#e8c547' }}>Could add ↗</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selfAssessModal.misses.map(k => (
+                      <span key={k} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(232,197,71,0.08)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.2)' }}>{k}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selfAssessModal.score >= 50 ? (
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => { const p = selfAssessModal.pendingPrompt; setSelfAssessModal(null); if (p) setCoachPrompt(p); else goNextTask() }}
+                    className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                    style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
+                    KEEP GOING →
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => setSelfAssessModal(null)}
+                    className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                    style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
+                    IMPROVE ANSWER →
+                  </button>
+                  <button
+                    onClick={() => { const p = selfAssessModal.pendingPrompt; setSelfAssessModal(null); if (p) setCoachPrompt(p); else goNextTask() }}
+                    className="w-full font-display text-xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.06em' }}>
+                    MOVE ON ANYWAY
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
