@@ -76,14 +76,6 @@ export default function BottomNav({ unreadCoach = 0 }: Props) {
           >
             {tab.icon}
             {tab.label}
-            {tab.badge ? (
-              <span
-                className="absolute top-2 right-1/4 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                style={{ background: '#e8c547', color: '#080810' }}
-              >
-                {tab.badge > 9 ? '9+' : tab.badge}
-              </span>
-            ) : null}
           </button>
         )
       })}
