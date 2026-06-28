@@ -322,6 +322,26 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
       return a + Math.max(0, completed - done)
     }, 0), 0)
 
+  // Response time rating: avg hours between task completed_at and remark updated_at, capped at 36h
+  const MAX_HOURS = 36
+  const responseTimes: number[] = []
+  for (const s of localStudents) {
+    for (let si = 0; si < 3; si++) {
+      for (let di = 0; di < STAGES[si].days.length; di++) {
+        const remark = remarks.find(r => r.student_id === s.id && r.stage_idx === si && r.day_idx === di)
+        if (!remark) continue
+        const dayTasks = allTasks.filter(t => t.student_id === s.id && t.stage_idx === si && t.day_idx === di && t.completed && t.completed_at)
+        if (dayTasks.length === 0) continue
+        const lastSubmit = Math.max(...dayTasks.map(t => new Date(t.completed_at!).getTime()))
+        const reviewedAt = new Date(remark.updated_at).getTime()
+        const hours = (reviewedAt - lastSubmit) / 3600000
+        if (hours >= 0) responseTimes.push(Math.min(hours, MAX_HOURS))
+      }
+    }
+  }
+  const avgResponseHours = responseTimes.length > 0 ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length : null
+  const responseRating = avgResponseHours !== null ? Math.round((1 - avgResponseHours / MAX_HOURS) * 100) : null
+
   return (
     <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 80 }}>
 
@@ -698,7 +718,26 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
             ))}
           </div>
 
-          {/* ② Messages — always shown */}
+          {/* ② Response time rating */}
+          {responseRating !== null && (
+            <div className="rounded-2xl px-4 py-4" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>ASSESSMENT RESPONSE SPEED</div>
+                <div className="font-display text-xl" style={{ color: responseRating >= 75 ? '#2ecc71' : responseRating >= 40 ? '#e8c547' : '#ff6b9d', lineHeight: 1 }}>{responseRating}%</div>
+              </div>
+              <div className="relative h-2 rounded-full overflow-hidden mb-2" style={{ background: '#1a1a2e' }}>
+                <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
+                  style={{ width: `${responseRating}%`, background: responseRating >= 75 ? '#2ecc71' : responseRating >= 40 ? '#e8c547' : '#ff6b9d' }} />
+              </div>
+              <div className="flex justify-between text-[9px] uppercase tracking-widest" style={{ color: '#60608a' }}>
+                <span>Slowest · 36h</span>
+                <span>{avgResponseHours !== null ? `avg ${avgResponseHours < 1 ? `${Math.round(avgResponseHours * 60)}m` : `${avgResponseHours.toFixed(1)}h`}` : ''}</span>
+                <span>Fastest · 0m</span>
+              </div>
+            </div>
+          )}
+
+          {/* ③ Messages — always shown */}
           <div>
             <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
               <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
