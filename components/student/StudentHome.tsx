@@ -169,7 +169,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           </div>
           <div className="text-right flex-shrink-0 pt-1">
             <div className="font-display" style={{ fontSize: 32, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
-            <div className="text-xs font-bold mt-1" style={{ color: '#9898c0' }}>HELLO, {firstName}</div>
+            <div className="text-xs font-bold mt-1 uppercase tracking-widest" style={{ color: '#9898c0' }}>Day {Math.min(doneTasks + 1, 90)} of 90</div>
           </div>
         </div>
 
