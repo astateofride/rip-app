@@ -91,6 +91,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
     }
     return flatTasks.length - 1
   })
+  const [taskExiting, setTaskExiting] = useState(false)
   const [coachPrompt, setCoachPrompt] = useState<{ di: number; done: number; total: number } | null>(null)
   const [promptDismissed, setPromptDismissed] = useState<Set<number>>(new Set())
   const [pingSending, setPingSending] = useState(false)
@@ -231,16 +232,21 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   }
 
   function goNextTask() {
-    let next = activeTaskFlat + 1
-    while (next < flatTasks.length) {
-      const { di: ndi, ti: nti } = flatTasks[next]
-      if (!localTasks.find(t => t.stage_idx === stageIdx && t.day_idx === ndi && t.task_idx === nti)?.completed) {
-        setActiveTaskFlat(next)
-        return
+    setTaskExiting(true)
+    setTimeout(() => {
+      let next = activeTaskFlat + 1
+      while (next < flatTasks.length) {
+        const { di: ndi, ti: nti } = flatTasks[next]
+        if (!localTasks.find(t => t.stage_idx === stageIdx && t.day_idx === ndi && t.task_idx === nti)?.completed) {
+          setActiveTaskFlat(next)
+          setTaskExiting(false)
+          return
+        }
+        next++
       }
-      next++
-    }
-    if (activeTaskFlat < flatTasks.length - 1) setActiveTaskFlat(activeTaskFlat + 1)
+      if (activeTaskFlat < flatTasks.length - 1) setActiveTaskFlat(activeTaskFlat + 1)
+      setTaskExiting(false)
+    }, 280)
   }
 
   const currentFlat = flatTasks[activeTaskFlat] ?? flatTasks[flatTasks.length - 1]
@@ -264,6 +270,16 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
   return (
     <div style={{ background: '#080810', minHeight: '100dvh', paddingBottom: 100 }}>
+      <style>{`
+        @keyframes taskSlideIn {
+          from { opacity: 0; transform: translateY(40px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes taskSlideOut {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(40px); }
+        }
+      `}</style>
       <Topbar progress={overallPct()} mode="student" />
 
       {/* STAGE HEADER */}
@@ -352,7 +368,13 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
         )}
 
         {/* CURRENT TASK */}
-        <div className="px-4 mb-4">
+        <div className="px-4 mb-4"
+          key={activeTaskFlat}
+          style={{
+            animation: taskExiting
+              ? 'taskSlideOut 0.28s cubic-bezier(0.4,0,1,1) forwards'
+              : 'taskSlideIn 0.35s cubic-bezier(0,0,0.2,1) forwards',
+          }}>
           {taskDone && !isExpandedForResubmit ? (
             /* Completed — show summary + NEXT TASK */
             <div className="flex flex-col gap-3">
