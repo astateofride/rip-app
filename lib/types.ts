@@ -19,6 +19,7 @@ export interface TaskProgress {
   task_idx: number
   completed: boolean
   completed_at: string | null
+  answer: string | null
 }
 
 export interface DayData {
