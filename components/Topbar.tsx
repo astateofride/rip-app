@@ -29,7 +29,7 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
     <>
       <div
         className="sticky top-0 z-50 flex items-center justify-between px-4 gap-3"
-        style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)', height: 62 }}
+        style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)', height: 72 }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -41,13 +41,16 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
             {initials ?? '?'}
           </button>
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-0.5 h-9 rounded-full flex-shrink-0" style={{ background: '#e8c547' }} />
-            <div className="leading-none">
-              <div className="font-display" style={{ fontSize: 26, color: '#f0f0eb', letterSpacing: '0.07em', lineHeight: 1 }}>
-                RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY
+            <div className="w-0.5 rounded-full flex-shrink-0" style={{ background: '#e8c547', height: 40 }} />
+            <div className="leading-none min-w-0">
+              <div className="font-display" style={{ fontSize: 11, color: '#e8c547', letterSpacing: '0.18em', marginBottom: 3 }}>
+                {mode === 'coach' ? 'COACH PORTAL' : 'BETA · VER 1.0'}
               </div>
-              <div className="text-[9px] font-bold tracking-widest mt-1" style={{ color: '#3a3a5c', letterSpacing: '0.14em' }}>
-                {mode === 'coach' ? '— COACH PORTAL —' : 'BETA · VER 1.0'}
+              <div className="font-display" style={{ fontSize: 22, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1 }}>
+                RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span>
+              </div>
+              <div className="font-display" style={{ fontSize: 22, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1 }}>
+                PATHWAY
               </div>
             </div>
           </div>
