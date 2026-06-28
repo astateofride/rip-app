@@ -186,14 +186,6 @@ export default function SignupPage() {
             <input className="inp" value={form.location} onChange={e => update('location', e.target.value)} placeholder="Your studio or club" style={{ fontSize: 16 }} />
           </div>
 
-          {form.role === 'student' && (
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>
-                Coach email <span style={{ color: '#60608a', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
-              </label>
-              <input type="email" className="inp" value={form.coachEmail} onChange={e => update('coachEmail', e.target.value)} placeholder="coach@astateofride.com" style={{ fontSize: 16 }} />
-            </div>
-          )}
 
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Password</label>
