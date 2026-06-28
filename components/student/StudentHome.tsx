@@ -224,6 +224,30 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           </div>
         )}
 
+        {/* ── MESSAGES BUTTON ── */}
+        <button onClick={() => router.push('/pathway/chat')}
+          className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-4 active:scale-[0.98] transition-all"
+          style={{ background: unreadFromCoach > 0 ? 'rgba(232,197,71,0.07)' : '#111120', border: `1px solid ${unreadFromCoach > 0 ? 'rgba(232,197,71,0.35)' : 'rgba(255,255,255,0.06)'}`, borderLeft: '4px solid #e8c547' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(232,197,71,0.1)', border: '1px solid rgba(232,197,71,0.3)' }}>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#e8c547" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>Messages from your coach</div>
+            <div className="text-xs mt-0.5" style={{ color: '#9898c0' }}>
+              {unreadFromCoach > 0 ? `${unreadFromCoach} new message${unreadFromCoach > 1 ? 's' : ''}` : 'No new messages'}
+            </div>
+          </div>
+          {unreadFromCoach > 0 && (
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style={{ background: '#e8c547', color: '#0a0a12' }}>
+              {unreadFromCoach}
+            </div>
+          )}
+        </button>
+
         {/* ── PRIMARY CTA ── */}
         {!allComplete && activeStageIdx >= 0 && (() => {
           const isFirstTime = activeDone === 0
@@ -320,30 +344,6 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
             )
           })}
         </div>
-
-        {/* ── MESSAGES BUTTON ── */}
-        <button onClick={() => router.push('/pathway/chat')}
-          className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3 active:scale-[0.98] transition-all"
-          style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', borderLeft: '4px solid #e8c547' }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(232,197,71,0.1)', border: '1px solid rgba(232,197,71,0.3)' }}>
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#e8c547" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </div>
-          <div className="flex-1 text-left">
-            <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>Messages from your coach</div>
-            <div className="text-xs mt-0.5" style={{ color: '#9898c0' }}>
-              {unreadFromCoach > 0 ? `${unreadFromCoach} unread` : 'No new messages'}
-            </div>
-          </div>
-          {unreadFromCoach > 0 && (
-            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style={{ background: '#e8c547', color: '#0a0a12' }}>
-              {unreadFromCoach}
-            </div>
-          )}
-        </button>
 
         {/* ASOR Academy link — locked until pathway complete (all 3 stages signed off, 70%+) */}
         {s1c && s2c && s3c ? (
