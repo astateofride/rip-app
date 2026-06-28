@@ -345,6 +345,40 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                               <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold underline block truncate" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
                             </div>
                           )}
+                          {/* Written answers */}
+                          {(() => {
+                            const writtenTasks = STAGES[si].days[di].tasks.map((task, ti) => {
+                              const prog = allTasks.find(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
+                              if (!prog?.answer) return null
+                              const needsReview = (prog.score ?? 0) < 60
+                              return { ti, task, prog, needsReview }
+                            }).filter(Boolean)
+                            if (writtenTasks.length === 0) return null
+                            return (
+                              <div className="mt-4 flex flex-col gap-2">
+                                <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>Written Answers</div>
+                                {writtenTasks.map(item => {
+                                  if (!item) return null
+                                  const { ti, task, prog, needsReview } = item
+                                  return (
+                                    <div key={ti} className="rounded-xl p-3" style={{ background: '#0c0c18', border: `1px solid ${needsReview ? 'rgba(255,107,157,0.3)' : 'rgba(46,204,113,0.2)'}` }}>
+                                      <div className="flex items-center justify-between mb-1.5">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#7878a8' }}>Task {ti + 1}</span>
+                                        <span className="text-xs font-bold px-2 py-0.5 rounded" style={needsReview
+                                          ? { background: 'rgba(255,107,157,0.1)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.25)' }
+                                          : { background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.2)' }}>
+                                          {prog.score ?? 0}% {needsReview ? '· needs work' : '✓ passed'}
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] leading-snug mb-2" style={{ color: '#50507a' }}>{task.text}</p>
+                                      <p className="text-sm leading-relaxed" style={{ color: needsReview ? '#f0f0eb' : '#9898c0' }}>{prog.answer}</p>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )
+                          })()}
+
                           <div className="text-xs font-bold uppercase tracking-widest mt-4 mb-2" style={{ color: '#7878a8' }}>Coach Note</div>
                           <textarea className="inp" placeholder="Leave a coaching note for this day…" defaultValue={remarkRow?.remark ?? ''} style={{ minHeight: 80, fontSize: 15 }} id={`remark-${rowKey}`} />
                           <button onClick={() => { const ta = document.getElementById(`remark-${rowKey}`) as HTMLTextAreaElement; if (ta) saveRemark(student.id, si, di, ta.value) }}
