@@ -30,6 +30,7 @@ export interface DayData {
   reflection: string | null
   video_url: string | null
   opened_at: string | null
+  manual_read_at: string | null
 }
 
 export interface CoachRemark {
