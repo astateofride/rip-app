@@ -559,14 +559,16 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                       <div className="flex border-t" style={{ borderColor: '#1a1a2e' }}>
                         <button onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
                           className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
-                          style={{ color: unreadMsgs > 0 ? '#e8c547' : '#60608a', borderRight: '1px solid #1a1a2e' }}>
+                          style={{ color: unreadMsgs > 0 ? '#e8c547' : '#8888b0', borderRight: hasReview ? '1px solid #1a1a2e' : undefined }}>
                           💬 Message{unreadMsgs > 0 ? ` (${unreadMsgs})` : ''}
                         </button>
-                        <button onClick={() => { setSelectedStudentId(s.id); setTab('tasks') }}
-                          className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
-                          style={{ color: hasReview ? '#ff6b9d' : '#60608a' }}>
-                          {hasReview ? `📋 Review (${toReview})` : '📋 Tasks'}
-                        </button>
+                        {hasReview && (
+                          <button onClick={() => { setSelectedStudentId(s.id); setTab('tasks') }}
+                            className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
+                            style={{ color: '#ff6b9d' }}>
+                            📋 Review ({toReview})
+                          </button>
+                        )}
                       </div>
                     </div>
                   )
