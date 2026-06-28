@@ -133,6 +133,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
       })
     }
     setSaving(null)
+    setExpandedDays(prev => { const n = new Set(prev); n.delete(`${studentId}-${si}-${di}`); return n })
   }
 
   async function confirmSignoff() {
