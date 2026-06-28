@@ -80,6 +80,43 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   const [saving, setSaving] = useState<string | null>(null)
   const [manualPopup, setManualPopup] = useState<ManualPopup | null>(null)
   const [manualExpanded, setManualExpanded] = useState<Set<number>>(new Set())
+  const [coachPrompt, setCoachPrompt] = useState<{ di: number; done: number; total: number } | null>(null)
+  const [promptDismissed, setPromptDismissed] = useState<Set<number>>(new Set())
+  const [pingSending, setPingSending] = useState(false)
+  const [pingSent, setPingSent] = useState(false)
+
+  function checkPrompt(di: number, updatedTasks: typeof localTasks) {
+    if (promptDismissed.has(di)) return
+    const total = stage.days[di].tasks.length
+    const done = updatedTasks.filter(t => t.stage_idx === stageIdx && t.day_idx === di && t.completed).length
+    if (done > 0 && done < total) {
+      setCoachPrompt({ di, done, total })
+    } else {
+      setCoachPrompt(null)
+    }
+  }
+
+  async function pingCoach(di: number, done: number, total: number) {
+    setPingSending(true)
+    const dayNum = stageIdx * 10 + di + 1
+    const dayTitle = stage.days[di].title
+    const text = `Hey! Just knocked out ${done} of ${total} tasks in Stage ${stageIdx + 1}, Day ${dayNum} — "${dayTitle}". Happy for you to take a look when you can 👊`
+    await supabase.from('messages').insert({
+      student_id: userId,
+      sender_id: userId,
+      from_role: 'student',
+      text,
+      stage_ref: stageIdx,
+      day_ref: di,
+    })
+    setPingSending(false)
+    setPingSent(true)
+    setTimeout(() => {
+      setCoachPrompt(null)
+      setPromptDismissed(prev => { const n = new Set(prev); n.add(di); return n })
+      setPingSent(false)
+    }, 1800)
+  }
 
   async function expandManual(di: number) {
     setManualExpanded(prev => { const n = new Set(prev); n.add(di); return n })
@@ -145,22 +182,34 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
     }, { onConflict: 'student_id,stage_idx,day_idx,task_idx' })
 
     setSaving(null)
+    // compute updated list to check prompt without relying on async state
+    const nextTasks = (() => {
+      const idx = localTasks.findIndex(t => t.stage_idx === stageIdx && t.day_idx === di && t.task_idx === ti)
+      if (idx >= 0) {
+        const n = [...localTasks]; n[idx] = { ...n[idx], completed: true, answer, score: result.score }; return n
+      }
+      return [...localTasks, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: new Date().toISOString(), answer, score: result.score }]
+    })()
+    checkPrompt(di, nextTasks)
   }
 
   async function toggleCheckbox(di: number, ti: number) {
     const existing = getTask(di, ti)
     const newCompleted = !existing?.completed
+    let updated: typeof localTasks = []
     setLocalTasks(prev => {
       const idx = prev.findIndex(t => t.stage_idx === stageIdx && t.day_idx === di && t.task_idx === ti)
       if (idx >= 0) {
-        const next = [...prev]; next[idx] = { ...next[idx], completed: newCompleted }; return next
+        const next = [...prev]; next[idx] = { ...next[idx], completed: newCompleted }; updated = next; return next
       }
-      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null, answer: null, score: null }]
+      const next = [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null, answer: null, score: null }]
+      updated = next; return next
     })
     await supabase.from('task_progress').upsert({
       student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti,
       completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null,
     }, { onConflict: 'student_id,stage_idx,day_idx,task_idx' })
+    checkPrompt(di, updated)
   }
 
   async function toggleDay(di: number) {
@@ -462,6 +511,58 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
               <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{manualPopup.note}</p>
             </div>
             <p className="text-xs mt-4 text-center" style={{ color: '#60608a' }}>Open your physical manual to {manualPopup.pageRef}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Coach ping prompt */}
+      {coachPrompt && (
+        <div className="fixed inset-0 z-[350] flex items-end" style={{ background: 'rgba(0,0,0,0.65)' }}
+          onClick={() => { setCoachPrompt(null); setPromptDismissed(prev => { const n = new Set(prev); n.add(coachPrompt.di); return n }) }}>
+          <div className="w-full rounded-t-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <div className="px-6">
+              {pingSent ? (
+                <div className="flex flex-col items-center py-6 gap-3">
+                  <div className="text-4xl">✅</div>
+                  <div className="font-display text-2xl text-center" style={{ color: '#2ecc71', letterSpacing: '0.06em' }}>SENT TO YOUR COACH</div>
+                  <p className="text-sm text-center" style={{ color: '#9898c0' }}>They'll take a look and get back to you.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>
+                    Stage {stageIdx + 1} · Day {stageIdx * 10 + coachPrompt.di + 1}
+                  </div>
+                  <div className="font-display text-3xl mb-2" style={{ color: '#e8c547', letterSpacing: '0.05em', lineHeight: 1.1 }}>
+                    GOOD WORK — KEEP IT GOING!
+                  </div>
+                  <p className="text-sm leading-relaxed mb-1" style={{ color: '#f0f0eb' }}>
+                    You've knocked out <strong style={{ color: '#e8c547' }}>{coachPrompt.done} of {coachPrompt.total}</strong> tasks today. You can keep going now, or ping your coach to check in on where you're at before you push on.
+                  </p>
+                  <p className="text-xs mb-5" style={{ color: '#7878a8' }}>
+                    Want to finish the rest first? No pressure — your progress is saved.
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => pingCoach(coachPrompt.di, coachPrompt.done, coachPrompt.total)}
+                      disabled={pingSending}
+                      className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-50"
+                      style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}
+                    >
+                      {pingSending ? 'SENDING…' : 'PING YOUR COACH →'}
+                    </button>
+                    <button
+                      onClick={() => { setCoachPrompt(null); setPromptDismissed(prev => { const n = new Set(prev); n.add(coachPrompt.di); return n }) }}
+                      className="w-full font-display text-xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.06em' }}
+                    >
+                      KEEP GOING
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
