@@ -47,7 +47,7 @@ export default function ChatView({ profile, messages: initialMessages, userId, c
         table: 'messages',
         filter: `student_id=eq.${userId}`,
       }, payload => {
-        setMessages(prev => [...prev, payload.new as Message])
+        setMessages(prev => prev.some(m => m.id === (payload.new as Message).id) ? prev : [...prev, payload.new as Message])
       })
       .subscribe()
 
@@ -86,10 +86,10 @@ export default function ChatView({ profile, messages: initialMessages, userId, c
     <div className="flex flex-col" style={{ background: '#0a0a12', height: '100dvh' }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4" style={{ background: '#1a1a2e', borderBottom: '1px solid #2a2a45', minHeight: 52, flexShrink: 0 }}>
-        <button onClick={() => router.back()} className="text-xl" style={{ color: '#7070a0', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer' }}>←</button>
+        <button onClick={() => router.back()} className="text-xl" style={{ color: '#9898c0', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer' }}>←</button>
         <div>
           <div className="font-display text-xl tracking-wide" style={{ color: '#f0f0eb' }}>MESSAGES</div>
-          <div className="text-[10px] uppercase tracking-widest" style={{ color: '#7070a0' }}>Your coach</div>
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: '#9898c0' }}>Your coach</div>
         </div>
       </div>
 
@@ -107,7 +107,7 @@ export default function ChatView({ profile, messages: initialMessages, userId, c
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
             <div className="text-2xl mb-3">💬</div>
-            <p className="text-sm" style={{ color: '#7070a0' }}>No messages yet.<br />Send your first message to your coach.</p>
+            <p className="text-sm" style={{ color: '#9898c0' }}>No messages yet.<br />Send your first message to your coach.</p>
           </div>
         ) : messages.map(m => {
           const fromMe = m.from_role === 'student'
@@ -117,7 +117,7 @@ export default function ChatView({ profile, messages: initialMessages, userId, c
           return (
             <div key={m.id} className={`flex flex-col ${fromMe ? 'items-end' : 'items-start'}`}>
               {stageName && (
-                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded mb-1" style={{ background: 'rgba(255,255,255,0.06)', color: '#7070a0' }}>
+                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded mb-1" style={{ background: 'rgba(255,255,255,0.06)', color: '#9898c0' }}>
                   {stageName}
                 </span>
               )}
@@ -130,7 +130,7 @@ export default function ChatView({ profile, messages: initialMessages, userId, c
               >
                 {m.text}
               </div>
-              <div className="text-[9px] mt-1" style={{ color: '#7070a0' }}>{timeAgo(m.created_at)}</div>
+              <div className="text-[9px] mt-1" style={{ color: '#9898c0' }}>{timeAgo(m.created_at)}</div>
             </div>
           )
         })}
