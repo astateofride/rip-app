@@ -15,6 +15,7 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
   const router = useRouter()
   const supabase = createClient()
   const [showInstructions, setShowInstructions] = useState(false)
+  const [showAccountMenu, setShowAccountMenu] = useState(false)
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -35,10 +36,9 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
           {/* Left: avatar + brand */}
           <div className="flex items-center gap-3 min-w-0">
             <button
-              onClick={signOut}
+              onClick={() => setShowAccountMenu(true)}
               className="w-9 h-9 rounded-full flex items-center justify-center font-display flex-shrink-0"
               style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.45)', color: '#e8c547', fontSize: 16 }}
-              title={`Sign out ${name ?? ''}`}
             >
               {initials ?? '?'}
             </button>
@@ -74,6 +74,31 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
         </div>
 
       </div>
+
+      {/* Account menu */}
+      {showAccountMenu && (
+        <div className="fixed inset-0 z-[400] flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowAccountMenu(false)}>
+          <div className="w-full rounded-t-3xl pb-8" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <div className="px-5">
+              <div className="flex items-center gap-3 mb-5 px-1">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center font-display flex-shrink-0" style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.45)', color: '#e8c547', fontSize: 17 }}>{initials ?? '?'}</div>
+                <div>
+                  <div className="font-bold text-sm" style={{ color: '#f0f0eb' }}>{name ?? ''}</div>
+                  <div className="text-xs" style={{ color: '#7878a8' }}>{mode === 'coach' ? 'Coach' : 'Student'}</div>
+                </div>
+              </div>
+              <button
+                onClick={signOut}
+                className="w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest active:scale-[0.98] transition-all"
+                style={{ background: 'rgba(255,107,157,0.08)', border: '1px solid rgba(255,107,157,0.25)', color: '#ff6b9d' }}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Instructions modal */}
       {showInstructions && (
