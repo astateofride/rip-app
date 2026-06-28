@@ -297,16 +297,14 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             {day.title}
           </span>
         </div>
-        <div className="flex gap-1 flex-wrap">
-          {flatTasks.map(({ di: fdi, ti: fti }, idx) => {
-            const isDone = !!localTasks.find(t => t.stage_idx === stageIdx && t.day_idx === fdi && t.task_idx === fti)?.completed
-            const isActive = idx === activeTaskFlat
-            return (
-              <button key={idx} onClick={() => setActiveTaskFlat(idx)}
-                className="rounded-full transition-all duration-300"
-                style={{ height: 6, width: isActive ? 28 : 8, background: isDone ? '#2ecc71' : isActive ? colour : '#1a1a2e', flexShrink: 0 }} />
-            )
-          })}
+        <div className="relative h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+          {/* completed portion */}
+          <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+            style={{ width: `${Math.round((flatTasks.filter(({ di: fdi, ti: fti }) => !!localTasks.find(t => t.stage_idx === stageIdx && t.day_idx === fdi && t.task_idx === fti)?.completed).length / flatTasks.length) * 100)}%`, background: '#2ecc71' }} />
+          {/* active position marker */}
+          <div className="absolute inset-y-0 rounded-full transition-all duration-300"
+            style={{ left: `${(activeTaskFlat / flatTasks.length) * 100}%`, width: `${(1 / flatTasks.length) * 100}%`, background: colour, opacity: 0.9 }} />
+        </div>
         </div>
       </div>
 
