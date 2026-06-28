@@ -159,9 +159,9 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
         {/* ── HERO ── */}
         <div className="pt-5 pb-2 flex items-start justify-between">
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>{dateStr}</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>STUDENT DASHBOARD</div>
             <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
-              HELLO<br /><span style={{ color: '#e8c547' }}>{profile.name.split(' ')[0].toUpperCase()}.</span>
+              HELLO,<br /><span style={{ color: '#e8c547' }}>{profile.name.split(' ')[0].toUpperCase()}.</span>
             </h1>
             <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
               {allComplete ? '🏆 ALL STAGES COMPLETE' : welcomeLine}
@@ -169,7 +169,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           </div>
           <div className="text-right flex-shrink-0 pt-1">
             <div className="font-display" style={{ fontSize: 32, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
-            <div className="text-xs font-bold mt-1 uppercase tracking-widest" style={{ color: '#9898c0' }}>Day {Math.min(doneTasks + 1, 90)} of 90</div>
+            <div className="text-xs font-bold mt-1 uppercase tracking-widest" style={{ color: '#9898c0' }}>{dateStr}</div>
           </div>
         </div>
 
