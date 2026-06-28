@@ -756,7 +756,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                   return (
                     <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
                       className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left active:scale-[0.98] transition-all"
-                      style={{ background: '#111120', border: '1px solid rgba(232,197,71,0.25)', borderLeft: '4px solid #e8c547' }}>
+                      style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
                         style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
                         {initials}
