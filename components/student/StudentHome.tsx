@@ -137,7 +137,41 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           </div>
         </div>
 
-        {/* Stage cards */}
+        {/* Primary CTA — what to do RIGHT NOW */}
+        {!allComplete && (() => {
+          const activeStage = s3c ? -1 : s2c ? 2 : s1c ? 1 : 0
+          if (activeStage === -1) return null
+          const { done, total } = countStageTasks(tasks, activeStage)
+          const isFirstTime = done === 0
+          return (
+            <button
+              onClick={() => router.push(`/pathway/stage/${activeStage}`)}
+              className="w-full rounded-2xl p-5 mb-4 text-left transition-all"
+              style={{
+                background: glows[activeStage],
+                border: `2px solid ${colours[activeStage]}`,
+                boxShadow: `0 0 32px ${glows[activeStage]}`,
+              }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: colours[activeStage], opacity: 0.7 }}>
+                {isFirstTime ? '👉 Start here' : '▶ Continue where you left off'}
+              </div>
+              <div className="font-display" style={{ fontSize: 36, color: colours[activeStage], letterSpacing: '0.04em', lineHeight: 1 }}>
+                {STAGES[activeStage].name}
+              </div>
+              <div className="text-sm mt-2 mb-4" style={{ color: '#f0f0eb', opacity: 0.7 }}>{STAGES[activeStage].tagline}</div>
+              <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <div className="h-full rounded-full" style={{ width: `${total ? Math.round(done/total*100) : 0}%`, background: colours[activeStage] }} />
+              </div>
+              <div className="flex justify-between text-sm font-bold" style={{ color: colours[activeStage] }}>
+                <span>{isFirstTime ? 'Tap to begin →' : `${done}/${total} tasks · tap to continue →`}</span>
+                <span>{total ? Math.round(done/total*100) : 0}%</span>
+              </div>
+            </button>
+          )
+        })()}
+
+        {/* All stages */}
+        <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7070a0' }}>All stages</div>
         <div className="flex flex-col gap-3 mb-4">
           {STAGES.map((s, i) => {
             const { total, done, pct: sp } = countStageTasks(tasks, i)
@@ -150,53 +184,24 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
                 onClick={() => unlocked ? router.push(`/pathway/stage/${i}`) : undefined}
                 className="rounded-2xl overflow-hidden transition-all duration-200"
                 style={{
-                  background: isActive ? glows[i] : '#1a1a2e',
-                  border: `1px solid ${isActive ? borders[i] : complete ? borders[i] : '#2a2a45'}`,
+                  background: '#1a1a2e',
+                  border: `1px solid ${complete ? borders[i] : isActive ? borders[i] : '#2a2a45'}`,
                   opacity: unlocked ? 1 : 0.3,
                   cursor: unlocked ? 'pointer' : 'default',
-                  boxShadow: isActive ? `0 0 24px ${glows[i]}` : 'none',
-                  transform: 'translateY(0)',
                 }}>
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: colours[i], opacity: 0.7 }}>{s.eyebrow}</div>
-                      <div className="font-display leading-none" style={{ fontSize: 44, color: colours[i], letterSpacing: '0.02em' }}>
-                        {s.name}
-                      </div>
+                <div className="p-4 flex items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: colours[i], opacity: 0.6 }}>{s.eyebrow}</div>
+                    <div className="font-display leading-none" style={{ fontSize: 28, color: colours[i], letterSpacing: '0.02em' }}>{s.name}</div>
+                    <div className="h-1.5 rounded-full overflow-hidden mt-2" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <div className="h-full rounded-full" style={{ width: `${sp}%`, background: colours[i] }} />
                     </div>
-                    {complete && (
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 mt-1"
-                        style={{ background: 'rgba(46,204,113,0.15)', border: '1px solid rgba(46,204,113,0.4)', color: '#2ecc71' }}>✓</div>
-                    )}
-                    {isActive && (
-                      <div className="text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 mt-1"
-                        style={{ background: colours[i], color: '#0a0a12' }}>ACTIVE</div>
-                    )}
+                    <div className="text-xs mt-1.5 font-semibold" style={{ color: '#7070a0' }}>{done}/{total} tasks · {sp}%</div>
                   </div>
-                  <p className="text-sm mb-4" style={{ color: '#7070a0' }}>{s.tagline}</p>
-
-                  {/* Progress bar */}
-                  <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <div className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${sp}%`, background: colours[i] }} />
-                  </div>
-                  <div className="flex justify-between text-xs font-semibold" style={{ color: colours[i] }}>
-                    <span>{done}/{total} tasks</span>
-                    <span>{sp}%</span>
+                  <div className="flex-shrink-0 text-lg" style={{ color: complete ? '#2ecc71' : isActive ? colours[i] : '#2a2a45' }}>
+                    {complete ? '✓' : unlocked ? '→' : '🔒'}
                   </div>
                 </div>
-
-                {unlocked && (
-                  <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
-                    <span className="text-xs font-bold uppercase tracking-widest" style={{ color: complete ? '#2ecc71' : colours[i] }}>
-                      {complete ? '✓ Complete' : isActive ? 'In progress →' : 'Start →'}
-                    </span>
-                    {!complete && (
-                      <span className="text-xs" style={{ color: '#7070a0' }}>{total - done} remaining</span>
-                    )}
-                  </div>
-                )}
               </div>
             )
           })}
