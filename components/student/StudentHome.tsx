@@ -147,7 +147,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           <div>
             <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>{dateStr}</div>
             <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
-              YOUR<br /><span style={{ color: '#e8c547' }}>PATHWAY.</span>
+              HELLO<br /><span style={{ color: '#e8c547' }}>{profile.name.split(' ')[0].toUpperCase()}.</span>
             </h1>
             <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
               {allComplete ? '🏆 ALL STAGES COMPLETE' : stageLine}
