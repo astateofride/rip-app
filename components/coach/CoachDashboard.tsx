@@ -566,9 +566,9 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                 {/* Written answers — main content */}
                 {writtenAnswers.length > 0 ? (
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
+                    <div className="flex items-center gap-2" style={{ paddingLeft: 4, borderLeft: '3px solid #e8c547' }}>
                       <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>Written Answers</div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,157,0.12)', color: '#ff6b9d' }}>{writtenAnswers.length}</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(232,197,71,0.15)', color: '#e8c547' }}>{writtenAnswers.length}</span>
                     </div>
                     {writtenAnswers.map(item => {
                       if (!item) return null
@@ -709,7 +709,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
             {[
               { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
               { label: 'SIGN OFF', value: stagesToSignOff, color: '#4ecdc4' },
-              { label: 'PENDING', value: totalPendingTasks, color: '#ff6b9d' },
+              { label: 'PENDING', value: totalPendingTasks, color: '#e8c547' },
             ].map(s => (
               <div key={s.label} className="rounded-2xl px-3 py-4 flex flex-col items-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="font-display" style={{ fontSize: 44, color: s.color, lineHeight: 1 }}>{s.value}</div>
@@ -739,9 +739,9 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
 
           {/* ③ Messages — always shown */}
           <div>
-            <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
+            <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #e8c547' }}>
               <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
-              {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length}</span>}
+              {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#e8c547', color: '#080810' }}>{allUnread.length}</span>}
             </div>
             {allUnread.length === 0 ? (
               <div className="rounded-2xl px-4 py-3 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#7878a8' }}>
@@ -756,7 +756,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                   return (
                     <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
                       className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left active:scale-[0.98] transition-all"
-                      style={{ background: '#111120', border: '1px solid rgba(255,107,157,0.25)', borderLeft: '4px solid #ff6b9d' }}>
+                      style={{ background: '#111120', border: '1px solid rgba(232,197,71,0.25)', borderLeft: '4px solid #e8c547' }}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
                         style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
                         {initials}
@@ -765,7 +765,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                         <div className="text-base font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
                         <div className="text-sm truncate mt-0.5" style={{ color: '#9898c0' }}>{lastUnread.text}</div>
                       </div>
-                      <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs.length}</span>
+                      <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#e8c547', color: '#080810' }}>{unreadMsgs.length}</span>
                     </button>
                   )
                 })}
@@ -879,18 +879,18 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
               <button
                 onClick={() => startReview(reviewable[0].id)}
                 className="w-full rounded-2xl active:scale-[0.98] transition-all overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, rgba(255,107,157,0.12) 0%, rgba(255,107,157,0.05) 100%)', border: '1px solid rgba(255,107,157,0.35)', boxShadow: '0 0 32px rgba(255,107,157,0.08)' }}
+                style={{ background: 'linear-gradient(135deg, rgba(232,197,71,0.12) 0%, rgba(232,197,71,0.05) 100%)', border: '1px solid rgba(232,197,71,0.4)', boxShadow: '0 0 32px rgba(232,197,71,0.1)' }}
               >
                 <div className="px-5 py-5 text-left">
-                  <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,107,157,0.7)' }}>
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(232,197,71,0.7)' }}>
                     {reviewable.length} STUDENT{reviewable.length !== 1 ? 'S' : ''} WAITING
                   </div>
-                  <div className="font-display leading-none mb-3" style={{ fontSize: 36, color: '#ff6b9d', letterSpacing: '0.03em' }}>
+                  <div className="font-display leading-none mb-3" style={{ fontSize: 36, color: '#e8c547', letterSpacing: '0.03em' }}>
                     START<br />REVIEW →
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1 rounded-full" style={{ background: 'rgba(255,107,157,0.15)' }}>
-                      <div className="h-full rounded-full" style={{ width: '0%', background: '#ff6b9d' }} />
+                    <div className="flex-1 h-1 rounded-full" style={{ background: 'rgba(232,197,71,0.15)' }}>
+                      <div className="h-full rounded-full" style={{ width: '0%', background: '#e8c547' }} />
                     </div>
                     <span className="text-xs font-bold" style={{ color: 'rgba(255,107,157,0.7)' }}>{totalToReview} task{totalToReview !== 1 ? 's' : ''}</span>
                   </div>
@@ -968,11 +968,11 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                           {hasReview && (
                             <button onClick={e => { e.stopPropagation(); setStudentReviewSheet(s.id); setSheetNotes({}) }}
                               className="text-[10px] font-bold px-2 py-1 rounded-full active:scale-95 transition-all flex-shrink-0"
-                              style={{ background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }}>
+                              style={{ background: 'rgba(232,197,71,0.15)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.35)' }}>
                               {toReview} to review →
                             </button>
                           )}
-                          {unreadMsgs > 0 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs}</span>}
+                          {unreadMsgs > 0 && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#e8c547', color: '#080810' }}>{unreadMsgs}</span>}
                         </div>
                         {/* Stage progress boxes */}
                         <div className="grid grid-cols-3 gap-1.5">
@@ -1005,7 +1005,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                         {hasReview && (
                           <button onClick={() => { setStudentReviewSheet(s.id); setSheetNotes({}) }}
                             className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
-                            style={{ color: '#ff6b9d' }}>
+                            style={{ color: '#e8c547' }}>
                             📋 REVIEW ({toReview})
                           </button>
                         )}
@@ -1113,7 +1113,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                               <div className="flex-1 min-w-0">
                                 <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#9898c0' }}>
                                   <span className="truncate mr-2">{stageNames[si]}</span>
-                                  <span style={{ color: hasReview ? '#ff6b9d' : colours[si], flexShrink: 0 }}>
+                                  <span style={{ color: hasReview ? '#e8c547' : colours[si], flexShrink: 0 }}>
                                     {s.done}/{s.total}{hasReview ? ` · ${completed - s.done} to review` : ''}
                                   </span>
                                 </div>
@@ -1142,7 +1142,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                                 </div>
                                 <button onClick={() => revokeSignoff(profileSheet, si)}
                                   className="self-start text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all"
-                                  style={{ color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.25)', background: 'rgba(255,107,157,0.06)' }}>
+                                  style={{ color: '#e8c547', border: '1px solid rgba(232,197,71,0.3)', background: 'rgba(232,197,71,0.06)' }}>
                                   UNDO SIGN-OFF
                                 </button>
                               </div>
@@ -1165,7 +1165,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                           {profileToReview && (
                             <button onClick={() => { setProfileSheet(null); setStudentReviewSheet(profileSheet); setSheetNotes({}) }}
                               className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
-                              style={{ background: 'rgba(255,107,157,0.08)', border: '1px solid rgba(255,107,157,0.3)', color: '#ff6b9d', letterSpacing: '0.06em' }}>
+                              style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.35)', color: '#e8c547', letterSpacing: '0.06em' }}>
                               📋 REVIEW
                             </button>
                           )}
@@ -1206,7 +1206,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
               </button>
               <div className="text-center">
                 <div className="font-display text-xl" style={{ color: '#f0f0eb', letterSpacing: '0.06em' }}>{srs.name.split(' ')[0].toUpperCase()}</div>
-                <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#ff6b9d' }}>{totalAnswers} answer{totalAnswers !== 1 ? 's' : ''} to review</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>{totalAnswers} answer{totalAnswers !== 1 ? 's' : ''} to review</div>
               </div>
               <button
                 onClick={() => saveAllSheetNotes(srs.id)}
@@ -1247,7 +1247,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                           📖 {dayDataRow?.manual_read_at ? 'Manual read ✓' : 'NOT read'}
                         </span>
                         {writtenAnswers.length > 0 && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,157,0.1)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.25)' }}>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(232,197,71,0.12)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.3)' }}>
                             {writtenAnswers.length} written answer{writtenAnswers.length !== 1 ? 's' : ''}
                           </span>
                         )}
