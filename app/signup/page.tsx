@@ -29,6 +29,7 @@ export default function SignupPage() {
     }
     setLoading(true)
 
+    console.log('Attempting signup with:', form.email, form.role)
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -37,32 +38,45 @@ export default function SignupPage() {
       },
     })
 
-    if (authError || !authData.user) {
-      setError(authError?.message || 'Sign up failed')
+    console.log('authData:', JSON.stringify(authData))
+    console.log('authError:', JSON.stringify(authError))
+
+    if (authError) {
+      setError(authError.message || authError.code || JSON.stringify(authError))
       setLoading(false)
       return
     }
 
-    // Update profile with extra fields
-    const updates: Record<string, unknown> = {
-      name: form.name,
-      location: form.location || null,
+    if (!authData.user) {
+      setError('Signup failed — please try again')
+      setLoading(false)
+      return
     }
 
+    // If email confirmation is required, user.identities will be empty
+    if (authData.user.identities?.length === 0) {
+      setError('An account with this email already exists')
+      setLoading(false)
+      return
+    }
+
+    // Update profile with location
+    if (form.location) {
+      await supabase.from('profiles').update({ location: form.location }).eq('id', authData.user.id)
+    }
+
+    // Look up coach by email if student provided one
     if (form.role === 'student' && form.coachEmail) {
-      // Look up coach by email
       const { data: coachProfile } = await supabase
         .from('profiles')
         .select('id')
+        .eq('email', form.coachEmail)
         .eq('role', 'coach')
-        .filter('id', 'in', `(
-          SELECT id FROM auth.users WHERE email = '${form.coachEmail}'
-        )`)
         .single()
-      if (coachProfile) updates.coach_id = coachProfile.id
+      if (coachProfile) {
+        await supabase.from('profiles').update({ coach_id: coachProfile.id }).eq('id', authData.user.id)
+      }
     }
-
-    await supabase.from('profiles').update(updates).eq('id', authData.user.id)
 
     router.push('/')
     router.refresh()
@@ -81,7 +95,6 @@ export default function SignupPage() {
         </div>
 
         <form onSubmit={handleSignup} className="flex flex-col gap-4">
-          {/* Role selector */}
           <div className="flex gap-2">
             {(['student', 'coach'] as const).map(r => (
               <button
@@ -115,7 +128,9 @@ export default function SignupPage() {
 
           {form.role === 'student' && (
             <div>
-              <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>Coach email <span style={{ color: '#7070a0', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+              <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>
+                Coach email <span style={{ color: '#7070a0', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+              </label>
               <input type="email" className="inp" value={form.coachEmail} onChange={e => update('coachEmail', e.target.value)} placeholder="coach@astateofride.com" />
             </div>
           )}

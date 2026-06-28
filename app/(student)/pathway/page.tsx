@@ -8,6 +8,11 @@ export default async function PathwayPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  // Small delay to allow trigger to create profile on first login
+  await new Promise(r => setTimeout(r, 500))
+
+  console.log('User ID on server:', user.id)
+
   const [
     { data: profile },
     { data: tasks },
@@ -21,6 +26,14 @@ export default async function PathwayPage() {
     supabase.from('messages').select('*').eq('student_id', user.id).order('created_at'),
     supabase.from('session_logs').select('*').eq('user_id', user.id).order('started_at', { ascending: false }).limit(1),
   ])
+
+  if (!profile) {
+    return (
+      <div style={{ background: '#0a0a12', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7070a0', fontSize: 14 }}>
+        Setting up your profile…
+      </div>
+    )
+  }
 
   return (
     <StudentHome
