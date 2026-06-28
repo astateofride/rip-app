@@ -59,7 +59,7 @@ function useClock() {
   return time
 }
 
-const colours = ['#e8c547', '#4ecdc4', '#ff6b9d']
+const colours = ['#e8c547', '#4ecdc4', '#c0bfe0']
 const stageNames = ['Mastering Music', 'Magic in Movement', 'Finding Your Voice']
 
 export default function CoachDashboard({ coach, students, pendingStudents, allCoaches, allTasks, allDayData, allRemarks, allSignoffs, allMessages, lastSessions, coachNotes: initialNotes, coachId }: Props) {
