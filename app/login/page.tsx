@@ -32,7 +32,7 @@ export default function LoginPage() {
 
       {/* Top brand mark */}
       <div className="mb-auto">
-        <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#3a3a5c' }}>A STATE OF RIDE</div>
+        <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#3a3a5c' }}>BETA · VER 1.0</div>
         <div className="flex items-center gap-2">
           <div className="w-1 h-8 rounded-full" style={{ background: '#e8c547' }} />
           <div className="font-display leading-none" style={{ fontSize: 18, color: '#4a4a70', letterSpacing: '0.1em' }}>
