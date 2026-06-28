@@ -68,9 +68,14 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   const [chatText, setChatText] = useState('')
   const [sending, setSending] = useState(false)
   const [saving, setSaving] = useState<string | null>(null)
+  const [profileSheet, setProfileSheet] = useState<string | null>(null)
+  const [editMode, setEditMode] = useState(false)
+  const [editForm, setEditForm] = useState({ name: '', location: '', start_date: '', email: '' })
+  const [editSaving, setEditSaving] = useState(false)
+  const [localStudents, setLocalStudents] = useState<Profile[]>(students)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const student = students.find(s => s.id === selectedStudentId)
+  const student = localStudents.find(s => s.id === selectedStudentId)
   const lastSession = lastSessions.find(s => s.user_id === selectedStudentId)
   const unreadCount = messages.filter(m => m.student_id === selectedStudentId && m.from_role === 'student' && !m.read).length
   const totalUnread = messages.filter(m => m.from_role === 'student' && !m.read).length
@@ -155,6 +160,29 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
+  }
+
+  function openProfile(studentId: string) {
+    const s = localStudents.find(x => x.id === studentId)
+    if (!s) return
+    setEditForm({ name: s.name, location: s.location ?? '', start_date: s.start_date ?? '', email: s.email ?? '' })
+    setEditMode(false)
+    setProfileSheet(studentId)
+  }
+
+  async function saveEdit() {
+    if (!profileSheet) return
+    setEditSaving(true)
+    await supabase.from('profiles').update({
+      name: editForm.name,
+      location: editForm.location || null,
+      start_date: editForm.start_date || null,
+    }).eq('id', profileSheet)
+    setLocalStudents(prev => prev.map(s => s.id === profileSheet
+      ? { ...s, name: editForm.name, location: editForm.location || null, start_date: editForm.start_date || null }
+      : s))
+    setEditMode(false)
+    setEditSaving(false)
   }
 
   const studentMessages = messages.filter(m => m.student_id === selectedStudentId)
@@ -267,13 +295,14 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           {/* Student card */}
           <div className="rounded-2xl p-5" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="flex items-start justify-between mb-4">
-              <div>
+              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProfile(student.id)}>
                 <div className="font-display tracking-wide leading-none" style={{ fontSize: 32, color: '#f0f0eb' }}>{student.name.toUpperCase()}</div>
                 <div className="text-xs mt-1.5 font-semibold" style={{ color: '#4a4a70' }}>
                   {student.location ?? 'No location'} · Started {formatDate(student.start_date)}
                 </div>
+                <div className="text-xs mt-2 font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>TAP TO VIEW PROFILE →</div>
               </div>
-              <div className="text-right flex-shrink-0">
+              <div className="text-right flex-shrink-0 ml-3">
                 <div className="text-xs uppercase tracking-widest font-bold" style={{ color: '#3a3a5c' }}>Last active</div>
                 <div className="text-sm font-bold mt-1" style={{ color: '#4ecdc4' }}>{timeAgo(lastSession?.started_at)}</div>
               </div>
@@ -454,6 +483,119 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           </div>
         </div>
       )}
+
+      {/* Learner Profile Sheet */}
+      {profileSheet && (() => {
+        const ps = localStudents.find(s => s.id === profileSheet)!
+        const stageStats = [0,1,2].map(si => ({ ...countTasks(profileSheet, si), signed: !!getSignoff(profileSheet, si) }))
+        const totalDone = stageStats.reduce((a, s) => a + s.done, 0)
+        const totalAll = stageStats.reduce((a, s) => a + s.total, 0)
+        return (
+          <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => { setProfileSheet(null); setEditMode(false) }}>
+            <div className="w-full max-w-lg rounded-t-3xl overflow-y-auto" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '90dvh' }} onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-2" style={{ background: 'rgba(255,255,255,0.07)' }} />
+
+              {/* Header */}
+              <div className="px-6 pt-3 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#3a3a5c' }}>LEARNER PROFILE</div>
+                    <div className="font-display leading-none" style={{ fontSize: 36, color: '#f0f0eb', letterSpacing: '0.04em' }}>{ps.name.toUpperCase()}</div>
+                  </div>
+                  <button onClick={() => { if (editMode) { setEditForm({ name: ps.name, location: ps.location ?? '', start_date: ps.start_date ?? '', email: ps.email ?? '' }); setEditMode(false) } else { setEditMode(true) } }}
+                    className="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex-shrink-0"
+                    style={{ background: editMode ? 'rgba(232,197,71,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${editMode ? 'rgba(232,197,71,0.4)' : 'rgba(255,255,255,0.07)'}`, color: editMode ? '#e8c547' : '#7070a0' }}>
+                    {editMode ? 'CANCEL' : '✏️ EDIT'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="px-6 py-5 flex flex-col gap-5">
+                {editMode ? (
+                  /* Edit form */
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Full name</label>
+                      <input className="inp" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} style={{ fontSize: 16 }} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Location / Club</label>
+                      <input className="inp" value={editForm.location} onChange={e => setEditForm(f => ({ ...f, location: e.target.value }))} placeholder="Studio or club name" style={{ fontSize: 16 }} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Start date</label>
+                      <input type="date" className="inp" value={editForm.start_date} onChange={e => setEditForm(f => ({ ...f, start_date: e.target.value }))} style={{ fontSize: 16 }} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email (read only)</label>
+                      <input className="inp" value={editForm.email} disabled style={{ fontSize: 16, opacity: 0.4 }} />
+                    </div>
+                    <button onClick={saveEdit} disabled={editSaving}
+                      className="font-display tracking-widest py-4 rounded-2xl transition-all disabled:opacity-40 active:scale-[0.98]"
+                      style={{ fontSize: 22, background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
+                      {editSaving ? 'SAVING…' : 'SAVE CHANGES →'}
+                    </button>
+                  </div>
+                ) : (
+                  /* Info view */
+                  <>
+                    {/* Key details */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { label: 'EMAIL', value: ps.email ?? '—', color: '#f0f0eb' },
+                        { label: 'LOCATION', value: ps.location ?? '—', color: '#f0f0eb' },
+                        { label: 'STARTED', value: formatDate(ps.start_date), color: '#e8c547' },
+                        { label: 'LAST ACTIVE', value: timeAgo(lastSessions.find(s => s.user_id === profileSheet)?.started_at), color: '#4ecdc4' },
+                      ].map(item => (
+                        <div key={item.label} className="rounded-2xl p-4" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#3a3a5c' }}>{item.label}</div>
+                          <div className="text-sm font-semibold leading-snug" style={{ color: item.color }}>{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Overall progress */}
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>TRAINING PROGRESS — {totalAll ? Math.round(totalDone / totalAll * 100) : 0}% OVERALL</div>
+                      {stageStats.map((s, si) => (
+                        <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                          <div className="font-display text-xl flex-shrink-0 w-8 text-center" style={{ color: colours[si] }}>S{si + 1}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between text-xs font-semibold mb-1.5" style={{ color: '#7070a0' }}>
+                              <span className="truncate mr-2">{stageNames[si]}</span>
+                              <span style={{ color: colours[si], flexShrink: 0 }}>{s.done}/{s.total}</span>
+                            </div>
+                            <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+                              <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: colours[si] }} />
+                            </div>
+                          </div>
+                          {s.signed
+                            ? <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71' }}>✓ SIGNED</span>
+                            : <span className="text-xs font-bold px-2 py-1 rounded-lg flex-shrink-0" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>{s.pct}%</span>}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Quick actions */}
+                    <div className="flex gap-3 pb-2">
+                      <button onClick={() => { setProfileSheet(null); setTab('messages') }}
+                        className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
+                        style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547', letterSpacing: '0.06em' }}>
+                        💬 MESSAGE
+                      </button>
+                      <button onClick={() => { setProfileSheet(null); setTab('tasks') }}
+                        className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
+                        style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.3)', color: '#4ecdc4', letterSpacing: '0.06em' }}>
+                        📋 TASKS
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Sign-off modal */}
       {signoffModal && (
