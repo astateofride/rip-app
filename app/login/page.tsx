@@ -32,17 +32,15 @@ export default function LoginPage() {
       <div className="w-full flex flex-col gap-6" style={{ maxWidth: 420 }}>
 
         {/* Brand */}
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#3a3a5c' }}>BETA · VER 1.0</div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: '#e8c547' }} />
-            <div className="font-display leading-none" style={{ fontSize: 20, color: '#f0f0eb', letterSpacing: '0.08em' }}>
-              RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY
-            </div>
+        <div style={{ paddingTop: 8, paddingBottom: 4 }}>
+          <div className="font-display leading-none mb-3" style={{ letterSpacing: '0.03em' }}>
+            <div style={{ fontSize: 72, color: '#f0f0eb', lineHeight: 0.88 }}>RIDE</div>
+            <div style={{ fontSize: 72, color: '#e8c547', lineHeight: 0.88 }}>INSTRUCTOR</div>
+            <div style={{ fontSize: 72, color: '#f0f0eb', lineHeight: 0.88 }}>PATHWAY</div>
           </div>
-          {/* What is this */}
+          <div style={{ width: 48, height: 3, background: '#e8c547', borderRadius: 2, marginBottom: 16 }} />
           <p className="text-sm leading-relaxed" style={{ color: '#4a4a70' }}>
-            The official certification pathway for RIDE indoor cycling instructors. Work through 3 stages, submit your assessments, get signed off by your coach.
+            The official certification pathway for RIDE indoor cycling instructors. 3 stages · coach sign-off required.
           </p>
         </div>
 
