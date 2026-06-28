@@ -590,19 +590,19 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                   </p>
                   <div className="flex flex-col gap-3">
                     <button
-                      onClick={() => pingCoach(coachPrompt.di, coachPrompt.done, coachPrompt.total)}
-                      disabled={pingSending}
-                      className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-50"
+                      onClick={() => { setCoachPrompt(null); setPromptDismissed(prev => { const n = new Set(prev); n.add(coachPrompt.di); return n }) }}
+                      className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
                       style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}
                     >
-                      {pingSending ? 'SENDING…' : 'PING YOUR COACH →'}
+                      KEEP GOING →
                     </button>
                     <button
-                      onClick={() => { setCoachPrompt(null); setPromptDismissed(prev => { const n = new Set(prev); n.add(coachPrompt.di); return n }) }}
-                      className="w-full font-display text-xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                      onClick={() => pingCoach(coachPrompt.di, coachPrompt.done, coachPrompt.total)}
+                      disabled={pingSending}
+                      className="w-full font-display text-xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all disabled:opacity-50"
                       style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.06em' }}
                     >
-                      KEEP GOING
+                      {pingSending ? 'SENDING…' : 'PING YOUR COACH'}
                     </button>
                   </div>
                 </>
