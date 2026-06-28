@@ -260,13 +260,16 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
   // Summary stats
   const totalStudents = localStudents.length
-  const totalSignoffs = signoffs.length
-  const pendingSignoffs = localStudents.reduce((acc, s) => {
-    return acc + [0,1,2].filter(si => {
-      const { pct } = countTasks(s.id, si)
-      return pct >= 75 && !getSignoff(s.id, si)
-    }).length
-  }, 0)
+  const stagesToSignOff = localStudents.reduce((acc, s) =>
+    acc + [0,1,2].filter(si => {
+      const { done, total } = countTasks(s.id, si)
+      return done === total && total > 0 && !getSignoff(s.id, si)
+    }).length, 0)
+  const totalPendingTasks = localStudents.reduce((acc, s) =>
+    acc + [0,1,2].reduce((a, si) => {
+      const { total, done } = countTasks(s.id, si)
+      return a + Math.max(0, total - done)
+    }, 0), 0)
 
   return (
     <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 80 }}>
@@ -608,7 +611,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                 HELLO,<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
               </h1>
               <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
-                {totalStudents} student{totalStudents !== 1 ? 's' : ''} · {totalSignoffs} stage{totalSignoffs !== 1 ? 's' : ''} signed off
+                {totalStudents} student{totalStudents !== 1 ? 's' : ''} · {stagesToSignOff > 0 ? `${stagesToSignOff} ready to sign off` : 'all stages up to date'}
               </p>
             </div>
             <div className="text-right flex-shrink-0 pt-1">
@@ -621,8 +624,8 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
-              { label: 'SIGN-OFFS', value: totalSignoffs, color: '#2ecc71' },
-              { label: 'PENDING', value: pendingSignoffs, color: '#ff6b9d' },
+              { label: 'SIGN OFF', value: stagesToSignOff, color: '#4ecdc4' },
+              { label: 'PENDING', value: totalPendingTasks, color: '#ff6b9d' },
             ].map(s => (
               <div key={s.label} className="rounded-2xl px-3 py-4 flex flex-col items-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="font-display" style={{ fontSize: 44, color: s.color, lineHeight: 1 }}>{s.value}</div>
@@ -631,40 +634,40 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
             ))}
           </div>
 
-          {/* ② Messages */}
-          {(() => {
-            const studentsWithMessages = localStudents.filter(s => messages.some(m => m.student_id === s.id && m.from_role === 'student' && !m.read))
-            if (studentsWithMessages.length === 0) return null
-            return (
-              <div>
-                <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
-                  <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length}</span>
-                </div>
-                <div className="flex flex-col gap-2">
-                  {studentsWithMessages.map(s => {
-                    const lastMsg = messages.filter(m => m.student_id === s.id).slice(-1)[0]
-                    const unread = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
-                    return (
-                      <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
-                        className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl text-left active:scale-[0.98] transition-all"
-                        style={{ background: '#111120', border: '1px solid rgba(255,107,157,0.2)', borderLeft: '4px solid #ff6b9d' }}>
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
-                          style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
-                          {s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-base font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
-                          <div className="text-sm truncate mt-0.5" style={{ color: '#9898c0' }}>{lastMsg?.text}</div>
-                        </div>
-                        <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>
-                      </button>
-                    )
-                  })}
-                </div>
+          {/* ② Messages — always shown */}
+          {localStudents.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
+                <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
+                {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length}</span>}
               </div>
-            )
-          })()}
+              <div className="flex flex-col gap-2">
+                {localStudents.map(s => {
+                  const threadMsgs = messages.filter(m => m.student_id === s.id)
+                  const lastMsg = threadMsgs.slice(-1)[0]
+                  const unread = threadMsgs.filter(m => m.from_role === 'student' && !m.read).length
+                  const initials = s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()
+                  return (
+                    <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left active:scale-[0.98] transition-all"
+                      style={{ background: '#111120', border: `1px solid ${unread ? 'rgba(255,107,157,0.25)' : 'rgba(255,255,255,0.06)'}`, borderLeft: `4px solid ${unread ? '#ff6b9d' : 'rgba(255,255,255,0.08)'}` }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
+                        style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
+                        {initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
+                        <div className="text-sm truncate mt-0.5" style={{ color: '#9898c0' }}>
+                          {lastMsg ? lastMsg.text : 'No messages yet — tap to start'}
+                        </div>
+                      </div>
+                      {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
 
           {/* ③ Review CTA — shown when any student has tasks needing review */}
