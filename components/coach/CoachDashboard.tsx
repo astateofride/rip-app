@@ -260,21 +260,39 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 80 }}>
 
       {/* Topbar */}
-      <div className="sticky top-0 z-50 flex items-center justify-between px-4" style={{ background: '#080810', borderBottom: '1px solid #1a1a2e', height: 56 }}>
-        <div className="flex items-center gap-2">
-          <div className="w-1 h-7 rounded-full flex-shrink-0" style={{ background: '#e8c547' }} />
-          <span className="font-display text-xl tracking-widest" style={{ color: '#f0f0eb', letterSpacing: '0.1em' }}>RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center font-display text-base flex-shrink-0" style={{ background: 'rgba(232,197,71,0.15)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547' }}>{coachInitials}</div>
-          <a href="/coach/preview" className="text-xs font-bold px-3 py-2 rounded-lg" style={{ border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547', background: 'rgba(232,197,71,0.06)', minHeight: 36, display: 'flex', alignItems: 'center' }}>👁 Student View</a>
-          <button onClick={signOut} className="text-xs font-bold px-3 py-2 rounded-lg" style={{ border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', background: 'none', minHeight: 36 }}>Sign out</button>
+      <div className="sticky top-0 z-50" style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="flex items-center justify-between px-4 gap-3" style={{ height: 60 }}>
+          {/* Left: avatar sign-out + brand */}
+          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={signOut}
+              className="w-9 h-9 rounded-full flex items-center justify-center font-display flex-shrink-0"
+              style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.45)', color: '#e8c547', fontSize: 16 }}
+              title={`Sign out ${coach.name}`}>
+              {coachInitials}
+            </button>
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-0.5 rounded-full flex-shrink-0" style={{ background: '#e8c547', height: 28 }} />
+              <div className="leading-none min-w-0">
+                <div className="font-display" style={{ fontSize: 10, color: '#e8c547', letterSpacing: '0.18em', marginBottom: 2 }}>COACH PORTAL</div>
+                <div className="font-display" style={{ fontSize: 16, color: '#f0f0eb', letterSpacing: '0.05em', lineHeight: 1.1 }}>RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY</div>
+              </div>
+            </div>
+          </div>
+          {/* Right: student view + badge */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <a href="/coach/preview"
+              className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-lg active:scale-95 transition-all"
+              style={{ border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547', background: 'rgba(232,197,71,0.06)' }}>
+              👁 Preview
+            </a>
+            <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full" style={{ background: '#e8c547', color: '#080810' }}>COACH</span>
+          </div>
         </div>
       </div>
 
       {tab === 'messages' && student ? (
         /* ── MESSAGES FULL SCREEN ── */
-        <div className="flex flex-col" style={{ height: 'calc(100dvh - 56px)' }}>
+        <div className="flex flex-col" style={{ height: 'calc(100dvh - 60px)' }}>
           <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid #1a1a2e', flexShrink: 0 }}>
             <button onClick={() => setTab('overview')}
               className="flex items-center justify-center rounded-xl flex-shrink-0 font-bold active:scale-95 transition-all"
@@ -326,7 +344,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
           if (isAllDone) {
             return (
-              <div className="flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: 'calc(100dvh - 56px)' }}>
+              <div className="flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: 'calc(100dvh - 60px)' }}>
                 <div className="font-display text-6xl mb-4" style={{ color: '#2ecc71', letterSpacing: '0.04em' }}>ALL CLEAR</div>
                 <p className="text-base mb-8" style={{ color: '#9898c0' }}>Nothing left in the queue. Your students are moving.</p>
                 <button onClick={() => setTab('overview')}
@@ -381,7 +399,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           const savingKey = `${qs.id}-${si}-${di}`
 
           return (
-            <div className="flex flex-col pb-10" style={{ minHeight: 'calc(100dvh - 56px)' }}>
+            <div className="flex flex-col pb-10" style={{ minHeight: 'calc(100dvh - 60px)' }}>
               {/* Queue progress bar */}
               <div style={{ background: '#111120', borderBottom: '1px solid #1a1a2e' }}>
                 <div className="flex items-center justify-between px-4 py-3">
@@ -539,56 +557,50 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           )
         })()
       ) : (
-        /* ── HOME: Summary → Messages → Students ── */
-        <div className="px-4 flex flex-col gap-6 pt-5">
+        /* ── HOME ── */
+        <div className="flex flex-col gap-5 pt-5 pb-10" style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 40px' }}>
 
           {/* Hero */}
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-3 mb-1">
             <div>
-              <div className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>COACH DASHBOARD</div>
-              <h1 className="font-display leading-none" style={{ fontSize: 44, letterSpacing: '0.02em', color: '#f0f0eb', lineHeight: 0.9 }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>COACH DASHBOARD</div>
+              <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
                 HELLO,<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
               </h1>
+              <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
+                {totalStudents} student{totalStudents !== 1 ? 's' : ''} · {totalSignoffs} stage{totalSignoffs !== 1 ? 's' : ''} signed off
+              </p>
             </div>
             <div className="text-right flex-shrink-0 pt-1">
-              <div className="font-display" style={{ fontSize: 28, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
-              <div className="text-sm mt-1 font-semibold" style={{ color: '#7878a8' }}>{today}</div>
+              <div className="font-display" style={{ fontSize: 30, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
+              <div className="text-xs font-bold mt-1" style={{ color: '#9898c0' }}>{today.split(',')[0].toUpperCase()}</div>
             </div>
           </div>
 
-          {/* ① Summary */}
-          <div>
-            <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#9898c0' }}>SUMMARY</div>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
-                { label: 'SIGN-OFFS', value: totalSignoffs, color: '#2ecc71' },
-                { label: 'PENDING', value: pendingSignoffs, color: '#ff6b9d' },
-              ].map(s => (
-                <div key={s.label} className="rounded-2xl px-3 py-4 flex flex-col items-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div className="font-display" style={{ fontSize: 40, color: s.color, lineHeight: 1 }}>{s.value}</div>
-                  <div className="text-[10px] font-bold tracking-widest mt-1.5 text-center" style={{ color: '#60608a' }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
+          {/* Stat pills */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
+              { label: 'SIGN-OFFS', value: totalSignoffs, color: '#2ecc71' },
+              { label: 'PENDING', value: pendingSignoffs, color: '#ff6b9d' },
+            ].map(s => (
+              <div key={s.label} className="rounded-2xl px-3 py-4 flex flex-col items-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="font-display" style={{ fontSize: 44, color: s.color, lineHeight: 1 }}>{s.value}</div>
+                <div className="text-[9px] font-bold tracking-widest mt-1.5 text-center uppercase" style={{ color: '#8888b0' }}>{s.label}</div>
+              </div>
+            ))}
           </div>
 
           {/* ② Messages */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>MESSAGES</div>
-              {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length} UNREAD</span>}
-            </div>
-            {(() => {
-              const studentsWithMessages = localStudents.filter(s => messages.some(m => m.student_id === s.id && m.from_role === 'student' && !m.read))
-              if (studentsWithMessages.length === 0) {
-                return (
-                  <div className="rounded-2xl px-4 py-5 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#7878a8' }}>
-                    No messages yet
-                  </div>
-                )
-              }
-              return (
+          {(() => {
+            const studentsWithMessages = localStudents.filter(s => messages.some(m => m.student_id === s.id && m.from_role === 'student' && !m.read))
+            if (studentsWithMessages.length === 0) return null
+            return (
+              <div>
+                <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
+                  <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length}</span>
+                </div>
                 <div className="flex flex-col gap-2">
                   {studentsWithMessages.map(s => {
                     const lastMsg = messages.filter(m => m.student_id === s.id).slice(-1)[0]
@@ -596,23 +608,24 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                     return (
                       <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
                         className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl text-left active:scale-[0.98] transition-all"
-                        style={{ background: '#111120', border: `1px solid ${unread ? 'rgba(255,107,157,0.3)' : 'rgba(255,255,255,0.06)'}`, borderLeft: `4px solid ${unread ? '#ff6b9d' : '#e8c547'}` }}>
+                        style={{ background: '#111120', border: '1px solid rgba(255,107,157,0.2)', borderLeft: '4px solid #ff6b9d' }}>
                         <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
                           style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
                           {s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-base font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
-                          <div className="text-sm truncate mt-0.5" style={{ color: '#7878a8' }}>{lastMsg.text}</div>
+                          <div className="text-sm truncate mt-0.5" style={{ color: '#9898c0' }}>{lastMsg?.text}</div>
                         </div>
-                        {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
+                        <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>
                       </button>
                     )
                   })}
                 </div>
-              )
-            })()}
-          </div>
+              </div>
+            )
+          })()}
+
 
           {/* ③ Review CTA — shown when any student has tasks needing review */}
           {(() => {
@@ -625,21 +638,32 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
             return (
               <button
                 onClick={() => startReview(reviewable[0].id)}
-                className="w-full flex items-center justify-between px-5 py-4 rounded-2xl active:scale-[0.98] transition-all"
-                style={{ background: 'rgba(255,107,157,0.08)', border: '2px solid rgba(255,107,157,0.4)' }}
+                className="w-full rounded-2xl active:scale-[0.98] transition-all overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, rgba(255,107,157,0.12) 0%, rgba(255,107,157,0.05) 100%)', border: '1px solid rgba(255,107,157,0.35)', boxShadow: '0 0 32px rgba(255,107,157,0.08)' }}
               >
-                <div className="text-left">
-                  <div className="font-display text-2xl tracking-wide" style={{ color: '#ff6b9d', letterSpacing: '0.06em' }}>REVIEW COMPLETED TASKS</div>
-                  <div className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#7878a8' }}>{totalToReview} task{totalToReview !== 1 ? 's' : ''} across {reviewable.length} student{reviewable.length !== 1 ? 's' : ''} need your eyes</div>
+                <div className="px-5 py-5 text-left">
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,107,157,0.7)' }}>
+                    {reviewable.length} STUDENT{reviewable.length !== 1 ? 'S' : ''} WAITING
+                  </div>
+                  <div className="font-display leading-none mb-3" style={{ fontSize: 36, color: '#ff6b9d', letterSpacing: '0.03em' }}>
+                    START<br />REVIEW →
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1 rounded-full" style={{ background: 'rgba(255,107,157,0.15)' }}>
+                      <div className="h-full rounded-full" style={{ width: '0%', background: '#ff6b9d' }} />
+                    </div>
+                    <span className="text-xs font-bold" style={{ color: 'rgba(255,107,157,0.7)' }}>{totalToReview} task{totalToReview !== 1 ? 's' : ''}</span>
+                  </div>
                 </div>
-                <span style={{ color: '#ff6b9d', fontSize: 22 }}>→</span>
               </button>
             )
           })()}
 
           {/* ③ Student overview — compact rows */}
           <div>
-            <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#9898c0' }}>STUDENT OVERVIEW</div>
+            <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #e8c547' }}>
+              <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>YOUR STUDENTS</div>
+            </div>
             {localStudents.length === 0 ? (
               <div className="rounded-2xl px-4 py-8 text-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="font-display text-3xl mb-2" style={{ color: 'rgba(255,255,255,0.07)' }}>NO STUDENTS</div>
@@ -680,7 +704,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                               <div className="h-full rounded-full transition-all" style={{ width: `${overallPct}%`, background: overallPct === 100 ? '#2ecc71' : '#e8c547' }} />
                             </div>
                             <span className="text-[10px] font-bold flex-shrink-0" style={{ color: '#7878a8' }}>{overallPct}%</span>
-                            <span className="text-[10px] flex-shrink-0" style={{ color: '#60608a' }}>{timeAgo(sLastSession?.started_at)}</span>
+                            <span className="text-[10px] flex-shrink-0" style={{ color: '#8888b0' }}>{timeAgo(sLastSession?.started_at)}</span>
                           </div>
                         </div>
                         <span style={{ color: '#3a3a5a', fontSize: 14 }}>›</span>
