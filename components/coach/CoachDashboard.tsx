@@ -276,7 +276,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
             <div key={si}>
               <div className="flex items-center gap-3 mb-3" style={{ borderLeft: `3px solid ${colours[si]}`, paddingLeft: 12 }}>
                 <div className="font-display text-2xl tracking-wide" style={{ color: colours[si], letterSpacing: '0.06em' }}>STAGE {si + 1}</div>
-                <div className="text-sm font-semibold" style={{ color: '#4a4a70' }}>{stageNames[si]}</div>
+                <div className="text-base font-semibold" style={{ color: '#4a4a70' }}>{stageNames[si]}</div>
               </div>
               <div className="flex flex-col gap-2">
                 {STAGES[si].days.map((day, di) => {
@@ -343,20 +343,20 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           {/* Hero */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#3a3a5c' }}>COACH DASHBOARD</div>
+              <div className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: '#7070a0' }}>COACH DASHBOARD</div>
               <h1 className="font-display leading-none" style={{ fontSize: 44, letterSpacing: '0.02em', color: '#f0f0eb', lineHeight: 0.9 }}>
                 HELLO,<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
               </h1>
             </div>
             <div className="text-right flex-shrink-0 pt-1">
               <div className="font-display" style={{ fontSize: 28, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
-              <div className="text-xs mt-1 font-semibold" style={{ color: '#4a4a70' }}>{today}</div>
+              <div className="text-sm mt-1 font-semibold" style={{ color: '#4a4a70' }}>{today}</div>
             </div>
           </div>
 
           {/* ① Summary */}
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>SUMMARY</div>
+            <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#7070a0' }}>SUMMARY</div>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
@@ -374,7 +374,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
           {/* ② Messages */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#3a3a5c' }}>MESSAGES</div>
+              <div className="text-sm font-bold uppercase tracking-widest" style={{ color: '#7070a0' }}>MESSAGES</div>
               {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length} UNREAD</span>}
             </div>
             {(() => {
@@ -400,8 +400,8 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                           {s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
-                          <div className="text-xs truncate mt-0.5" style={{ color: '#4a4a70' }}>{lastMsg.text}</div>
+                          <div className="text-base font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
+                          <div className="text-sm truncate mt-0.5" style={{ color: '#4a4a70' }}>{lastMsg.text}</div>
                         </div>
                         {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
                       </button>
@@ -414,7 +414,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
           {/* ③ Student overview — one card per student */}
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>STUDENT OVERVIEW</div>
+            <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#7070a0' }}>STUDENT OVERVIEW</div>
             {localStudents.length === 0 ? (
               <div className="rounded-2xl px-4 py-8 text-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="font-display text-3xl mb-2" style={{ color: 'rgba(255,255,255,0.07)' }}>NO STUDENTS</div>
@@ -433,15 +433,15 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                       {/* Student header */}
                       <div className="flex items-start justify-between mb-4 cursor-pointer" onClick={() => openProfile(s.id)}>
                         <div>
-                          <div className="font-display tracking-wide leading-none" style={{ fontSize: 28, color: '#f0f0eb' }}>{s.name.toUpperCase()}</div>
-                          <div className="text-xs mt-1.5 font-semibold" style={{ color: '#4a4a70' }}>
+                          <div className="font-display tracking-wide leading-none" style={{ fontSize: 32, color: '#f0f0eb' }}>{s.name.toUpperCase()}</div>
+                          <div className="text-sm mt-1.5 font-semibold" style={{ color: '#4a4a70' }}>
                             {s.location ?? 'No location'} · Started {formatDate(s.start_date)}
                           </div>
-                          <div className="text-xs mt-1.5 font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>TAP TO VIEW PROFILE →</div>
+                          <div className="text-sm mt-1.5 font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>TAP TO VIEW PROFILE →</div>
                         </div>
                         <div className="text-right flex-shrink-0 ml-3">
                           <div className="text-[10px] uppercase tracking-widest font-bold" style={{ color: '#3a3a5c' }}>Last active</div>
-                          <div className="text-sm font-bold mt-1" style={{ color: '#4ecdc4' }}>{timeAgo(sLastSession?.started_at)}</div>
+                          <div className="text-base font-bold mt-1" style={{ color: '#4ecdc4' }}>{timeAgo(sLastSession?.started_at)}</div>
                         </div>
                       </div>
 
@@ -454,7 +454,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                           <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid #1a1a2e' }}>
                             <div className="font-display flex-shrink-0 text-center" style={{ color: colours[si], width: 32, fontSize: 18 }}>S{si + 1}</div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex justify-between text-xs font-semibold mb-1.5" style={{ color: '#7070a0' }}>
+                              <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#7070a0' }}>
                                 <span className="truncate mr-2">{stageNames[si]}</span><span style={{ color: colours[si], flexShrink: 0 }}>{pct}%</span>
                               </div>
                               <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
@@ -527,7 +527,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               <div className="px-6 pt-3 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#3a3a5c' }}>LEARNER PROFILE</div>
+                    <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#3a3a5c' }}>LEARNER PROFILE</div>
                     <div className="font-display leading-none" style={{ fontSize: 36, color: '#f0f0eb', letterSpacing: '0.04em' }}>{ps.name.toUpperCase()}</div>
                   </div>
                   <button onClick={() => { if (editMode) { setEditForm({ name: ps.name, location: ps.location ?? '', start_date: ps.start_date ?? '', email: ps.email ?? '' }); setEditMode(false) } else { setEditMode(true) } }}
@@ -543,19 +543,19 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                   /* Edit form */
                   <div className="flex flex-col gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Full name</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Full name</label>
                       <input className="inp" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} style={{ fontSize: 16 }} />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Location / Club</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Location / Club</label>
                       <input className="inp" value={editForm.location} onChange={e => setEditForm(f => ({ ...f, location: e.target.value }))} placeholder="Studio or club name" style={{ fontSize: 16 }} />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Start date</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Start date</label>
                       <input type="date" className="inp" value={editForm.start_date} onChange={e => setEditForm(f => ({ ...f, start_date: e.target.value }))} style={{ fontSize: 16 }} />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email (read only)</label>
+                      <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email (read only)</label>
                       <input className="inp" value={editForm.email} disabled style={{ fontSize: 16, opacity: 0.4 }} />
                     </div>
                     <button onClick={saveEdit} disabled={editSaving}
@@ -576,7 +576,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                         { label: 'LAST ACTIVE', value: timeAgo(lastSessions.find(s => s.user_id === profileSheet)?.started_at), color: '#4ecdc4' },
                       ].map(item => (
                         <div key={item.label} className="rounded-2xl p-4" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.05)' }}>
-                          <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#3a3a5c' }}>{item.label}</div>
+                          <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#3a3a5c' }}>{item.label}</div>
                           <div className="text-sm font-semibold leading-snug" style={{ color: item.color }}>{item.value}</div>
                         </div>
                       ))}
@@ -584,12 +584,12 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
                     {/* Overall progress */}
                     <div>
-                      <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>TRAINING PROGRESS — {totalAll ? Math.round(totalDone / totalAll * 100) : 0}% OVERALL</div>
+                      <div className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: '#7070a0' }}>TRAINING PROGRESS — {totalAll ? Math.round(totalDone / totalAll * 100) : 0}% OVERALL</div>
                       {stageStats.map((s, si) => (
                         <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
                           <div className="font-display text-xl flex-shrink-0 w-8 text-center" style={{ color: colours[si] }}>S{si + 1}</div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex justify-between text-xs font-semibold mb-1.5" style={{ color: '#7070a0' }}>
+                            <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#7070a0' }}>
                               <span className="truncate mr-2">{stageNames[si]}</span>
                               <span style={{ color: colours[si], flexShrink: 0 }}>{s.done}/{s.total}</span>
                             </div>
