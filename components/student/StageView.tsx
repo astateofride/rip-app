@@ -83,12 +83,13 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   const [manualPopup, setManualPopup] = useState<ManualPopup | null>(null)
   const [manualExpanded, setManualExpanded] = useState<Set<number>>(new Set())
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set())
-  const [activeDayIdx, setActiveDayIdx] = useState(() => {
-    for (let di = 0; di < stage.days.length; di++) {
-      const hasPending = stage.days[di].tasks.some((_, ti) => !tasks.find(t => t.stage_idx === stageIdx && t.day_idx === di && t.task_idx === ti)?.completed)
-      if (hasPending) return di
+  const flatTasks = stage.days.flatMap((day, di) => day.tasks.map((task, ti) => ({ di, ti, task, day })))
+  const [activeTaskFlat, setActiveTaskFlat] = useState(() => {
+    for (let i = 0; i < flatTasks.length; i++) {
+      const { di, ti } = flatTasks[i]
+      if (!tasks.find(t => t.stage_idx === stageIdx && t.day_idx === di && t.task_idx === ti)?.completed) return i
     }
-    return stage.days.length - 1
+    return flatTasks.length - 1
   })
   const [coachPrompt, setCoachPrompt] = useState<{ di: number; done: number; total: number } | null>(null)
   const [promptDismissed, setPromptDismissed] = useState<Set<number>>(new Set())
@@ -229,14 +230,37 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
     )
   }
 
-  const di = activeDayIdx
-  const day = stage.days[di]
+  function goNextTask() {
+    let next = activeTaskFlat + 1
+    while (next < flatTasks.length) {
+      const { di: ndi, ti: nti } = flatTasks[next]
+      if (!localTasks.find(t => t.stage_idx === stageIdx && t.day_idx === ndi && t.task_idx === nti)?.completed) {
+        setActiveTaskFlat(next)
+        return
+      }
+      next++
+    }
+    if (activeTaskFlat < flatTasks.length - 1) setActiveTaskFlat(activeTaskFlat + 1)
+  }
+
+  const currentFlat = flatTasks[activeTaskFlat] ?? flatTasks[flatTasks.length - 1]
+  const { di, ti: activeTi, task: activeTask, day } = currentFlat
   const dayNum = stageIdx * 10 + di + 1
   const taskCount = getTaskCount(di)
-  const allDayDone = taskCount === day.tasks.length
+  const allDayTasksDone = taskCount === day.tasks.length
   const dd = getDayData(di)
   const remark = remarks.find(r => r.stage_idx === stageIdx && r.day_idx === di)
   const isLastDay = di === stage.days.length - 1
+  const isFirstTaskInDay = activeTaskFlat === 0 || flatTasks[activeTaskFlat - 1]?.di !== di
+  const allStageDone = localTasks.filter(t => t.stage_idx === stageIdx && t.completed).length === flatTasks.length
+
+  const prog = getTask(di, activeTi)
+  const taskDone = prog?.completed ?? false
+  const written = isWrittenTask(activeTask.text)
+  const taskKey = `${di}-${activeTi}`
+  const assessment = assessments[taskKey]
+  const savedAnswer = prog?.answer ?? ''
+  const isExpandedForResubmit = expandedTasks.has(taskKey)
 
   return (
     <div style={{ background: '#080810', minHeight: '100dvh', paddingBottom: 100 }}>
@@ -263,301 +287,236 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
         </div>
       </div>
 
-      {/* DAY MAP — horizontal scroll */}
-      <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-        <div className="flex gap-3 px-4 py-4" style={{ width: 'max-content' }}>
-          {stage.days.map((d, idx) => {
-            const tc = getTaskCount(idx)
-            const done = tc === d.tasks.length
-            const active = idx === activeDayIdx
-            const num = stageIdx * 10 + idx + 1
+      {/* TASK PROGRESS — dots strip */}
+      <div className="px-4 py-3" style={{ maxWidth: 480, margin: '0 auto' }}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>
+            Task {activeTaskFlat + 1} / {flatTasks.length}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-widest ml-auto" style={{ color: colour }}>
+            {day.title}
+          </span>
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {flatTasks.map(({ di: fdi, ti: fti }, idx) => {
+            const isDone = !!localTasks.find(t => t.stage_idx === stageIdx && t.day_idx === fdi && t.task_idx === fti)?.completed
+            const isActive = idx === activeTaskFlat
             return (
-              <button key={idx} onClick={() => setActiveDayIdx(idx)}
-                className="flex flex-col items-center gap-1.5 transition-all active:scale-90"
-                style={{ minWidth: 48 }}>
-                <div className="w-11 h-11 rounded-full flex items-center justify-center font-display text-lg transition-all"
-                  style={done
-                    ? { background: '#2ecc71', color: '#080810', border: '2px solid #2ecc71' }
-                    : active
-                    ? { background: 'transparent', color: colour, border: `2px solid ${colour}`, boxShadow: `0 0 14px ${colour}50` }
-                    : { background: '#111120', color: '#4a4a70', border: '2px solid #1a1a2e' }
-                  }>
-                  {done ? '✓' : String(num).padStart(2, '0')}
-                </div>
-                <div className="text-[8px] font-bold uppercase tracking-widest text-center leading-tight"
-                  style={{ color: active ? colour : done ? '#2ecc71' : '#3a3a5c', maxWidth: 44 }}>
-                  {d.title.split(' ')[0]}
-                </div>
-              </button>
+              <button key={idx} onClick={() => setActiveTaskFlat(idx)}
+                className="rounded-full transition-all duration-300"
+                style={{ height: 6, width: isActive ? 28 : 8, background: isDone ? '#2ecc71' : isActive ? colour : '#1a1a2e', flexShrink: 0 }} />
             )
           })}
         </div>
       </div>
 
-      {/* ACTIVE DAY */}
+      {/* MAIN CONTENT */}
       <div style={{ maxWidth: 480, margin: '0 auto' }}>
 
-        {/* Day hero */}
-        <div className="px-4 pt-2 pb-5">
-          <div className="flex items-end gap-3 mb-3">
-            <div className="font-display leading-none select-none" style={{ fontSize: 88, color: colour, opacity: 0.12, lineHeight: 0.85, flexShrink: 0 }}>
-              {String(dayNum).padStart(2, '0')}
-            </div>
-            <div className="mb-1 flex-1 min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>Day {dayNum} · {day.focus}</div>
-              <div className="font-display leading-tight" style={{ fontSize: 26, color: '#f0f0eb', letterSpacing: '0.02em' }}>{day.title}</div>
-            </div>
-          </div>
-          {/* Task progress track */}
-          <div className="flex items-center gap-1.5">
-            {day.tasks.map((_, ti) => (
-              <div key={ti} className="h-1.5 flex-1 rounded-full transition-all duration-500"
-                style={{ background: getTask(di, ti)?.completed ? colour : '#1a1a2e', maxWidth: 36 }} />
-            ))}
-            <span className="text-xs font-bold ml-2 flex-shrink-0" style={{ color: allDayDone ? '#2ecc71' : '#9898c0' }}>{taskCount}/{day.tasks.length}</span>
-          </div>
-        </div>
-
-        {/* Coach remark */}
+        {/* Coach remark for this day */}
         {remark && (
-          <div className="mx-4 mb-4 px-4 py-3 rounded-2xl" style={{ background: 'rgba(232,197,71,0.05)', border: `1px solid rgba(232,197,71,0.2)`, borderLeft: `3px solid ${colour}` }}>
+          <div className="mx-4 mb-3 px-4 py-3 rounded-2xl" style={{ background: 'rgba(232,197,71,0.05)', borderLeft: `3px solid ${colour}` }}>
             <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: colour }}>Your Coach Says</div>
             <div className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{remark.remark}</div>
           </div>
         )}
 
-        {/* MANUAL REFERENCE */}
-        <div className="mx-4 mb-5">
-          <button
-            onClick={() => manualExpanded.has(di) ? setManualExpanded(prev => { const n = new Set(prev); n.delete(di); return n }) : expandManual(di)}
-            className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98]"
-            style={{
-              background: manualExpanded.has(di) ? '#0a0a18' : 'rgba(232,197,71,0.05)',
-              border: `2px solid ${manualExpanded.has(di) ? '#e8c547' : dd?.manual_read_at ? 'rgba(232,197,71,0.25)' : 'rgba(232,197,71,0.55)'}`,
-              boxShadow: !dd?.manual_read_at && !manualExpanded.has(di) ? '0 0 18px rgba(232,197,71,0.1)' : undefined,
-            }}>
-            <div className="flex items-center gap-3">
-              <span style={{ fontSize: 22 }}>📖</span>
-              <div className="text-left">
-                <div className="text-sm font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>
-                  {dd?.manual_read_at ? 'Manual Reference' : 'Read This First'}
+        {/* Manual reference — shown when entering a new day */}
+        {isFirstTaskInDay && (
+          <div className="mx-4 mb-4">
+            <button
+              onClick={() => manualExpanded.has(di) ? setManualExpanded(prev => { const n = new Set(prev); n.delete(di); return n }) : expandManual(di)}
+              className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all active:scale-[0.98]"
+              style={{
+                background: manualExpanded.has(di) ? '#0a0a18' : 'rgba(232,197,71,0.05)',
+                border: `2px solid ${manualExpanded.has(di) ? '#e8c547' : dd?.manual_read_at ? 'rgba(232,197,71,0.25)' : 'rgba(232,197,71,0.55)'}`,
+                boxShadow: !dd?.manual_read_at && !manualExpanded.has(di) ? '0 0 18px rgba(232,197,71,0.1)' : undefined,
+              }}>
+              <div className="flex items-center gap-3">
+                <span style={{ fontSize: 22 }}>📖</span>
+                <div className="text-left">
+                  <div className="text-sm font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>
+                    {dd?.manual_read_at ? 'Manual Reference' : 'Read This First'}
+                  </div>
+                  <div className="text-[10px] mt-0.5" style={{ color: '#9898c0' }}>{day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ?? stage.ref}</div>
                 </div>
-                <div className="text-[10px] mt-0.5" style={{ color: '#9898c0' }}>{day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ?? stage.ref}</div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {dd?.manual_read_at && <span className="text-[9px] font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71' }}>READ ✓</span>}
-              <span style={{ color: '#e8c547', fontSize: 14, transform: manualExpanded.has(di) ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>▾</span>
-            </div>
-          </button>
-          {manualExpanded.has(di) && (
-            <div className="px-5 py-4 rounded-b-2xl -mt-2" style={{ background: '#0a0a18', border: '2px solid #e8c547', borderTop: 'none' }}>
-              <p className="text-sm leading-relaxed" style={{ color: '#d4d4ea' }}>{day.manualNote}</p>
-            </div>
-          )}
-        </div>
-
-        {/* TASKS — game flow */}
-        <div className="px-4 flex flex-col gap-3 mb-5">
-          {day.tasks.map((task, ti) => {
-            const prog = getTask(di, ti)
-            const done = prog?.completed ?? false
-            const written = isWrittenTask(task.text)
-            const key = `${di}-${ti}`
-            const assessment = assessments[key]
-            const savedAnswer = prog?.answer ?? ''
-            const isExpanded = expandedTasks.has(key)
-            const prevDone = ti === 0 || !!(getTask(di, ti - 1)?.completed)
-            const isActiveTask = !done && prevDone
-
-            /* ── COMPLETED (collapsed) ── */
-            if (done && !isExpanded) {
-              return (
-                <button key={ti}
-                  onClick={() => written
-                    ? setExpandedTasks(prev => { const n = new Set(prev); n.add(key); return n })
-                    : toggleCheckbox(di, ti)}
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left w-full active:scale-[0.98] transition-all"
-                  style={{ background: 'rgba(46,204,113,0.05)', border: '1px solid rgba(46,204,113,0.18)' }}>
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold" style={{ background: '#2ecc71', color: '#080810' }}>✓</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate" style={{ color: '#9898c0' }}>{task.text}</p>
-                    {written && prog?.score !== null && (
-                      <div className="text-[10px] mt-0.5 font-bold" style={{ color: (prog?.score ?? 0) >= 60 ? '#2ecc71' : '#e8c547' }}>
-                        Score: {prog?.score}% {(prog?.score ?? 0) >= 60 ? '✓' : '— tap to improve'}
-                      </div>
-                    )}
-                  </div>
-                  {written && <span className="text-[10px] font-bold uppercase tracking-widest flex-shrink-0" style={{ color: '#9898c0' }}>edit</span>}
-                </button>
-              )
-            }
-
-            /* ── COMPLETED (expanded for review/resubmit) ── */
-            if (done && isExpanded) {
-              return (
-                <div key={ti} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: '1px solid rgba(46,204,113,0.3)' }}>
-                  <div className="flex items-center gap-2 px-4 pt-4 pb-2">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: '#2ecc71', color: '#080810' }}>✓</div>
-                    <p className="text-sm flex-1 leading-snug" style={{ color: '#9898c0' }}>{task.text}</p>
-                    <button onClick={() => setExpandedTasks(prev => { const n = new Set(prev); n.delete(key); return n })}
-                      className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ color: '#9898c0', background: 'rgba(255,255,255,0.05)' }}>▲</button>
-                  </div>
-                  <div className="px-4 pb-4">
-                    {(assessment ? assessment.score < 60 : (prog?.score ?? 100) < 60) && (
-                      <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
-                        <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#e8c547' }}>💬 Coach says</div>
-                        <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>
-                          {(() => {
-                            const sc = assessment?.score ?? prog?.score ?? 0
-                            const hint = assessment?.misses?.[0] ?? null
-                            return sc < 30
-                              ? `Good attempt — let's build on this. Can you write a bit more${hint ? ` and try to explain "${hint}" in your own words` : ''}?`
-                              : `You're on the right track! Can you expand your answer a little? ${hint ? `Try to say a bit more about "${hint}" —` : 'Even'} one extra sentence makes a difference.`
-                          })()}
-                        </p>
-                      </div>
-                    )}
-                    <textarea key={`answer-${key}-${savedAnswer}`} id={`answer-${key}`} className="inp" defaultValue={savedAnswer} style={{ minHeight: 100, fontSize: 15 }} />
-                    <button onClick={() => { const el = document.getElementById(`answer-${key}`) as HTMLTextAreaElement; if (el?.value.trim()) submitAnswer(di, ti, el.value.trim()) }}
-                      disabled={saving === key}
-                      className="w-full mt-2 py-3 rounded-xl font-display text-xl tracking-wide disabled:opacity-40 active:scale-[0.98] transition-all"
-                      style={{ background: '#4ecdc4', color: '#080810', letterSpacing: '0.04em' }}>
-                      {saving === key ? 'CHECKING…' : 'RESUBMIT ANSWER'}
-                    </button>
-                    {assessment && (
-                      <div className="mt-3 rounded-xl p-3" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.07)' }}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>Self-Assessment</div>
-                          <div className="font-display text-xl" style={{ color: assessment.score >= 60 ? '#2ecc71' : assessment.score >= 40 ? '#e8c547' : '#ff6b9d' }}>{assessment.score}%</div>
-                        </div>
-                        {assessment.hits.length > 0 && <div className="flex flex-wrap gap-1 mb-1">{assessment.hits.map(k => <span key={k} className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.2)' }}>{k}</span>)}</div>}
-                        {assessment.misses.length > 0 && <div className="flex flex-wrap gap-1">{assessment.misses.map(k => <span key={k} className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(232,197,71,0.08)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.2)' }}>{k}</span>)}</div>}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
-            }
-
-            /* ── ACTIVE TASK — YOUR TURN ── */
-            if (isActiveTask) {
-              return (
-                <div key={ti} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `2px solid ${colour}`, boxShadow: `0 0 28px ${colour}18` }}>
-                  <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: colour, color: '#080810', letterSpacing: '0.08em' }}>YOUR TURN</div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>Task {ti + 1} of {day.tasks.length}</span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto flex-shrink-0"
-                        style={written
-                          ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.25)' }
-                          : { background: 'rgba(255,255,255,0.05)', color: '#9898c0', border: '1px solid rgba(255,255,255,0.07)' }}>
-                        {written ? '✍ Written' : '✓ Practical'}
-                      </span>
-                    </div>
-                    <p className="text-base leading-relaxed font-medium" style={{ color: '#f0f0eb' }}>
-                      {renderWithSectionLinks(task.text, () => setManualPopup({ ref: task.ref, note: day.manualNote, pageRef: task.ref }))}
-                    </p>
-                    <div className="text-[10px] font-bold mt-1" style={{ color: '#9898c0' }}>{task.ref}</div>
-                  </div>
-                  <div className="p-4">
-                    {written ? (
-                      <>
-                        <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Your answer</div>
-                        <textarea id={`answer-${key}`} className="inp"
-                          placeholder="Write your answer here — use your own words…"
-                          style={{ minHeight: 100, fontSize: 15 }} />
-                        <button
-                          onClick={() => { const el = document.getElementById(`answer-${key}`) as HTMLTextAreaElement; if (el?.value.trim()) submitAnswer(di, ti, el.value.trim()) }}
-                          disabled={saving === key}
-                          className="w-full mt-3 py-4 rounded-xl font-display text-2xl tracking-wide disabled:opacity-40 active:scale-[0.98] transition-all"
-                          style={{ background: colour, color: '#080810', letterSpacing: '0.05em' }}>
-                          {saving === key ? 'CHECKING…' : 'SUBMIT ANSWER →'}
-                        </button>
-                      </>
-                    ) : (
-                      <button onClick={() => toggleCheckbox(di, ti)}
-                        className="w-full py-5 rounded-xl font-display text-2xl tracking-wide active:scale-[0.98] transition-all"
-                        style={{ background: colour, color: '#080810', letterSpacing: '0.05em' }}>
-                        MARK DONE ✓
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            }
-
-            /* ── PENDING / UPCOMING TASK ── */
-            return (
-              <div key={ti} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
-                style={{ background: '#0c0c18', border: '1px solid #1a1a2e', opacity: 0.55 }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-display text-sm" style={{ background: '#1a1a2e', color: '#b0b0cc' }}>{ti + 1}</div>
-                <p className="text-sm leading-snug" style={{ color: '#b0b0cc' }}>{task.text}</p>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {dd?.manual_read_at && <span className="text-[9px] font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71' }}>READ ✓</span>}
+                <span style={{ color: '#e8c547', fontSize: 14, transform: manualExpanded.has(di) ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>▾</span>
               </div>
-            )
-          })}
-        </div>
-
-        {/* DAY COMPLETE */}
-        {allDayDone && (
-          <div className="mx-4 mb-5 p-5 rounded-2xl text-center" style={{ background: 'rgba(46,204,113,0.05)', border: '1px solid rgba(46,204,113,0.2)' }}>
-            <div className="font-display text-3xl mb-1" style={{ color: '#2ecc71', letterSpacing: '0.05em' }}>DAY {dayNum} DONE ✓</div>
-            <p className="text-sm" style={{ color: '#9898c0' }}>Your coach can see your progress. Keep the momentum.</p>
+            </button>
+            {manualExpanded.has(di) && (
+              <div className="px-5 py-4 rounded-b-2xl -mt-2" style={{ background: '#0a0a18', border: '2px solid #e8c547', borderTop: 'none' }}>
+                <p className="text-sm leading-relaxed" style={{ color: '#d4d4ea' }}>{day.manualNote}</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* EXTRAS — video, reflection, coach chat */}
-        <div className="mx-4 mb-5 rounded-2xl overflow-hidden" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="px-4 py-4 flex flex-col gap-4">
-            <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Video Link (optional)</div>
-              <input type="url" className="inp" placeholder="https://youtube.com/..." defaultValue={dd?.video_url ?? ''} onBlur={e => saveField(di, 'video_url', e.target.value)} style={{ fontSize: 15 }} />
-            </div>
-            <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Reflection for this day</div>
-              <textarea className="inp" placeholder="What clicked? What felt hard? What surprised you?" defaultValue={dd?.reflection ?? ''} onBlur={e => saveField(di, 'reflection', e.target.value)} style={{ minHeight: 80, fontSize: 15 }} />
-            </div>
-            {!previewMode && (
-              <button onClick={() => router.push(`/pathway/chat?stage=${stageIdx}&day=${di}`)}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all active:scale-[0.98]"
-                style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
-                <span style={{ color: '#e8c547' }}>💬</span>
-                <span className="text-sm font-bold" style={{ color: '#e8c547' }}>Ask your coach about this day</span>
-              </button>
-            )}
-            {isLastDay && (
-              <div className="px-4 py-3 rounded-xl text-sm font-medium"
-                style={signoff
-                  ? { border: '1px solid rgba(46,204,113,0.3)', background: 'rgba(46,204,113,0.07)', color: '#2ecc71' }
-                  : { border: '1px solid rgba(255,255,255,0.07)', background: '#0c0c18', color: '#9898c0' }}>
-                {signoff ? `✓ Stage ${stageIdx + 1} signed off by your coach` : 'Complete all days — your coach will sign off to unlock the next stage'}
+        {/* CURRENT TASK */}
+        <div className="px-4 mb-4">
+          {taskDone && !isExpandedForResubmit ? (
+            /* Completed — show summary + NEXT TASK */
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
+                style={{ background: 'rgba(46,204,113,0.06)', border: '1px solid rgba(46,204,113,0.2)' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold" style={{ background: '#2ecc71', color: '#080810' }}>✓</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm leading-snug" style={{ color: '#c0c0d8' }}>{activeTask.text}</p>
+                  {written && prog?.score !== null && (
+                    <div className="text-[10px] mt-1 font-bold" style={{ color: (prog?.score ?? 0) >= 60 ? '#2ecc71' : '#e8c547' }}>
+                      Score: {prog?.score}% {(prog?.score ?? 0) >= 60 ? '✓' : '— tap to improve'}
+                    </div>
+                  )}
+                </div>
+                {written && (
+                  <button onClick={() => setExpandedTasks(prev => { const n = new Set(prev); n.add(taskKey); return n })}
+                    className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded flex-shrink-0"
+                    style={{ color: '#9898c0', background: 'rgba(255,255,255,0.05)' }}>edit</button>
+                )}
               </div>
-            )}
-          </div>
+              {activeTaskFlat < flatTasks.length - 1 && (
+                <button onClick={goNextTask}
+                  className="w-full py-5 rounded-2xl font-display text-2xl tracking-wide active:scale-[0.98] transition-all"
+                  style={{ background: colour, color: '#080810', letterSpacing: '0.05em' }}>
+                  NEXT TASK →
+                </button>
+              )}
+            </div>
+          ) : taskDone && isExpandedForResubmit ? (
+            /* Resubmit written answer */
+            <div className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: '1px solid rgba(46,204,113,0.3)' }}>
+              <div className="flex items-center gap-2 px-4 pt-4 pb-2">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: '#2ecc71', color: '#080810' }}>✓</div>
+                <p className="text-sm flex-1 leading-snug" style={{ color: '#9898c0' }}>{activeTask.text}</p>
+                <button onClick={() => setExpandedTasks(prev => { const n = new Set(prev); n.delete(taskKey); return n })}
+                  className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ color: '#9898c0', background: 'rgba(255,255,255,0.05)' }}>▲</button>
+              </div>
+              <div className="px-4 pb-4">
+                {(assessment ? assessment.score < 60 : (prog?.score ?? 100) < 60) && (
+                  <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
+                    <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#e8c547' }}>💬 Coach says</div>
+                    <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>
+                      {(() => {
+                        const sc = assessment?.score ?? prog?.score ?? 0
+                        const hint = assessment?.misses?.[0] ?? null
+                        return sc < 30
+                          ? `Good attempt — let's build on this. Can you write a bit more${hint ? ` and try to explain "${hint}" in your own words` : ''}?`
+                          : `You're on the right track! Can you expand your answer a little? ${hint ? `Try to say a bit more about "${hint}" —` : 'Even'} one extra sentence makes a difference.`
+                      })()}
+                    </p>
+                  </div>
+                )}
+                <textarea key={`answer-${taskKey}-${savedAnswer}`} id={`answer-${taskKey}`} className="inp" defaultValue={savedAnswer} style={{ minHeight: 100, fontSize: 15 }} />
+                <button onClick={() => { const el = document.getElementById(`answer-${taskKey}`) as HTMLTextAreaElement; if (el?.value.trim()) submitAnswer(di, activeTi, el.value.trim()) }}
+                  disabled={saving === taskKey}
+                  className="w-full mt-2 py-3 rounded-xl font-display text-xl tracking-wide disabled:opacity-40 active:scale-[0.98] transition-all"
+                  style={{ background: '#4ecdc4', color: '#080810', letterSpacing: '0.04em' }}>
+                  {saving === taskKey ? 'CHECKING…' : 'RESUBMIT ANSWER'}
+                </button>
+                {assessment && (
+                  <div className="mt-3 rounded-xl p-3" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>Self-Assessment</div>
+                      <div className="font-display text-xl" style={{ color: assessment.score >= 60 ? '#2ecc71' : assessment.score >= 40 ? '#e8c547' : '#ff6b9d' }}>{assessment.score}%</div>
+                    </div>
+                    {assessment.hits.length > 0 && <div className="flex flex-wrap gap-1 mb-1">{assessment.hits.map(k => <span key={k} className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.2)' }}>{k}</span>)}</div>}
+                    {assessment.misses.length > 0 && <div className="flex flex-wrap gap-1">{assessment.misses.map(k => <span key={k} className="text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(232,197,71,0.08)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.2)' }}>{k}</span>)}</div>}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Active task — YOUR TURN */
+            <div className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `2px solid ${colour}`, boxShadow: `0 0 28px ${colour}18` }}>
+              <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: colour, color: '#080810', letterSpacing: '0.08em' }}>YOUR TURN</div>
+                  <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto flex-shrink-0"
+                    style={written
+                      ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.25)' }
+                      : { background: 'rgba(255,255,255,0.05)', color: '#9898c0', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    {written ? '✍ Written' : '✓ Practical'}
+                  </span>
+                </div>
+                <p className="text-base leading-relaxed font-medium" style={{ color: '#f0f0eb' }}>
+                  {renderWithSectionLinks(activeTask.text, () => setManualPopup({ ref: activeTask.ref, note: day.manualNote, pageRef: activeTask.ref }))}
+                </p>
+                <div className="text-[10px] font-bold mt-1" style={{ color: '#9898c0' }}>{activeTask.ref}</div>
+              </div>
+              <div className="p-4">
+                {written ? (
+                  <>
+                    <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Your answer</div>
+                    <textarea id={`answer-${taskKey}`} className="inp"
+                      placeholder="Write your answer here — use your own words…"
+                      style={{ minHeight: 100, fontSize: 15 }} />
+                    <button
+                      onClick={() => { const el = document.getElementById(`answer-${taskKey}`) as HTMLTextAreaElement; if (el?.value.trim()) submitAnswer(di, activeTi, el.value.trim()) }}
+                      disabled={saving === taskKey}
+                      className="w-full mt-3 py-4 rounded-xl font-display text-2xl tracking-wide disabled:opacity-40 active:scale-[0.98] transition-all"
+                      style={{ background: colour, color: '#080810', letterSpacing: '0.05em' }}>
+                      {saving === taskKey ? 'CHECKING…' : 'SUBMIT ANSWER →'}
+                    </button>
+                  </>
+                ) : (
+                  <button onClick={() => toggleCheckbox(di, activeTi)}
+                    className="w-full py-5 rounded-xl font-display text-2xl tracking-wide active:scale-[0.98] transition-all"
+                    style={{ background: colour, color: '#080810', letterSpacing: '0.05em' }}>
+                    MARK DONE ✓
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* DAY NAVIGATION */}
-        <div className="flex gap-3 px-4 mb-6">
-          {di > 0 && (
-            <button onClick={() => setActiveDayIdx(di - 1)}
-              className="flex-1 py-3.5 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.04em' }}>
-              ← PREV DAY
-            </button>
-          )}
-          {di < stage.days.length - 1 && (
-            <button onClick={() => setActiveDayIdx(di + 1)}
-              className="flex-1 py-3.5 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
-              style={{
-                background: allDayDone ? colour : 'rgba(255,255,255,0.04)',
-                color: allDayDone ? '#080810' : '#9898c0',
-                border: allDayDone ? `1px solid ${colour}` : '1px solid rgba(255,255,255,0.07)',
-                letterSpacing: '0.04em',
-              }}>
-              NEXT DAY →
-            </button>
-          )}
-        </div>
+        {/* Video + reflection — shown when all tasks in the day are done */}
+        {allDayTasksDone && (
+          <div className="mx-4 mb-5 rounded-2xl overflow-hidden" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="px-4 pt-4 pb-1">
+              <div className="font-display text-xl mb-1" style={{ color: '#2ecc71', letterSpacing: '0.04em' }}>DAY {dayNum} DONE ✓</div>
+              <p className="text-xs mb-4" style={{ color: '#9898c0' }}>Log your video and reflection before moving on.</p>
+            </div>
+            <div className="px-4 pb-4 flex flex-col gap-4">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Video Link (optional)</div>
+                <input type="url" className="inp" placeholder="https://youtube.com/..." defaultValue={dd?.video_url ?? ''} onBlur={e => saveField(di, 'video_url', e.target.value)} style={{ fontSize: 15 }} />
+              </div>
+              <div>
+                <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Reflection</div>
+                <textarea className="inp" placeholder="What clicked? What felt hard? What surprised you?" defaultValue={dd?.reflection ?? ''} onBlur={e => saveField(di, 'reflection', e.target.value)} style={{ minHeight: 80, fontSize: 15 }} />
+              </div>
+              {!previewMode && (
+                <button onClick={() => router.push(`/pathway/chat?stage=${stageIdx}&day=${di}`)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all active:scale-[0.98]"
+                  style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
+                  <span style={{ color: '#e8c547' }}>💬</span>
+                  <span className="text-sm font-bold" style={{ color: '#e8c547' }}>Ask your coach about this day</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Sign-off status — shown on last task */}
+        {isLastDay && activeTaskFlat === flatTasks.length - 1 && (
+          <div className="mx-4 mb-5 px-4 py-3 rounded-xl text-sm font-medium"
+            style={signoff
+              ? { border: '1px solid rgba(46,204,113,0.3)', background: 'rgba(46,204,113,0.07)', color: '#2ecc71' }
+              : { border: '1px solid rgba(255,255,255,0.07)', background: '#0c0c18', color: '#9898c0' }}>
+            {signoff ? `✓ Stage ${stageIdx + 1} signed off by your coach` : 'Complete all tasks — your coach will sign off to unlock the next stage'}
+          </div>
+        )}
+
+        {/* All stage done */}
+        {allStageDone && !signoff && (
+          <div className="mx-4 mb-6 p-5 rounded-2xl text-center" style={{ background: 'rgba(78,205,196,0.05)', border: '1px solid rgba(78,205,196,0.2)' }}>
+            <div className="font-display text-3xl mb-1" style={{ color: '#4ecdc4', letterSpacing: '0.05em' }}>STAGE COMPLETE</div>
+            <p className="text-sm" style={{ color: '#9898c0' }}>Waiting for your coach to sign off. Keep training!</p>
+          </div>
+        )}
       </div>
 
       {/* Manual popup */}
