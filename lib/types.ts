@@ -73,6 +73,16 @@ export interface SessionLog {
   duration_mins: number | null
 }
 
+export interface CoachNote {
+  id: string
+  coach_id: string
+  text: string
+  type: 'general' | 'student_file' | 'coach_flag'
+  student_id: string | null
+  flagged_coach_id: string | null
+  created_at: string
+}
+
 export interface StageDay {
   title: string
   focus: string

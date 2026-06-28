@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import CoachDashboard from '@/components/coach/CoachDashboard'
-import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message, SessionLog } from '@/lib/types'
+import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message, SessionLog, CoachNote } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,24 +29,13 @@ export default async function CoachPage() {
     .eq('role', 'student')
     .eq('pending', true)
 
-  const studentIds = (students ?? []).map((s: Profile) => s.id)
+  // Get all coaches (for flagging notes)
+  const { data: allCoaches } = await supabase
+    .from('profiles')
+    .select('id, name, email')
+    .eq('role', 'coach')
 
-  if (studentIds.length === 0) {
-    return (
-      <CoachDashboard
-        coach={coachProfile as Profile}
-        students={[]}
-        pendingStudents={(pendingStudents ?? []) as Profile[]}
-        allTasks={[]}
-        allDayData={[]}
-        allRemarks={[]}
-        allSignoffs={[]}
-        allMessages={[]}
-        lastSessions={[]}
-        coachId={user.id}
-      />
-    )
-  }
+  const studentIds = (students ?? []).map((s: Profile) => s.id)
 
   const [
     { data: allTasks },
@@ -55,13 +44,15 @@ export default async function CoachPage() {
     { data: allSignoffs },
     { data: allMessages },
     { data: lastSessions },
+    { data: coachNotes },
   ] = await Promise.all([
-    supabase.from('task_progress').select('*').in('student_id', studentIds),
-    supabase.from('day_data').select('*').in('student_id', studentIds),
+    studentIds.length > 0 ? supabase.from('task_progress').select('*').in('student_id', studentIds) : Promise.resolve({ data: [] }),
+    studentIds.length > 0 ? supabase.from('day_data').select('*').in('student_id', studentIds) : Promise.resolve({ data: [] }),
     supabase.from('coach_remarks').select('*').eq('coach_id', user.id),
-    supabase.from('stage_signoffs').select('*').in('student_id', studentIds),
-    supabase.from('messages').select('*').in('student_id', studentIds).order('created_at'),
-    supabase.from('session_logs').select('*').in('user_id', studentIds).order('started_at', { ascending: false }),
+    studentIds.length > 0 ? supabase.from('stage_signoffs').select('*').in('student_id', studentIds) : Promise.resolve({ data: [] }),
+    studentIds.length > 0 ? supabase.from('messages').select('*').in('student_id', studentIds).order('created_at') : Promise.resolve({ data: [] }),
+    studentIds.length > 0 ? supabase.from('session_logs').select('*').in('user_id', studentIds).order('started_at', { ascending: false }) : Promise.resolve({ data: [] }),
+    supabase.from('coach_notes').select('*').eq('coach_id', user.id).order('created_at', { ascending: false }),
   ])
 
   return (
@@ -69,12 +60,14 @@ export default async function CoachPage() {
       coach={coachProfile as Profile}
       students={(students ?? []) as Profile[]}
       pendingStudents={(pendingStudents ?? []) as Profile[]}
+      allCoaches={(allCoaches ?? []) as Profile[]}
       allTasks={(allTasks ?? []) as TaskProgress[]}
       allDayData={(allDayData ?? []) as DayData[]}
       allRemarks={(allRemarks ?? []) as CoachRemark[]}
       allSignoffs={(allSignoffs ?? []) as StageSignoff[]}
       allMessages={(allMessages ?? []) as Message[]}
       lastSessions={(lastSessions ?? []) as SessionLog[]}
+      coachNotes={(coachNotes ?? []) as CoachNote[]}
       coachId={user.id}
     />
   )

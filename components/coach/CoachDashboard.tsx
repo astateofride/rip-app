@@ -4,18 +4,20 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { STAGES } from '@/lib/stages'
-import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message, SessionLog } from '@/lib/types'
+import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message, SessionLog, CoachNote } from '@/lib/types'
 
 interface Props {
   coach: Profile
   students: Profile[]
   pendingStudents: Profile[]
+  allCoaches: Profile[]
   allTasks: TaskProgress[]
   allDayData: DayData[]
   allRemarks: CoachRemark[]
   allSignoffs: StageSignoff[]
   allMessages: Message[]
   lastSessions: SessionLog[]
+  coachNotes: CoachNote[]
   coachId: string
 }
 
@@ -60,7 +62,7 @@ function useClock() {
 const colours = ['#e8c547', '#4ecdc4', '#ff6b9d']
 const stageNames = ['Mastering Music', 'Magic in Movement', 'Finding Your Voice']
 
-export default function CoachDashboard({ coach, students, pendingStudents, allTasks, allDayData, allRemarks, allSignoffs, allMessages, lastSessions, coachId }: Props) {
+export default function CoachDashboard({ coach, students, pendingStudents, allCoaches, allTasks, allDayData, allRemarks, allSignoffs, allMessages, lastSessions, coachNotes: initialNotes, coachId }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const time = useClock()
@@ -87,6 +89,12 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
   const [sheetNotes, setSheetNotes] = useState<Record<string, string>>({})
   const [newStudentToast, setNewStudentToast] = useState<string | null>(null)
   const [localPending, setLocalPending] = useState<Profile[]>(pendingStudents)
+  const [localNotes, setLocalNotes] = useState<CoachNote[]>(initialNotes)
+  const [noteText, setNoteText] = useState('')
+  const [noteMode, setNoteMode] = useState<'general' | 'student_file' | 'coach_flag' | null>(null)
+  const [noteStudentId, setNoteStudentId] = useState<string>('')
+  const [noteFlaggedCoachId, setNoteFlaggedCoachId] = useState<string>('')
+  const [noteSaving, setNoteSaving] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const student = localStudents.find(s => s.id === selectedStudentId)
@@ -218,6 +226,25 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
     const accepted = localPending.find(p => p.id === studentId)
     if (accepted) setLocalStudents(prev => [...prev, accepted])
     router.refresh()
+  }
+
+  async function saveNote() {
+    if (!noteText.trim() || !noteMode) return
+    setNoteSaving(true)
+    const payload: Partial<CoachNote> = {
+      coach_id: coachId,
+      text: noteText.trim(),
+      type: noteMode,
+      student_id: noteMode === 'student_file' ? noteStudentId || null : null,
+      flagged_coach_id: noteMode === 'coach_flag' ? noteFlaggedCoachId || null : null,
+    }
+    const { data } = await supabase.from('coach_notes').insert(payload).select().single()
+    if (data) setLocalNotes(prev => [data as CoachNote, ...prev])
+    setNoteText('')
+    setNoteMode(null)
+    setNoteStudentId('')
+    setNoteFlaggedCoachId('')
+    setNoteSaving(false)
   }
 
   function openProfile(studentId: string) {
@@ -708,7 +735,100 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
           </div>
 
 
-          {/* ③ Review CTA — shown when any student has tasks needing review */}
+          {/* ③ Coach Notes */}
+          <div>
+            <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #9898c0' }}>
+              <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>NOTES</div>
+            </div>
+
+            {/* Write a note */}
+            <div className="rounded-2xl overflow-hidden mb-3" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Write a note…"
+                rows={3}
+                className="w-full px-4 pt-3 pb-2 text-sm resize-none bg-transparent outline-none"
+                style={{ color: '#f0f0eb', borderBottom: noteText ? '1px solid rgba(255,255,255,0.07)' : 'none' }}
+              />
+              {noteText.trim() && (
+                <div className="px-3 pb-3 pt-2 flex flex-col gap-2">
+                  {/* Mode picker */}
+                  <div className="flex gap-2">
+                    <button onClick={() => setNoteMode(noteMode === 'general' ? null : 'general')}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                      style={{ background: noteMode === 'general' ? 'rgba(152,152,192,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${noteMode === 'general' ? 'rgba(152,152,192,0.5)' : 'rgba(255,255,255,0.07)'}`, color: noteMode === 'general' ? '#c0c0e0' : '#7878a8' }}>
+                      General
+                    </button>
+                    <button onClick={() => setNoteMode(noteMode === 'student_file' ? null : 'student_file')}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                      style={{ background: noteMode === 'student_file' ? 'rgba(232,197,71,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${noteMode === 'student_file' ? 'rgba(232,197,71,0.4)' : 'rgba(255,255,255,0.07)'}`, color: noteMode === 'student_file' ? '#e8c547' : '#7878a8' }}>
+                      Student File
+                    </button>
+                    <button onClick={() => setNoteMode(noteMode === 'coach_flag' ? null : 'coach_flag')}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                      style={{ background: noteMode === 'coach_flag' ? 'rgba(255,107,157,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${noteMode === 'coach_flag' ? 'rgba(255,107,157,0.4)' : 'rgba(255,255,255,0.07)'}`, color: noteMode === 'coach_flag' ? '#ff6b9d' : '#7878a8' }}>
+                      Flag Coach
+                    </button>
+                  </div>
+
+                  {/* Student picker */}
+                  {noteMode === 'student_file' && (
+                    <select value={noteStudentId} onChange={e => setNoteStudentId(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl text-sm"
+                      style={{ background: '#0c0c18', border: '1px solid rgba(232,197,71,0.3)', color: noteStudentId ? '#f0f0eb' : '#7878a8' }}>
+                      <option value="">Select student…</option>
+                      {localStudents.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  )}
+
+                  {/* Coach picker */}
+                  {noteMode === 'coach_flag' && (
+                    <select value={noteFlaggedCoachId} onChange={e => setNoteFlaggedCoachId(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl text-sm"
+                      style={{ background: '#0c0c18', border: '1px solid rgba(255,107,157,0.3)', color: noteFlaggedCoachId ? '#f0f0eb' : '#7878a8' }}>
+                      <option value="">Select coach…</option>
+                      {allCoaches.filter(c => c.id !== coachId).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  )}
+
+                  {/* Save */}
+                  {noteMode && (
+                    <button onClick={saveNote} disabled={noteSaving || (noteMode === 'student_file' && !noteStudentId) || (noteMode === 'coach_flag' && !noteFlaggedCoachId)}
+                      className="w-full py-2.5 rounded-xl font-display tracking-widest text-sm uppercase active:scale-[0.98] transition-all disabled:opacity-40"
+                      style={{ background: noteMode === 'coach_flag' ? '#ff6b9d' : noteMode === 'student_file' ? '#e8c547' : '#9898c0', color: '#080810' }}>
+                      {noteSaving ? 'Saving…' : 'Save Note'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Existing notes */}
+            {localNotes.length === 0 ? (
+              <div className="rounded-2xl px-4 py-3 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#7878a8' }}>
+                No notes yet
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {localNotes.map(n => {
+                  const tagColour = n.type === 'student_file' ? '#e8c547' : n.type === 'coach_flag' ? '#ff6b9d' : '#9898c0'
+                  const tagLabel = n.type === 'student_file' ? `Student File${n.student_id ? ' — ' + (localStudents.find(s => s.id === n.student_id)?.name ?? '') : ''}` : n.type === 'coach_flag' ? `Flagged${n.flagged_coach_id ? ' — ' + (allCoaches.find(c => c.id === n.flagged_coach_id)?.name ?? '') : ''}` : 'General'
+                  return (
+                    <div key={n.id} className="rounded-2xl px-4 py-3" style={{ background: '#111120', border: `1px solid rgba(255,255,255,0.06)`, borderLeft: `3px solid ${tagColour}` }}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tagColour }}>{tagLabel}</span>
+                        <span className="text-[10px]" style={{ color: '#7878a8' }}>{new Date(n.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                      <p className="text-sm leading-relaxed" style={{ color: '#c0c0d8' }}>{n.text}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ④ Review CTA — shown when any student has tasks needing review */}
           {(() => {
             const reviewable = localStudents.filter(s =>
               [0,1,2].some(si => { const { done, completed } = countTasks(s.id, si); return completed > done && !getSignoff(s.id, si) })
