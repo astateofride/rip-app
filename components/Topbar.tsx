@@ -38,9 +38,9 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
         >
           {initials ?? '?'}
         </button>
-        <div className="font-bold text-base leading-none" style={{ letterSpacing: '0.02em' }}>
-          ASORos <span className="font-normal text-xs" style={{ color: '#7070a0', letterSpacing: '0.06em' }}>RIP</span>{' '}
-          <span className="font-normal text-[9px]" style={{ color: '#4a4a70', letterSpacing: '0.06em' }}>BETA</span>
+        <div className="leading-none">
+          <div className="font-display tracking-wide" style={{ fontSize: 15, color: '#f0f0eb', letterSpacing: '0.06em' }}>RIDE INSTRUCTOR PATHWAY</div>
+          <div className="text-[9px] font-bold tracking-widest" style={{ color: '#7070a0' }}>BETA · VER 1.0</div>
         </div>
       </div>
 
