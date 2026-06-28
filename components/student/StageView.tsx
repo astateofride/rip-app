@@ -155,7 +155,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       if (idx >= 0) {
         const next = [...prev]; next[idx] = { ...next[idx], completed: newCompleted }; return next
       }
-      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: null, answer: null }]
+      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: null, answer: null, score: null }]
     })
     await supabase.from('task_progress').upsert({
       student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti,
@@ -171,7 +171,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       setLocalDayData(prev => {
         const idx = prev.findIndex(d => d.stage_idx === stageIdx && d.day_idx === di)
         if (idx >= 0) { const n = [...prev]; n[idx] = { ...n[idx], opened_at: now }; return n }
-        return [...prev, { id: `temp-${di}`, student_id: userId, stage_idx: stageIdx, day_idx: di, reflection: null, video_url: null, opened_at: now }]
+        return [...prev, { id: `temp-${di}`, student_id: userId, stage_idx: stageIdx, day_idx: di, reflection: null, video_url: null, opened_at: now, manual_read_at: null }]
       })
       await supabase.from('day_data').upsert({ student_id: userId, stage_idx: stageIdx, day_idx: di, opened_at: now }, { onConflict: 'student_id,stage_idx,day_idx' })
     }
