@@ -287,7 +287,13 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               DONE →
             </button>
           </div>
-          {[0,1,2].map(si => (
+          {[0,1,2].map(si => {
+            if (getSignoff(student.id, si)) return null
+            const daysWithWork = STAGES[si].days.filter((_, di) =>
+              allTasks.some(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed)
+            )
+            if (daysWithWork.length === 0) return null
+            return (
             <div key={si}>
               <div className="flex items-center gap-3 mb-3" style={{ borderLeft: `3px solid ${colours[si]}`, paddingLeft: 12 }}>
                 <div className="font-display text-2xl tracking-wide" style={{ color: colours[si], letterSpacing: '0.06em' }}>STAGE {si + 1}</div>
@@ -295,9 +301,10 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               </div>
               <div className="flex flex-col gap-2">
                 {STAGES[si].days.map((day, di) => {
+                  const doneCount = allTasks.filter(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed).length
+                  if (doneCount === 0) return null
                   const rowKey = `${student.id}-${si}-${di}`
                   const isOpen = expandedDays.has(rowKey)
-                  const doneCount = allTasks.filter(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed).length
                   const allDone = doneCount === day.tasks.length
                   const dayDataRow = allDayData.find(d => d.student_id === student.id && d.stage_idx === si && d.day_idx === di)
                   const remarkRow = remarks.find(r => r.student_id === student.id && r.stage_idx === si && r.day_idx === di)
@@ -349,7 +356,8 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                 })}
               </div>
             </div>
-          ))}
+            )
+          })}
 
           {/* Bottom nav back */}
           <button
