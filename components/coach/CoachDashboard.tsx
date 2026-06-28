@@ -930,7 +930,8 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
           {localPending.length > 0 && (
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #4ecdc4' }}>
-                <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#4ecdc4' }}>NEW STUDENTS AWAITING ACCEPTANCE</div>
+                <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#4ecdc4' }}>UNALLOCATED STUDENTS</div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#4ecdc4', color: '#080810' }}>{localPending.length}</span>
               </div>
               <div className="flex flex-col gap-2">
                 {localPending.map(p => (
