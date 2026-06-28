@@ -84,6 +84,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   const [queueNote, setQueueNote] = useState('')
   const [studentReviewSheet, setStudentReviewSheet] = useState<string | null>(null)
   const [sheetNotes, setSheetNotes] = useState<Record<string, string>>({})
+  const [newStudentToast, setNewStudentToast] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const student = localStudents.find(s => s.id === selectedStudentId)
@@ -96,6 +97,18 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, tab])
+
+  useEffect(() => {
+    const channel = supabase.channel('coach-new-students')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles', filter: `role=eq.student` },
+        payload => {
+          const p = payload.new as Profile
+          setNewStudentToast(p.name || 'A new student')
+          setTimeout(() => setNewStudentToast(null), 6000)
+        })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   useEffect(() => {
     if (!selectedStudentId) return
@@ -273,6 +286,19 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
   return (
     <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 80 }}>
+
+      {/* New student toast */}
+      {newStudentToast && (
+        <div className="fixed top-4 left-1/2 z-[500] -translate-x-1/2 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in"
+          style={{ background: '#111120', border: '1px solid rgba(78,205,196,0.4)', minWidth: 260, maxWidth: 'calc(100vw - 32px)' }}>
+          <span className="text-xl flex-shrink-0">🎉</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#4ecdc4' }}>New Student Joined</div>
+            <div className="text-sm font-semibold truncate" style={{ color: '#f0f0eb' }}>{newStudentToast} has signed up</div>
+          </div>
+          <button onClick={() => setNewStudentToast(null)} className="text-sm flex-shrink-0" style={{ color: '#7878a8' }}>✕</button>
+        </div>
+      )}
 
       {/* Topbar */}
       <div className="sticky top-0 z-50" style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
