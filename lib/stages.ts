@@ -4,7 +4,7 @@ export const STAGES: Stage[] = [
   {
     id: 's1', num: 1,
     name: 'MASTERING\nMUSIC',
-    eyebrow: 'Stage 1',
+    eyebrow: 'Foundations',
     colour: '#e8c547',
     cardClass: 's1-card',
     tagline: 'Know the music. Know when everything happens.',
@@ -96,7 +96,7 @@ export const STAGES: Stage[] = [
   {
     id: 's2', num: 2,
     name: 'MAGIC IN\nMOVEMENT',
-    eyebrow: 'Stage 2',
+    eyebrow: 'Advanced',
     colour: '#4ecdc4',
     cardClass: 's2-card',
     tagline: 'Confident choreography. Physiology applied to the ride.',
@@ -188,7 +188,7 @@ export const STAGES: Stage[] = [
   {
     id: 's3', num: 3,
     name: 'FINDING\nYOUR VOICE',
-    eyebrow: 'Stage 3',
+    eyebrow: 'Mastery',
     colour: '#ff6b9d',
     cardClass: 's3-card',
     tagline: 'Find your coaching style. Hold the room.',
