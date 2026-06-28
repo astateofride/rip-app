@@ -481,9 +481,17 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                               <div className="flex-1 min-w-0">
                                 <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#9898c0' }}>
                                   <span className="truncate mr-2">{stageNames[si]}</span>
-                                  <span style={{ color: stageComplete ? '#2ecc71' : completed < total ? colours[si] : '#ff6b9d', flexShrink: 0 }}>
-                                    {done}/{total}{completed > done ? ` (${completed - done} need review)` : ''}
-                                  </span>
+                                  <button
+                                    onClick={() => { setSelectedStudentId(s.id); setTab('tasks') }}
+                                    className="active:scale-95 transition-all flex-shrink-0 rounded-lg px-1.5 py-0.5 -mr-1"
+                                    style={{
+                                      color: stageComplete ? '#2ecc71' : completed < total ? colours[si] : '#ff6b9d',
+                                      background: completed > done ? 'rgba(255,107,157,0.08)' : 'transparent',
+                                      border: completed > done ? '1px solid rgba(255,107,157,0.25)' : '1px solid transparent',
+                                    }}
+                                  >
+                                    {done}/{total}{completed > done ? ` · ${completed - done} to review ↗` : ''}
+                                  </button>
                                 </div>
                                 <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
                                   <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: stageComplete ? '#2ecc71' : colours[si] }} />
