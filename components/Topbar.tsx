@@ -39,8 +39,10 @@ export default function Topbar({ name, initials, progress, mode = 'student', onS
           {initials ?? '?'}
         </button>
         <div className="leading-none">
-          <div className="font-display tracking-wide" style={{ fontSize: 15, color: '#f0f0eb', letterSpacing: '0.06em' }}>RIDE INSTRUCTOR PATHWAY</div>
-          <div className="text-[9px] font-bold tracking-widest" style={{ color: '#7070a0' }}>BETA · VER 1.0</div>
+          <div className="font-display" style={{ fontSize: 22, color: '#f0f0eb', letterSpacing: '0.08em', lineHeight: 1 }}>
+            RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY
+          </div>
+          <div className="text-[10px] font-bold tracking-widest mt-0.5" style={{ color: '#4a4a70', letterSpacing: '0.12em' }}>BETA · VER 1.0</div>
         </div>
       </div>
 
