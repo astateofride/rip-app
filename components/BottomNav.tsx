@@ -72,7 +72,7 @@ export default function BottomNav({ unreadCoach = 0 }: Props) {
             onClick={() => router.push(tab.href)}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
             style={{
-              color: active ? '#e8c547' : '#7070a0',
+              color: active ? '#e8c547' : '#9898c0',
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 8,
               fontWeight: 600,

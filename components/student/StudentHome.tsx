@@ -141,17 +141,17 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
         {/* ── HERO ── */}
         <div className="pt-5 pb-2 flex items-start justify-between">
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>{dateStr}</div>
+            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>{dateStr}</div>
             <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
               YOUR<br /><span style={{ color: '#e8c547' }}>PATHWAY.</span>
             </h1>
-            <p className="mt-3 text-sm font-semibold" style={{ color: '#7070a0' }}>
+            <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
               {allComplete ? '🏆 ALL STAGES COMPLETE' : stageLine}
             </p>
           </div>
           <div className="text-right flex-shrink-0 pt-1">
             <div className="font-display" style={{ fontSize: 32, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
-            <div className="text-xs font-bold mt-1" style={{ color: '#4a4a70' }}>HELLO, {firstName}</div>
+            <div className="text-xs font-bold mt-1" style={{ color: '#7878a8' }}>HELLO, {firstName}</div>
           </div>
         </div>
 
@@ -165,8 +165,8 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
             <div key={card.label} className="rounded-2xl p-3 flex flex-col items-center justify-center"
               style={{ background: '#111120', border: `1px solid rgba(255,255,255,0.06)`, minHeight: 80 }}>
               <div className="font-display" style={{ fontSize: 36, color: card.colour, letterSpacing: '0.02em', lineHeight: 1 }}>{card.value}</div>
-              <div className="text-xs font-semibold mt-1" style={{ color: '#4a4a70' }}>{card.sub}</div>
-              <div className="text-[9px] uppercase tracking-widest mt-0.5 font-bold" style={{ color: '#3a3a5c' }}>{card.label}</div>
+              <div className="text-xs font-semibold mt-1" style={{ color: '#7878a8' }}>{card.sub}</div>
+              <div className="text-[9px] uppercase tracking-widest mt-0.5 font-bold" style={{ color: '#60608a' }}>{card.label}</div>
             </div>
           ))}
         </div>
@@ -177,7 +177,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
             <div className="h-full rounded-full transition-all duration-700"
               style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#e8c547 0%,#4ecdc4 50%,#ff6b9d 100%)' }} />
           </div>
-          <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#3a3a5c' }}>
+          <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#60608a' }}>
             <span>Foundation</span><span>Mastery</span><span>Advanced</span>
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
             style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.25)', borderLeft: '3px solid #e8c547' }}>
             <div className="flex items-center justify-between mb-1">
               <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>🔔 Coach Note</div>
-              <div className="text-[10px]" style={{ color: '#4a4a70' }}>{timeAgo(latestCoachMsg.created_at)}</div>
+              <div className="text-[10px]" style={{ color: '#7878a8' }}>{timeAgo(latestCoachMsg.created_at)}</div>
             </div>
             <div className="text-sm italic leading-snug" style={{ color: '#a0a0c0' }}>
               "{latestCoachMsg.text.substring(0, 90)}{latestCoachMsg.text.length > 90 ? '…' : ''}"
@@ -245,7 +245,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
         )}
 
         {/* ── ALL STAGES ── */}
-        <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>All Stages</div>
+        <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#60608a' }}>All Stages</div>
         <div className="flex flex-col gap-2 mb-5">
           {STAGES.map((s, i) => {
             const { total, done, pct: sp } = countStageTasks(tasks, i)
@@ -268,20 +268,20 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
                 <div className="px-4 py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="text-[9px] font-bold uppercase tracking-widest mb-0.5" style={{ color: c, opacity: 0.6 }}>{s.eyebrow}</div>
-                    <div className="font-display" style={{ fontSize: 26, color: complete ? c : isActive ? c : '#4a4a70', letterSpacing: '0.02em', lineHeight: 1 }}>
+                    <div className="font-display" style={{ fontSize: 26, color: complete ? c : isActive ? c : '#7878a8', letterSpacing: '0.02em', lineHeight: 1 }}>
                       {s.name}
                     </div>
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         <div className="h-full rounded-full transition-all" style={{ width: `${sp}%`, background: c }} />
                       </div>
-                      <div className="text-[10px] font-bold flex-shrink-0" style={{ color: '#3a3a5c' }}>{done}/{total}</div>
+                      <div className="text-[10px] font-bold flex-shrink-0" style={{ color: '#60608a' }}>{done}/{total}</div>
                     </div>
                   </div>
                   <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-display text-xl"
                     style={{
                       background: complete ? 'rgba(46,204,113,0.12)' : isActive ? GLOWS[i] : 'rgba(255,255,255,0.03)',
-                      color: complete ? '#2ecc71' : isActive ? c : '#3a3a5c',
+                      color: complete ? '#2ecc71' : isActive ? c : '#60608a',
                       border: `1px solid ${complete ? 'rgba(46,204,113,0.3)' : isActive ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
                     }}>
                     {complete ? '✓' : unlocked ? '→' : '🔒'}
@@ -304,7 +304,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           </div>
           <div className="flex-1 text-left">
             <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>Messages from your coach</div>
-            <div className="text-xs mt-0.5" style={{ color: '#4a4a70' }}>
+            <div className="text-xs mt-0.5" style={{ color: '#7878a8' }}>
               {unreadFromCoach > 0 ? `${unreadFromCoach} unread` : 'No new messages'}
             </div>
           </div>
@@ -330,19 +330,19 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
             </div>
             <div className="flex-1 text-left">
               <div className="text-sm font-bold" style={{ color: '#4ecdc4' }}>🎓 RIDE Academy · A State of Ride</div>
-              <div className="text-xs mt-0.5" style={{ color: '#4a4a70' }}>Pathway complete — tap to access ↗</div>
+              <div className="text-xs mt-0.5" style={{ color: '#7878a8' }}>Pathway complete — tap to access ↗</div>
             </div>
           </a>
         ) : (
           <div className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3"
-            style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.04)', borderLeft: '4px solid #2a2a3c', opacity: 0.5 }}>
+            style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.04)', borderLeft: '4px solid #50507a', opacity: 0.5 }}>
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
               <span style={{ fontSize: 18 }}>🔒</span>
             </div>
             <div className="flex-1 text-left">
-              <div className="text-sm font-bold" style={{ color: '#3a3a5c' }}>RIDE Academy · A State of Ride</div>
-              <div className="text-xs mt-0.5" style={{ color: '#2a2a4a' }}>Unlocks when all 3 stages are signed off at 70%+</div>
+              <div className="text-sm font-bold" style={{ color: '#60608a' }}>RIDE Academy · A State of Ride</div>
+              <div className="text-xs mt-0.5" style={{ color: '#50507a' }}>Unlocks when all 3 stages are signed off at 70%+</div>
             </div>
           </div>
         )}

@@ -39,7 +39,7 @@ export default function LoginPage() {
             <div style={{ fontSize: 72, color: '#f0f0eb', lineHeight: 0.88 }}>PATHWAY</div>
           </div>
           <div style={{ width: 48, height: 3, background: '#e8c547', borderRadius: 2, marginBottom: 16 }} />
-          <p className="text-sm leading-relaxed" style={{ color: '#4a4a70' }}>
+          <p className="text-sm leading-relaxed" style={{ color: '#7878a8' }}>
             The official certification pathway for RIDE indoor cycling instructors. 3 stages · coach sign-off required.
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function LoginPage() {
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#2a2a4a' }}>Already have an account</span>
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#50507a' }}>Already have an account</span>
           <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
         </div>
 
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="flex flex-col gap-4 rounded-3xl p-5"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Email</label>
             <input
               type="email"
               className="inp"
@@ -82,7 +82,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Password</label>
             <input
               type="password"
               className="inp"

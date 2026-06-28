@@ -191,15 +191,15 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       <div style={{ maxWidth: 480, margin: '0 auto' }}>
 
         {/* Back */}
-        <button onClick={() => router.push('/pathway')} className="flex items-center gap-2 px-4 py-3 text-sm w-full" style={{ color: '#7070a0', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <button onClick={() => router.push('/pathway')} className="flex items-center gap-2 px-4 py-3 text-sm w-full" style={{ color: '#9898c0', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <span style={{ color: '#f0f0eb', fontSize: 18 }}>←</span> All Stages
         </button>
 
         {/* Stage hero */}
         <div className="px-4 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>{stage.eyebrow}</div>
+          <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>{stage.eyebrow}</div>
           <div className="font-display whitespace-pre-line leading-none" style={{ fontSize: 56, color: colour, letterSpacing: '0.02em' }}>{stage.name}</div>
-          <p className="text-sm mt-2 leading-relaxed" style={{ color: '#7070a0' }}>{stage.desc}</p>
+          <p className="text-sm mt-2 leading-relaxed" style={{ color: '#9898c0' }}>{stage.desc}</p>
           <span className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded" style={{ background: 'rgba(232,197,71,0.08)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.2)' }}>{stage.ref}</span>
         </div>
 
@@ -208,7 +208,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
           <div className="mx-4 mt-3 px-4 py-3 rounded-xl text-sm font-medium"
             style={signoffs.some(s => s.stage_idx === stageIdx - 1)
               ? { border: '1px solid rgba(46,204,113,0.3)', background: 'rgba(46,204,113,0.07)', color: '#2ecc71' }
-              : { border: '1px solid rgba(255,255,255,0.08)', background: '#111120', color: '#7070a0' }}>
+              : { border: '1px solid rgba(255,255,255,0.08)', background: '#111120', color: '#9898c0' }}>
             {signoffs.some(s => s.stage_idx === stageIdx - 1)
               ? `✓ Stage ${stageIdx} complete — unlocked`
               : `Stage ${stageIdx} in progress — coach sign-off required to unlock`}
@@ -236,7 +236,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-base font-semibold truncate">{day.title}</div>
-                    <div className="text-xs uppercase tracking-widest mt-0.5" style={{ color: '#7070a0' }}>
+                    <div className="text-xs uppercase tracking-widest mt-0.5" style={{ color: '#9898c0' }}>
                       {day.focus} · {taskCount}/{day.tasks.length} tasks
                     </div>
                   </div>
@@ -244,7 +244,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                     style={allDone ? { background: '#2ecc71', borderColor: '#2ecc71', color: '#080810', fontWeight: 700 } : { borderColor: 'rgba(255,255,255,0.07)' }}>
                     {allDone ? '✓' : ''}
                   </div>
-                  <span style={{ color: '#7070a0', fontSize: 16, transform: isOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>▾</span>
+                  <span style={{ color: '#9898c0', fontSize: 16, transform: isOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>▾</span>
                 </button>
 
                 {isOpen && (
@@ -279,7 +279,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
                     {/* Tasks */}
                     <div className="px-4 pt-4">
-                      <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7070a0' }}>Tasks</div>
+                      <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#9898c0' }}>Tasks</div>
                       <div className="flex flex-col gap-4">
                         {day.tasks.map((task, ti) => {
                           const prog = getTask(di, ti)
@@ -298,17 +298,17 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                   <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                                     style={written
                                       ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.25)' }
-                                      : { background: 'rgba(255,255,255,0.05)', color: '#7070a0', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                      : { background: 'rgba(255,255,255,0.05)', color: '#9898c0', border: '1px solid rgba(255,255,255,0.07)' }}>
                                     {written ? '✍ Written' : '✓ Practical'}
                                   </span>
                                   {done && <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>Done</span>}
                                 </div>
 
                                 {/* Task text */}
-                                <p className="text-sm leading-relaxed mb-1" style={{ color: done ? '#7070a0' : '#f0f0eb' }}>
+                                <p className="text-sm leading-relaxed mb-1" style={{ color: done ? '#9898c0' : '#f0f0eb' }}>
                                   {renderWithSectionLinks(task.text, () => setManualPopup({ ref: task.ref, note: day.manualNote, pageRef: task.ref }))}
                                 </p>
-                                <div className="text-xs font-bold" style={{ color: '#4a4a70' }}>{task.ref}</div>
+                                <div className="text-xs font-bold" style={{ color: '#7878a8' }}>{task.ref}</div>
                               </div>
 
                               {written ? (
@@ -333,8 +333,8 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                   {/* Always-editable answer textarea */}
                                   <div className="mt-3">
                                     <div className="flex items-center justify-between mb-2">
-                                      <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7070a0' }}>Your answer</div>
-                                      {done && savedAnswer && <div className="text-xs font-bold" style={{ color: '#3a3a5c' }}>Edit and resubmit anytime</div>}
+                                      <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>Your answer</div>
+                                      {done && savedAnswer && <div className="text-xs font-bold" style={{ color: '#60608a' }}>Edit and resubmit anytime</div>}
                                     </div>
                                     <textarea
                                       key={`answer-${key}-${savedAnswer}`}
@@ -360,7 +360,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                   {assessment && (
                                     <div className="mt-3 rounded-xl p-4" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
                                       <div className="flex items-center justify-between mb-3">
-                                        <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#7070a0' }}>Self-Assessment</div>
+                                        <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>Self-Assessment</div>
                                         <div className="font-display text-2xl" style={{ color: assessment.score >= 70 ? '#2ecc71' : assessment.score >= 40 ? '#e8c547' : '#ff6b9d' }}>
                                           {assessment.score}%
                                         </div>
@@ -385,7 +385,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                           </div>
                                         </div>
                                       )}
-                                      <p className="text-xs mt-3 leading-relaxed" style={{ color: '#7070a0' }}>
+                                      <p className="text-xs mt-3 leading-relaxed" style={{ color: '#9898c0' }}>
                                         {assessment.score >= 70 ? 'Strong answer — your coach can see this. ✓' : assessment.score >= 40 ? 'Good start — expand your answer above and resubmit.' : 'Have another go — read the manual reference, then try again.'}
                                       </p>
                                     </div>
@@ -399,7 +399,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                                     className="w-full mt-3 py-3 rounded-xl font-display text-xl tracking-wide transition-all"
                                     style={done
                                       ? { background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71', letterSpacing: '0.04em' }
-                                      : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#7070a0', letterSpacing: '0.04em' }}>
+                                      : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.04em' }}>
                                     {done ? '✓ DONE' : 'MARK DONE'}
                                   </button>
                                 </div>
@@ -412,10 +412,10 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
                     {/* Day inputs */}
                     <div className="px-4 mt-4 pb-4">
-                      <div className="text-xs font-bold uppercase tracking-widest mb-2 mt-2" style={{ color: '#7070a0' }}>Video Link (optional)</div>
+                      <div className="text-xs font-bold uppercase tracking-widest mb-2 mt-2" style={{ color: '#9898c0' }}>Video Link (optional)</div>
                       <input type="url" className="inp" placeholder="https://youtube.com/..." defaultValue={dd?.video_url ?? ''} onBlur={e => saveField(di, 'video_url', e.target.value)} />
 
-                      <div className="text-xs font-bold uppercase tracking-widest mb-2 mt-3" style={{ color: '#7070a0' }}>Overall Reflection for this day</div>
+                      <div className="text-xs font-bold uppercase tracking-widest mb-2 mt-3" style={{ color: '#9898c0' }}>Overall Reflection for this day</div>
                       <textarea className="inp" placeholder="What did you notice? What clicked? What felt hard?" defaultValue={dd?.reflection ?? ''} onBlur={e => saveField(di, 'reflection', e.target.value)} />
 
                       <button onClick={() => router.push(`/pathway/chat?stage=${stageIdx}&day=${di}`)}
@@ -429,7 +429,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                         <div className="mt-3 px-4 py-3 rounded-xl text-sm font-medium"
                           style={coachSigned
                             ? { border: '1px solid rgba(46,204,113,0.3)', background: 'rgba(46,204,113,0.07)', color: '#2ecc71' }
-                            : { border: '1px solid rgba(255,255,255,0.07)', background: '#0c0c18', color: '#7070a0' }}>
+                            : { border: '1px solid rgba(255,255,255,0.07)', background: '#0c0c18', color: '#9898c0' }}>
                           {coachSigned ? `✓ Stage ${stageIdx + 1} signed off by your coach` : 'Awaiting coach sign-off to unlock the next stage'}
                         </div>
                       )}
@@ -451,17 +451,17 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>Manual Reference</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>Manual Reference</div>
                 <div className="font-display text-2xl leading-none" style={{ color: '#e8c547', letterSpacing: '0.04em' }}>{manualPopup.ref}</div>
               </div>
               <button onClick={() => setManualPopup(null)}
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                style={{ background: 'rgba(255,255,255,0.07)', color: '#7070a0' }}>✕</button>
+                style={{ background: 'rgba(255,255,255,0.07)', color: '#9898c0' }}>✕</button>
             </div>
             <div className="rounded-2xl p-4" style={{ background: '#0c0c18', borderLeft: '3px solid #e8c547' }}>
               <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{manualPopup.note}</p>
             </div>
-            <p className="text-xs mt-4 text-center" style={{ color: '#3a3a5c' }}>Open your physical manual to {manualPopup.pageRef}</p>
+            <p className="text-xs mt-4 text-center" style={{ color: '#60608a' }}>Open your physical manual to {manualPopup.pageRef}</p>
           </div>
         </div>
       )}

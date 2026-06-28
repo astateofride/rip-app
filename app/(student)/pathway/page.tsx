@@ -29,7 +29,7 @@ export default async function PathwayPage() {
 
   if (!profile) {
     return (
-      <div style={{ background: '#0a0a12', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7070a0', fontSize: 14 }}>
+      <div style={{ background: '#0a0a12', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9898c0', fontSize: 14 }}>
         Setting up your profile…
       </div>
     )

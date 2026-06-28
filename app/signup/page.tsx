@@ -94,7 +94,7 @@ export default function SignupPage() {
             <div style={{ fontSize: 72, color: '#f0f0eb', lineHeight: 0.88 }}>PATHWAY</div>
           </div>
           <div style={{ width: 48, height: 3, background: '#e8c547', borderRadius: 2, marginBottom: 16 }} />
-          <p className="text-sm leading-relaxed" style={{ color: '#4a4a70' }}>
+          <p className="text-sm leading-relaxed" style={{ color: '#7878a8' }}>
             Create your account to begin the RIDE certification pathway.
           </p>
         </div>
@@ -129,14 +129,14 @@ export default function SignupPage() {
                     <span className="text-base flex-shrink-0">📁</span>
                     <div>
                       <div className="text-xs font-bold" style={{ color: '#4ecdc4' }}>Google Drive</div>
-                      <div className="text-xs leading-relaxed mt-0.5" style={{ color: '#7070a0' }}>Record → upload to Drive → right-click → Share → "Anyone with the link" → paste the link in your task</div>
+                      <div className="text-xs leading-relaxed mt-0.5" style={{ color: '#9898c0' }}>Record → upload to Drive → right-click → Share → "Anyone with the link" → paste the link in your task</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,107,157,0.08)', border: '1px solid rgba(255,107,157,0.2)' }}>
                     <span className="text-base flex-shrink-0">▶</span>
                     <div>
                       <div className="text-xs font-bold" style={{ color: '#ff6b9d' }}>YouTube</div>
-                      <div className="text-xs leading-relaxed mt-0.5" style={{ color: '#7070a0' }}>Upload → set visibility to <strong style={{ color: '#f0f0eb' }}>"Unlisted"</strong> (not Private) → paste the link in your task</div>
+                      <div className="text-xs leading-relaxed mt-0.5" style={{ color: '#9898c0' }}>Upload → set visibility to <strong style={{ color: '#f0f0eb' }}>"Unlisted"</strong> (not Private) → paste the link in your task</div>
                     </div>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default function SignupPage() {
                 className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
                 style={{
                   background: form.role === r ? '#e8c547' : 'rgba(255,255,255,0.04)',
-                  color: form.role === r ? '#080810' : '#7070a0',
+                  color: form.role === r ? '#080810' : '#9898c0',
                   border: form.role === r ? '1px solid #e8c547' : '1px solid rgba(255,255,255,0.07)',
                 }}
               >
@@ -174,33 +174,33 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Full name</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Full name</label>
             <input className="inp" value={form.name} onChange={e => update('name', e.target.value)} placeholder="Your name" required style={{ fontSize: 16 }} />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Email</label>
             <input type="email" className="inp" value={form.email} onChange={e => update('email', e.target.value)} placeholder="you@example.com" required style={{ fontSize: 16 }} />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Location / Club</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Location / Club</label>
             <input className="inp" value={form.location} onChange={e => update('location', e.target.value)} placeholder="Your studio or club" style={{ fontSize: 16 }} />
           </div>
 
           {form.role === 'student' && (
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>
-                Coach email <span style={{ color: '#3a3a5c', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>
+                Coach email <span style={{ color: '#60608a', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
               </label>
               <input type="email" className="inp" value={form.coachEmail} onChange={e => update('coachEmail', e.target.value)} placeholder="coach@astateofride.com" style={{ fontSize: 16 }} />
             </div>
           )}
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Password</label>
             <input type="password" className="inp" value={form.password} onChange={e => update('password', e.target.value)} placeholder="Min 8 characters" required minLength={8} style={{ fontSize: 16 }} />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Confirm password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Confirm password</label>
             <input type="password" className="inp" value={form.confirmPassword} onChange={e => update('confirmPassword', e.target.value)} placeholder="Repeat password" required style={{ fontSize: 16 }} />
           </div>
 
@@ -220,12 +220,12 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm" style={{ color: '#7070a0' }}>
+        <p className="text-center text-sm" style={{ color: '#9898c0' }}>
           Already have an account?{' '}
           <Link href="/login" className="font-semibold" style={{ color: '#e8c547' }}>Sign in →</Link>
         </p>
 
-        <p className="text-center text-[10px] uppercase tracking-widest" style={{ color: '#2a2a3c' }}>BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}</p>
+        <p className="text-center text-[10px] uppercase tracking-widest" style={{ color: '#50507a' }}>BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}</p>
       </div>
     </div>
   )
