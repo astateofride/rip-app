@@ -539,19 +539,6 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                           style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.25)', color: '#4ecdc4', letterSpacing: '0.04em' }}>
                           📋 TASKS
                         </button>
-                        {[0,1,2].filter(si => !!getSignoff(s.id, si)).map(si => (
-                          <button key={si} onClick={() => {
-                            const { total, done } = countTasks(s.id, si)
-                            const signoff = getSignoff(s.id, si)
-                            const subject = encodeURIComponent(`RIP — Stage ${si + 1} signed off — ${s.name}`)
-                            const body = encodeURIComponent(`Stage ${si + 1} — ${stageNames[si]}\n\nTasks: ${done}/${total}\nSigned off by: ${coach.name}\n${signoff?.note ? `\nNote: ${signoff.note}\n` : ''}\n— RIDE Instructor Pathway`)
-                            window.location.href = `mailto:?subject=${subject}&body=${body}`
-                          }}
-                            className="flex-1 py-3 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
-                            style={{ background: `rgba(${si===0?'232,197,71':si===1?'78,205,196':'255,107,157'},0.08)`, border: `1px solid ${colours[si]}40`, color: colours[si], letterSpacing: '0.04em' }}>
-                            ⇩ S{si+1}
-                          </button>
-                        ))}
                       </div>
                     </div>
                   )
