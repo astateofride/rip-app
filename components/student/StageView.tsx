@@ -155,7 +155,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       if (idx >= 0) {
         const next = [...prev]; next[idx] = { ...next[idx], completed: newCompleted }; return next
       }
-      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: true, completed_at: null, answer: null, score: null }]
+      return [...prev, { id: `temp-${di}-${ti}`, student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null, answer: null, score: null }]
     })
     await supabase.from('task_progress').upsert({
       student_id: userId, stage_idx: stageIdx, day_idx: di, task_idx: ti,
@@ -222,7 +222,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             const taskCount = getTaskCount(di)
             const allDone = taskCount === day.tasks.length
             const dd = getDayData(di)
-            const remark = remarks.find(r => r.day_idx === di)
+            const remark = remarks.find(r => r.stage_idx === stageIdx && r.day_idx === di)
             const isLastDay = di === 9
             const coachSigned = isLastDay && !!signoff
 
@@ -314,14 +314,18 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                               {written ? (
                                 <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
 
-                                  {/* Coaching nudge — only shown when there's a low-scoring saved answer */}
-                                  {done && savedAnswer && assessment && assessment.score < 70 && (
+                                  {/* Coaching nudge — shown when saved score is low, even on return visits */}
+                                  {done && savedAnswer && (assessment ? assessment.score < 70 : (prog?.score ?? 100) < 70) && (
                                     <div className="mt-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
                                       <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#e8c547' }}>💬 Coach says</div>
                                       <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>
-                                        {assessment.score < 30
-                                          ? `Good attempt — let's build on this. Can you write a bit more and try to explain ${assessment.misses[0] ?? 'the concept'} in your own words?`
-                                          : `You're on the right track! Can you expand your answer a little? Try to say a bit more about ${assessment.misses[0] ?? 'the key ideas'} — even one extra sentence makes a difference.`}
+                                        {(() => {
+                                          const sc = assessment?.score ?? prog?.score ?? 0
+                                          const hint = assessment?.misses?.[0] ?? null
+                                          return sc < 30
+                                            ? `Good attempt — let's build on this. Can you write a bit more${hint ? ` and try to explain "${hint}" in your own words` : ''}?`
+                                            : `You're on the right track! Can you expand your answer a little? ${hint ? `Try to say a bit more about "${hint}" —` : 'Even'} one extra sentence makes a difference.`
+                                        })()}
                                       </p>
                                     </div>
                                   )}

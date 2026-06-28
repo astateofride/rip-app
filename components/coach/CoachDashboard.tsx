@@ -103,8 +103,15 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
   function countTasks(studentId: string, si: number) {
     const total = STAGES[si].days.reduce((a, d) => a + d.tasks.length, 0)
-    const done = allTasks.filter(t => t.student_id === studentId && t.stage_idx === si && t.completed).length
-    return { total, done, pct: total ? Math.round(done / total * 100) : 0 }
+    const stageTasks = allTasks.filter(t => t.student_id === studentId && t.stage_idx === si)
+    // "done" = completed practical tasks OR written tasks with score >= 70
+    const done = stageTasks.filter(t => {
+      if (!t.completed) return false
+      if (t.answer !== null) return (t.score ?? 0) >= 70
+      return true
+    }).length
+    const completed = stageTasks.filter(t => t.completed).length
+    return { total, done, completed, pct: total ? Math.round(done / total * 100) : 0 }
   }
 
   function getSignoff(studentId: string, si: number) {
@@ -449,7 +456,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
 
                       {/* Stage rows */}
                       {[0,1,2].map(si => {
-                        const { total, done, pct } = countTasks(s.id, si)
+                        const { total, done, completed, pct } = countTasks(s.id, si)
                         const signed = !!getSignoff(s.id, si)
                         const unlocked = si === 0 || !!getSignoff(s.id, si - 1)
                         const stageComplete = done === total && total > 0
@@ -460,7 +467,9 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                               <div className="flex-1 min-w-0">
                                 <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#7070a0' }}>
                                   <span className="truncate mr-2">{stageNames[si]}</span>
-                                  <span style={{ color: stageComplete ? '#2ecc71' : colours[si], flexShrink: 0 }}>{done}/{total}</span>
+                                  <span style={{ color: stageComplete ? '#2ecc71' : completed < total ? colours[si] : '#ff6b9d', flexShrink: 0 }}>
+                                    {done}/{total}{completed > done ? ` (${completed - done} need review)` : ''}
+                                  </span>
                                 </div>
                                 <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
                                   <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: stageComplete ? '#2ecc71' : colours[si] }} />
