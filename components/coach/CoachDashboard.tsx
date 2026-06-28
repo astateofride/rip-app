@@ -956,8 +956,8 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                   const unreadMsgs = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
                   return (
                     <div key={s.id} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${hasReview ? 'rgba(255,107,157,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
-                      {/* Main row — tap for profile */}
-                      <button className="w-full px-4 pt-3 pb-3 text-left active:bg-white/[0.02]" onClick={() => openProfile(s.id)}>
+                      {/* Main card body — not tappable */}
+                      <div className="px-4 pt-3 pb-3">
                         {/* Name row */}
                         <div className="flex items-center gap-2 mb-3">
                           <div className="w-8 h-8 rounded-full flex items-center justify-center font-display text-sm flex-shrink-0"
@@ -966,7 +966,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                           </div>
                           <span className="font-bold text-base leading-none flex-1 min-w-0 truncate" style={{ color: '#f0f0eb' }}>{s.name}</span>
                           {hasReview && (
-                            <button onClick={e => { e.stopPropagation(); setStudentReviewSheet(s.id); setSheetNotes({}) }}
+                            <button onClick={() => { setStudentReviewSheet(s.id); setSheetNotes({}) }}
                               className="text-[10px] font-bold px-2 py-1 rounded-full active:scale-95 transition-all flex-shrink-0"
                               style={{ background: 'rgba(232,197,71,0.15)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.35)' }}>
                               {toReview} to review →
@@ -983,7 +983,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                             const pctVal = st.total ? Math.round(st.done / st.total * 100) : 0
                             return (
                               <div key={si} className="rounded-xl px-2 py-2"
-                                style={{ background: signed ? 'rgba(46,204,113,0.07)' : `rgba(${si===0?'232,197,71':si===1?'78,205,196':'255,107,157'},0.06)`, border: `1px solid ${signed ? 'rgba(46,204,113,0.25)' : `rgba(${si===0?'232,197,71':si===1?'78,205,196':'255,107,157'},0.18)`}` }}>
+                                style={{ background: signed ? 'rgba(46,204,113,0.07)' : `rgba(${si===0?'232,197,71':si===1?'78,205,196':'192,191,224'},0.06)`, border: `1px solid ${signed ? 'rgba(46,204,113,0.25)' : `rgba(${si===0?'232,197,71':si===1?'78,205,196':'192,191,224'},0.18)`}` }}>
                                 <div className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: signed ? '#2ecc71' : c }}>{signed ? '✓ ' : ''}{stageName}</div>
                                 <div className="font-display" style={{ fontSize: 20, color: signed ? '#2ecc71' : c, lineHeight: 1 }}>{pctVal}%</div>
                                 <div className="h-1 rounded-full mt-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
@@ -994,21 +994,26 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                           })}
                         </div>
                         <div className="text-[10px] mt-2 text-right" style={{ color: '#8888b0' }}>{timeAgo(sLastSession?.started_at)}</div>
-                      </button>
+                      </div>
                       {/* Quick actions */}
                       <div className="flex border-t" style={{ borderColor: '#1a1a2e' }}>
                         <button onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
                           className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
-                          style={{ color: unreadMsgs > 0 ? '#e8c547' : '#8888b0', borderRight: hasReview ? '1px solid #1a1a2e' : undefined }}>
+                          style={{ color: unreadMsgs > 0 ? '#e8c547' : '#8888b0', borderRight: '1px solid #1a1a2e' }}>
                           💬 Message{unreadMsgs > 0 ? ` (${unreadMsgs})` : ''}
                         </button>
                         {hasReview && (
                           <button onClick={() => { setStudentReviewSheet(s.id); setSheetNotes({}) }}
                             className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
-                            style={{ color: '#e8c547' }}>
+                            style={{ color: '#e8c547', borderRight: '1px solid #1a1a2e' }}>
                             📋 REVIEW ({toReview})
                           </button>
                         )}
+                        <button onClick={() => openProfile(s.id)}
+                          className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
+                          style={{ color: '#9898c0' }}>
+                          👤 PROFILE
+                        </button>
                       </div>
                     </div>
                   )
@@ -1030,10 +1035,10 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
           <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: 'rgba(0,0,0,0.88)' }} onClick={() => { setProfileSheet(null); setEditMode(false) }}>
             <div className="w-full max-w-lg rounded-t-3xl flex flex-col" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '90dvh' }} onClick={e => e.stopPropagation()}>
               {/* Sticky top handle + close */}
-              <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">
-                <div className="w-10 h-1 rounded-full mx-auto" style={{ background: 'rgba(255,255,255,0.07)' }} />
+              <div className="flex-shrink-0 relative flex items-center justify-center px-4 pt-3 pb-2">
+                <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }} />
                 <button onClick={() => { setProfileSheet(null); setEditMode(false) }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                  className="absolute right-4 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
                   style={{ background: 'rgba(255,255,255,0.06)', color: '#9898c0' }}>✕</button>
               </div>
               <div className="overflow-y-auto flex-1">
