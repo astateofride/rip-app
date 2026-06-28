@@ -9,9 +9,10 @@ interface Props {
   initials?: string
   progress?: number
   mode?: 'student' | 'coach'
+  previewHref?: string
 }
 
-export default function Topbar({ name, initials, progress, mode = 'student' }: Props) {
+export default function Topbar({ name, initials, progress, mode = 'student', previewHref }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const [showInstructions, setShowInstructions] = useState(false)
@@ -88,6 +89,15 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
                   <div className="text-xs" style={{ color: '#7878a8' }}>{mode === 'coach' ? 'Coach' : 'Student'}</div>
                 </div>
               </div>
+              {previewHref && (
+                <a
+                  href={previewHref}
+                  className="w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-3"
+                  style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.25)', color: '#e8c547', textDecoration: 'none' }}
+                >
+                  👁 Student Preview
+                </a>
+              )}
               <button
                 onClick={signOut}
                 className="w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest active:scale-[0.98] transition-all"
