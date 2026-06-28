@@ -75,12 +75,6 @@ export default function ChatView({ profile, messages: initialMessages, userId, c
 
     if (data) setMessages(prev => [...prev, data as Message])
 
-    // mailto to coach (supplementary)
-    const mentorEmail = coachEmail ?? 'matty@astateofride.com'
-    const subject = encodeURIComponent(`RIP Chat — ${profile.name}`)
-    const body = encodeURIComponent(`${trimmed.substring(0, 200)}\n\n— Sent from RIDE Instructor Pathway`)
-    window.open(`mailto:${mentorEmail}?subject=${subject}&body=${body}`, '_blank')
-
     setSending(false)
   }
 
