@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { STAGES, STAGE_LINES } from '@/lib/stages'
@@ -46,28 +46,59 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`
 }
 
+function useLiveClock() {
+  const [time, setTime] = useState('')
+  useEffect(() => {
+    function tick() {
+      const now = new Date()
+      setTime(now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true }))
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+  return time
+}
+
+const COLOURS = ['#e8c547', '#4ecdc4', '#ff6b9d']
+const GLOWS = ['rgba(232,197,71,0.18)', 'rgba(78,205,196,0.18)', 'rgba(255,107,157,0.18)']
+const BORDERS = ['rgba(232,197,71,0.4)', 'rgba(78,205,196,0.4)', 'rgba(255,107,157,0.4)']
+
+const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+
 export default function StudentHome({ profile, tasks, signoffs, messages, userId }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const sessionStart = useRef(Date.now())
+  const time = useLiveClock()
 
   const pct = overallPct(tasks)
   const initials = profile.name.trim().split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
+  const firstName = profile.name.trim().split(' ')[0].toUpperCase()
 
   const s1c = isStageComplete(tasks, signoffs, 0)
   const s2c = isStageComplete(tasks, signoffs, 1)
   const s3c = isStageComplete(tasks, signoffs, 2)
   const allComplete = pct === 100 && s1c && s2c && s3c
 
+  const activeStageIdx = s3c ? -1 : s2c ? 2 : s1c ? 1 : 0
+  const { done: activeDone, total: activeTotal } = activeStageIdx >= 0
+    ? countStageTasks(tasks, activeStageIdx)
+    : { done: 0, total: 0 }
+
+  const unreadFromCoach = messages.filter(m => m.from_role === 'coach' && !m.read).length
+  const latestCoachMsg = [...messages].reverse().find(m => m.from_role === 'coach')
+  const totalTasks = STAGES.reduce((a, s) => a + s.days.reduce((b, d) => b + d.tasks.length, 0), 0)
+  const doneTasks = tasks.filter(t => t.completed).length
+
+  const now = new Date()
+  const dateStr = `${DAYS_OF_WEEK[now.getDay()]} · ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`
+
   let stageLine = STAGE_LINES[0]
   if (s3c) stageLine = STAGE_LINES[3]
   else if (s2c) stageLine = STAGE_LINES[2]
   else if (s1c) stageLine = STAGE_LINES[1]
-
-  const unreadFromCoach = messages.filter(m => m.from_role === 'coach' && !m.read).length
-  const latestCoachMsg = [...messages].reverse().find(m => m.from_role === 'coach')
-
-  const totalTasks = STAGES.reduce((a, s) => a + s.days.reduce((b, d) => b + d.tasks.length, 0), 0)
 
   useEffect(() => {
     supabase.from('session_logs').insert({ user_id: userId }).then(() => {})
@@ -83,10 +114,6 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
     }
   }, [])
 
-  const colours = ['#e8c547', '#4ecdc4', '#ff6b9d']
-  const glows = ['rgba(232,197,71,0.15)', 'rgba(78,205,196,0.15)', 'rgba(255,107,157,0.15)']
-  const borders = ['rgba(232,197,71,0.35)', 'rgba(78,205,196,0.35)', 'rgba(255,107,157,0.35)']
-
   async function sendToCoach() {
     const subject = encodeURIComponent(`RIDE Pathway — COMPLETE — ${profile.name}`)
     const body = encodeURIComponent(
@@ -96,141 +123,188 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
   }
 
   return (
-    <div style={{ background: '#0a0a12', minHeight: '100vh', paddingBottom: 80 }}>
+    <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 88 }}>
       <Topbar name={profile.name} initials={initials} progress={pct} mode="student" />
 
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px' }}>
 
-        {/* Hero */}
-        <div className="pt-6 pb-4">
-          <h1 className="font-display leading-none" style={{ fontSize: 52, letterSpacing: '0.02em', color: '#f0f0eb' }}>
-            WELCOME<br />BACK,<br /><span style={{ color: '#e8c547' }}>{profile.name.toUpperCase()}.</span>
-          </h1>
-          <p className="text-base mt-3" style={{ color: '#7070a0' }}>Your pathway is <strong style={{ color: '#f0f0eb' }}>{pct}%</strong> complete.</p>
-          <p className="text-base mt-1 italic" style={{ color: '#e8c547' }}>{stageLine}</p>
+        {/* ── HERO ── */}
+        <div className="pt-5 pb-2 flex items-start justify-between">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>{dateStr}</div>
+            <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
+              YOUR<br /><span style={{ color: '#e8c547' }}>PATHWAY.</span>
+            </h1>
+            <p className="mt-3 text-sm font-semibold" style={{ color: '#7070a0' }}>
+              {allComplete ? '🏆 ALL STAGES COMPLETE' : stageLine}
+            </p>
+          </div>
+          <div className="text-right flex-shrink-0 pt-1">
+            <div className="font-display" style={{ fontSize: 32, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
+            <div className="text-xs font-bold mt-1" style={{ color: '#4a4a70' }}>HELLO, {firstName}</div>
+          </div>
         </div>
 
-        {/* Coach notification */}
-        {latestCoachMsg && (
-          <div onClick={() => router.push('/pathway/chat')}
-            className="rounded-xl p-4 mb-4 cursor-pointer"
-            style={{ background: '#1a1a2e', borderLeft: '3px solid #e8c547', border: '1px solid rgba(232,197,71,0.25)' }}>
-            <div className="text-sm font-semibold" style={{ color: '#e8c547' }}>
-              🔔 Your coach left a note · {timeAgo(latestCoachMsg.created_at)}
+        {/* ── STAT CARDS ── */}
+        <div className="grid grid-cols-3 gap-2 mt-4 mb-4">
+          {[
+            { label: 'TASKS DONE', value: doneTasks, sub: `/ ${totalTasks}`, colour: '#e8c547' },
+            { label: 'COMPLETE', value: `${pct}%`, sub: 'overall', colour: '#4ecdc4' },
+            { label: 'STAGE', value: activeStageIdx >= 0 ? activeStageIdx + 1 : '✓', sub: `of ${STAGES.length}`, colour: '#ff6b9d' },
+          ].map(card => (
+            <div key={card.label} className="rounded-2xl p-3 flex flex-col items-center justify-center"
+              style={{ background: '#111120', border: `1px solid rgba(255,255,255,0.06)`, minHeight: 80 }}>
+              <div className="font-display" style={{ fontSize: 36, color: card.colour, letterSpacing: '0.02em', lineHeight: 1 }}>{card.value}</div>
+              <div className="text-xs font-semibold mt-1" style={{ color: '#4a4a70' }}>{card.sub}</div>
+              <div className="text-[9px] uppercase tracking-widest mt-0.5 font-bold" style={{ color: '#3a3a5c' }}>{card.label}</div>
             </div>
-            <div className="text-sm mt-1 italic" style={{ color: '#7070a0' }}>
-              "{latestCoachMsg.text.substring(0, 80)}{latestCoachMsg.text.length > 80 ? '…' : ''}"
-            </div>
-            <div className="text-sm font-semibold mt-2" style={{ color: '#e8c547' }}>View Message →</div>
+          ))}
+        </div>
+
+        {/* ── OVERALL PROGRESS BAR ── */}
+        <div className="mb-5">
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+            <div className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#e8c547 0%,#4ecdc4 50%,#ff6b9d 100%)' }} />
           </div>
+          <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#3a3a5c' }}>
+            <span>Foundation</span><span>Mastery</span><span>Advanced</span>
+          </div>
+        </div>
+
+        {/* ── COACH MESSAGE ALERT ── */}
+        {latestCoachMsg && (
+          <button onClick={() => router.push('/pathway/chat')}
+            className="w-full rounded-2xl p-4 mb-4 text-left"
+            style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.25)', borderLeft: '3px solid #e8c547' }}>
+            <div className="flex items-center justify-between mb-1">
+              <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>🔔 Coach Note</div>
+              <div className="text-[10px]" style={{ color: '#4a4a70' }}>{timeAgo(latestCoachMsg.created_at)}</div>
+            </div>
+            <div className="text-sm italic leading-snug" style={{ color: '#a0a0c0' }}>
+              "{latestCoachMsg.text.substring(0, 90)}{latestCoachMsg.text.length > 90 ? '…' : ''}"
+            </div>
+            <div className="text-xs font-bold mt-2" style={{ color: '#e8c547' }}>View message →</div>
+          </button>
         )}
 
-        {/* Overall progress */}
-        <div className="mb-5">
-          <div className="flex justify-between text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7070a0' }}>
-            <span>Overall Progress</span>
-            <span style={{ color: '#f0f0eb' }}>{tasks.filter(t => t.completed).length} / {totalTasks} tasks</span>
-          </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: '#2a2a45' }}>
-            <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#e8c547,#4ecdc4,#ff6b9d)' }} />
-          </div>
-        </div>
-
-        {/* Primary CTA — what to do RIGHT NOW */}
-        {!allComplete && (() => {
-          const activeStage = s3c ? -1 : s2c ? 2 : s1c ? 1 : 0
-          if (activeStage === -1) return null
-          const { done, total } = countStageTasks(tasks, activeStage)
-          const isFirstTime = done === 0
+        {/* ── PRIMARY CTA ── */}
+        {!allComplete && activeStageIdx >= 0 && (() => {
+          const isFirstTime = activeDone === 0
+          const c = COLOURS[activeStageIdx]
+          const g = GLOWS[activeStageIdx]
+          const stage = STAGES[activeStageIdx]
           return (
             <button
-              onClick={() => router.push(`/pathway/stage/${activeStage}`)}
-              className="w-full rounded-2xl p-5 mb-4 text-left transition-all"
-              style={{
-                background: glows[activeStage],
-                border: `2px solid ${colours[activeStage]}`,
-                boxShadow: `0 0 32px ${glows[activeStage]}`,
-              }}>
-              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: colours[activeStage], opacity: 0.7 }}>
-                {isFirstTime ? '👉 Start here' : '▶ Continue where you left off'}
-              </div>
-              <div className="font-display" style={{ fontSize: 36, color: colours[activeStage], letterSpacing: '0.04em', lineHeight: 1 }}>
-                {STAGES[activeStage].name}
-              </div>
-              <div className="text-sm mt-2 mb-4" style={{ color: '#f0f0eb', opacity: 0.7 }}>{STAGES[activeStage].tagline}</div>
-              <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <div className="h-full rounded-full" style={{ width: `${total ? Math.round(done/total*100) : 0}%`, background: colours[activeStage] }} />
-              </div>
-              <div className="flex justify-between text-sm font-bold" style={{ color: colours[activeStage] }}>
-                <span>{isFirstTime ? 'Tap to begin →' : `${done}/${total} tasks · tap to continue →`}</span>
-                <span>{total ? Math.round(done/total*100) : 0}%</span>
+              onClick={() => router.push(`/pathway/stage/${activeStageIdx}`)}
+              className="w-full rounded-2xl mb-4 text-left overflow-hidden"
+              style={{ background: g, border: `2px solid ${c}`, boxShadow: `0 0 40px ${g}` }}>
+              <div className="px-5 pt-5 pb-4">
+                <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: c, opacity: 0.8 }}>
+                  {isFirstTime ? '👉 START HERE' : '▶ CONTINUE WHERE YOU LEFT OFF'}
+                </div>
+                <div className="font-display" style={{ fontSize: 42, color: c, letterSpacing: '0.03em', lineHeight: 0.95 }}>
+                  {stage.name}
+                </div>
+                <div className="text-sm mt-2 mb-4" style={{ color: '#f0f0eb', opacity: 0.65 }}>{stage.tagline}</div>
+                {/* Progress bar */}
+                <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <div className="h-full rounded-full transition-all"
+                    style={{ width: `${activeTotal ? Math.round(activeDone / activeTotal * 100) : 0}%`, background: c }} />
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="text-sm font-bold" style={{ color: c }}>
+                    {isFirstTime ? 'Tap to begin →' : `${activeDone} of ${activeTotal} tasks done`}
+                  </div>
+                  <div className="font-display text-2xl" style={{ color: c }}>
+                    {activeTotal ? Math.round(activeDone / activeTotal * 100) : 0}%
+                  </div>
+                </div>
               </div>
             </button>
           )
         })()}
 
-        {/* All stages */}
-        <div className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7070a0' }}>All stages</div>
-        <div className="flex flex-col gap-3 mb-4">
+        {allComplete && (
+          <button onClick={sendToCoach}
+            className="w-full rounded-2xl p-5 mb-4 text-center"
+            style={{ background: 'rgba(232,197,71,0.12)', border: '2px solid #e8c547', boxShadow: '0 0 40px rgba(232,197,71,0.2)' }}>
+            <div className="font-display text-3xl tracking-widest" style={{ color: '#e8c547' }}>🏆 ALL DONE</div>
+            <div className="text-sm mt-1 font-semibold" style={{ color: '#a0a0c0' }}>Tap to notify your coach</div>
+          </button>
+        )}
+
+        {/* ── ALL STAGES ── */}
+        <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>All Stages</div>
+        <div className="flex flex-col gap-2 mb-5">
           {STAGES.map((s, i) => {
             const { total, done, pct: sp } = countStageTasks(tasks, i)
             const complete = isStageComplete(tasks, signoffs, i)
             const unlocked = i === 0 || isStageComplete(tasks, signoffs, i - 1)
             const isActive = unlocked && !complete
+            const c = COLOURS[i]
 
             return (
-              <div key={s.id}
+              <button key={s.id}
                 onClick={() => unlocked ? router.push(`/pathway/stage/${i}`) : undefined}
-                className="rounded-2xl overflow-hidden transition-all duration-200"
+                disabled={!unlocked}
+                className="w-full rounded-2xl overflow-hidden text-left transition-all active:scale-[0.98]"
                 style={{
-                  background: '#1a1a2e',
-                  border: `1px solid ${complete ? borders[i] : isActive ? borders[i] : '#2a2a45'}`,
+                  background: '#111120',
+                  border: `1px solid ${isActive ? BORDERS[i] : complete ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
                   opacity: unlocked ? 1 : 0.3,
-                  cursor: unlocked ? 'pointer' : 'default',
+                  borderLeft: `4px solid ${c}`,
                 }}>
-                <div className="p-4 flex items-center gap-4">
+                <div className="px-4 py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: colours[i], opacity: 0.6 }}>{s.eyebrow}</div>
-                    <div className="font-display leading-none" style={{ fontSize: 28, color: colours[i], letterSpacing: '0.02em' }}>{s.name}</div>
-                    <div className="h-1.5 rounded-full overflow-hidden mt-2" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                      <div className="h-full rounded-full" style={{ width: `${sp}%`, background: colours[i] }} />
+                    <div className="text-[9px] font-bold uppercase tracking-widest mb-0.5" style={{ color: c, opacity: 0.6 }}>{s.eyebrow}</div>
+                    <div className="font-display" style={{ fontSize: 26, color: complete ? c : isActive ? c : '#4a4a70', letterSpacing: '0.02em', lineHeight: 1 }}>
+                      {s.name}
                     </div>
-                    <div className="text-xs mt-1.5 font-semibold" style={{ color: '#7070a0' }}>{done}/{total} tasks · {sp}%</div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div className="h-full rounded-full transition-all" style={{ width: `${sp}%`, background: c }} />
+                      </div>
+                      <div className="text-[10px] font-bold flex-shrink-0" style={{ color: '#3a3a5c' }}>{done}/{total}</div>
+                    </div>
                   </div>
-                  <div className="flex-shrink-0 text-lg" style={{ color: complete ? '#2ecc71' : isActive ? colours[i] : '#2a2a45' }}>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-display text-xl"
+                    style={{
+                      background: complete ? 'rgba(46,204,113,0.12)' : isActive ? GLOWS[i] : 'rgba(255,255,255,0.03)',
+                      color: complete ? '#2ecc71' : isActive ? c : '#3a3a5c',
+                      border: `1px solid ${complete ? 'rgba(46,204,113,0.3)' : isActive ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
+                    }}>
                     {complete ? '✓' : unlocked ? '→' : '🔒'}
                   </div>
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>
 
-        {/* Messages button */}
+        {/* ── MESSAGES BUTTON ── */}
         <button onClick={() => router.push('/pathway/chat')}
-          className="w-full flex items-center gap-3 rounded-xl px-5 py-4 mb-3 transition-all"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a45' }}>
-          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#e8c547" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-          <span className="text-base font-semibold flex-1 text-left">Messages from your coach</span>
+          className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3 active:scale-[0.98] transition-all"
+          style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', borderLeft: '4px solid #e8c547' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(232,197,71,0.1)', border: '1px solid rgba(232,197,71,0.3)' }}>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#e8c547" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>Messages from your coach</div>
+            <div className="text-xs mt-0.5" style={{ color: '#4a4a70' }}>
+              {unreadFromCoach > 0 ? `${unreadFromCoach} unread` : 'No new messages'}
+            </div>
+          </div>
           {unreadFromCoach > 0 && (
-            <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#e8c547', color: '#0a0a12' }}>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style={{ background: '#e8c547', color: '#0a0a12' }}>
               {unreadFromCoach}
-            </span>
+            </div>
           )}
         </button>
-
-        {/* Send to coach */}
-        <button onClick={allComplete ? sendToCoach : undefined} disabled={!allComplete}
-          className="w-full py-5 rounded-xl font-display text-2xl transition-all disabled:opacity-25"
-          style={{ border: '2px solid #e8c547', background: allComplete ? 'rgba(232,197,71,0.12)' : 'transparent', color: '#e8c547', letterSpacing: '0.08em' }}>
-          ✉ SEND TO COACH
-        </button>
-        <p className="text-center text-sm mt-2" style={{ color: allComplete ? '#e8c547' : '#7070a0' }}>
-          {allComplete ? 'All stages complete — your coach is waiting.' : `${totalTasks - tasks.filter(t => t.completed).length} tasks remaining to unlock`}
-        </p>
 
       </div>
 
