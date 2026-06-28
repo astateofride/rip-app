@@ -3,6 +3,8 @@ import { STAGES, STAGE_LINES } from '@/lib/stages'
 import StudentHome from '@/components/student/StudentHome'
 import type { TaskProgress, StageSignoff, Message, Profile, SessionLog } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PathwayPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
