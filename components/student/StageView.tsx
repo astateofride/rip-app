@@ -239,8 +239,8 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
     <div style={{ background: '#080810', minHeight: '100dvh', paddingBottom: 100 }}>
       <Topbar progress={overallPct()} mode="student" />
 
-      {/* STAGE HEADER — sticky below topbar */}
-      <div className="sticky z-40" style={{ top: 72, background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+      {/* STAGE HEADER */}
+      <div style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3 px-4 py-3" style={{ maxWidth: 480, margin: '0 auto' }}>
           <button onClick={() => router.push('/pathway')}
             style={{ color: '#9898c0', minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>←</button>

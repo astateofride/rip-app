@@ -349,6 +349,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
 
       </div>
 
+      <p className="text-center text-[10px] uppercase tracking-widest pb-2" style={{ color: '#2a2a4a' }}>BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}</p>
       <BottomNav unreadCoach={unreadFromCoach} />
     </div>
   )
