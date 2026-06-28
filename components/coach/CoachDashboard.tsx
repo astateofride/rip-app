@@ -267,8 +267,8 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     }).length, 0)
   const totalPendingTasks = localStudents.reduce((acc, s) =>
     acc + [0,1,2].reduce((a, si) => {
-      const { total, done } = countTasks(s.id, si)
-      return a + Math.max(0, total - done)
+      const { completed, done } = countTasks(s.id, si)
+      return a + Math.max(0, completed - done)
     }, 0), 0)
 
   return (
