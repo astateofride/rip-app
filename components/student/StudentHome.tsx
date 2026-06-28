@@ -24,10 +24,20 @@ function countStageTasks(tasks: TaskProgress[], si: number) {
   return { total, done, pct: total ? Math.round(done / total * 100) : 0 }
 }
 
+// A task truly passes if: completed AND (practical task OR written answer scores ≥70%)
+function taskPasses(t: TaskProgress) {
+  if (!t.completed) return false
+  if (t.answer !== null) return (t.score ?? 0) >= 70
+  return true
+}
+
 function isStageComplete(tasks: TaskProgress[], signoffs: StageSignoff[], si: number) {
-  const { total, done } = countStageTasks(tasks, si)
+  const total = STAGES[si].days.reduce((a, d) => a + d.tasks.length, 0)
+  const stageTasks = tasks.filter(t => t.stage_idx === si)
+  const allSubmitted = stageTasks.filter(t => t.completed).length === total
+  const allPassing = stageTasks.every(taskPasses)
   const signed = signoffs.some(s => s.stage_idx === si)
-  return total > 0 && done / total >= 0.70 && signed
+  return total > 0 && allSubmitted && allPassing && signed
 }
 
 function overallPct(tasks: TaskProgress[]) {
