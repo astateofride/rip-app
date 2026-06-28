@@ -27,7 +27,7 @@ function countStageTasks(tasks: TaskProgress[], si: number) {
 function isStageComplete(tasks: TaskProgress[], signoffs: StageSignoff[], si: number) {
   const { total, done } = countStageTasks(tasks, si)
   const signed = signoffs.some(s => s.stage_idx === si)
-  return total > 0 && done / total >= 0.75 && signed
+  return total > 0 && done / total >= 0.70 && signed
 }
 
 function overallPct(tasks: TaskProgress[]) {
@@ -306,22 +306,36 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           )}
         </button>
 
-        {/* ASOR Academy link */}
-        <a href="https://www.astateofride.com" target="_blank" rel="noopener noreferrer"
-          className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3 active:scale-[0.98] transition-all"
-          style={{ background: '#111120', border: '1px solid rgba(78,205,196,0.15)', borderLeft: '4px solid #4ecdc4', textDecoration: 'none' }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(78,205,196,0.1)', border: '1px solid rgba(78,205,196,0.25)' }}>
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-            </svg>
+        {/* ASOR Academy link — locked until pathway complete (all 3 stages signed off, 70%+) */}
+        {s1c && s2c && s3c ? (
+          <a href="https://www.astateofride.com" target="_blank" rel="noopener noreferrer"
+            className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3 active:scale-[0.98] transition-all"
+            style={{ background: '#111120', border: '1px solid rgba(78,205,196,0.2)', borderLeft: '4px solid #4ecdc4', textDecoration: 'none' }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(78,205,196,0.1)', border: '1px solid rgba(78,205,196,0.3)' }}>
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+            <div className="flex-1 text-left">
+              <div className="text-sm font-bold" style={{ color: '#4ecdc4' }}>🎓 RIDE Academy · A State of Ride</div>
+              <div className="text-xs mt-0.5" style={{ color: '#4a4a70' }}>Pathway complete — tap to access ↗</div>
+            </div>
+          </a>
+        ) : (
+          <div className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 mb-3"
+            style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.04)', borderLeft: '4px solid #2a2a3c', opacity: 0.5 }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <span style={{ fontSize: 18 }}>🔒</span>
+            </div>
+            <div className="flex-1 text-left">
+              <div className="text-sm font-bold" style={{ color: '#3a3a5c' }}>RIDE Academy · A State of Ride</div>
+              <div className="text-xs mt-0.5" style={{ color: '#2a2a4a' }}>Unlocks when all 3 stages are signed off at 70%+</div>
+            </div>
           </div>
-          <div className="flex-1 text-left">
-            <div className="text-sm font-bold" style={{ color: '#4ecdc4' }}>RIDE Academy · A State of Ride</div>
-            <div className="text-xs mt-0.5" style={{ color: '#4a4a70' }}>Instructor resources, login & more ↗</div>
-          </div>
-        </a>
+        )}
 
       </div>
 
