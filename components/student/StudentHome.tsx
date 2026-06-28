@@ -175,10 +175,10 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
         <div className="mb-5">
           <div className="h-2.5 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
             <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#e8c547 0%,#4ecdc4 50%,#ff6b9d 100%)' }} />
+              style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #ffffff 0%, #3b82f6 20%, #22c55e 40%, #eab308 60%, #f97316 80%, #ef4444 100%)' }} />
           </div>
           <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#8888b0' }}>
-            <span>Foundation</span><span>Mastery</span><span>Advanced</span>
+            <span>Foundations</span><span>Advanced</span><span>Mastery</span>
           </div>
         </div>
 

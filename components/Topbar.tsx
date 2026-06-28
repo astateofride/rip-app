@@ -73,18 +73,6 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
           </div>
         </div>
 
-        {/* Progress strip — student only, full width below header */}
-        {mode === 'student' && (
-          <div style={{ height: 3, background: '#111120' }}>
-            <div
-              className="h-full transition-all duration-700"
-              style={{
-                width: `${pct}%`,
-                background: 'linear-gradient(90deg, #ffffff 0%, #3b82f6 20%, #22c55e 40%, #eab308 60%, #f97316 80%, #ef4444 100%)',
-              }}
-            />
-          </div>
-        )}
       </div>
 
       {/* Instructions modal */}
