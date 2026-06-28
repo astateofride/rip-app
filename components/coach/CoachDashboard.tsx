@@ -185,12 +185,13 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     setEditSaving(false)
   }
 
-  const studentMessages = messages.filter(m => m.student_id === selectedStudentId)
+  // compute per-student message threads for the home view
+  const allUnread = messages.filter(m => m.from_role === 'student' && !m.read)
 
   // Summary stats
-  const totalStudents = students.length
+  const totalStudents = localStudents.length
   const totalSignoffs = signoffs.length
-  const pendingSignoffs = students.reduce((acc, s) => {
+  const pendingSignoffs = localStudents.reduce((acc, s) => {
     return acc + [0,1,2].filter(si => {
       const { pct } = countTasks(s.id, si)
       return pct >= 75 && !getSignoff(s.id, si)
@@ -198,7 +199,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   }, 0)
 
   return (
-    <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 40 }}>
+    <div style={{ background: '#080810', minHeight: '100vh', paddingBottom: 80 }}>
 
       {/* Topbar */}
       <div className="sticky top-0 z-50 flex items-center justify-between px-4" style={{ background: '#080810', borderBottom: '1px solid #1a1a2e', height: 56 }}>
@@ -212,252 +213,23 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
         </div>
       </div>
 
-      {/* Hero header */}
-      <div className="px-4 pt-5 pb-5" style={{ borderBottom: '1px solid #1a1a2e' }}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#3a3a5c' }}>COACH DASHBOARD</div>
-            <h1 className="font-display leading-none" style={{ fontSize: 48, letterSpacing: '0.02em', color: '#f0f0eb', lineHeight: 0.9 }}>
-              HELLO,<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
-            </h1>
-          </div>
-          <div className="text-right flex-shrink-0 pt-1">
-            <div className="font-display" style={{ fontSize: 30, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
-            <div className="text-xs mt-1 font-semibold" style={{ color: '#4a4a70' }}>{today}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-2 px-4 pt-4">
-        {[
-          { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
-          { label: 'SIGN-OFFS', value: totalSignoffs, color: '#2ecc71' },
-          { label: 'PENDING', value: pendingSignoffs, color: '#ff6b9d' },
-        ].map(s => (
-          <div key={s.label} className="rounded-2xl px-3 py-4 flex flex-col items-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="font-display" style={{ fontSize: 40, color: s.color, lineHeight: 1 }}>{s.value}</div>
-            <div className="text-[10px] font-bold tracking-widest mt-1.5 text-center" style={{ color: '#3a3a5c' }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Student selector (if multiple) */}
-      {students.length > 1 && (
-        <div className="px-4 mt-4">
-          <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Viewing student</div>
-          <div className="flex gap-2 flex-wrap">
-            {students.map(s => (
-              <button key={s.id} onClick={() => setSelectedStudentId(s.id)}
-                className="px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
-                style={selectedStudentId === s.id
-                  ? { background: '#e8c547', color: '#0a0a12', border: '1px solid #e8c547' }
-                  : { background: '#111120', color: '#7070a0', border: '1px solid rgba(255,255,255,0.07)' }}>
-                {s.name.split(' ')[0].toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div className="flex mt-4 px-4 gap-2">
-        {(['overview', 'tasks', 'messages'] as Tab[]).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className="flex-1 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all relative active:scale-95"
-            style={tab === t
-              ? { background: '#e8c547', color: '#0a0a12', border: '1px solid #e8c547' }
-              : { background: '#111120', color: '#7070a0', border: '1px solid rgba(255,255,255,0.07)' }}>
-            {t}
-            {t === 'messages' && totalUnread > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center" style={{ background: '#ff6b9d', color: '#fff' }}>{totalUnread}</span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* No students */}
-      {!student && (
-        <div className="px-4 pt-16 text-center">
-          <div className="font-display text-4xl mb-3" style={{ color: 'rgba(255,255,255,0.07)' }}>NO STUDENTS</div>
-          <p className="text-base leading-relaxed" style={{ color: '#7070a0' }}>Students link to you by entering your email during sign-up.</p>
-          <div className="mt-4 px-5 py-4 rounded-2xl inline-block" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <div className="text-xs uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>Your coach email</div>
-            <div className="text-base font-semibold" style={{ color: '#e8c547' }}>{coach.email}</div>
-          </div>
-        </div>
-      )}
-
-      {/* ── OVERVIEW ── */}
-      {tab === 'overview' && student && (
-        <div className="px-4 mt-4 flex flex-col gap-3">
-
-          {/* Student card */}
-          <div className="rounded-2xl p-5" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openProfile(student.id)}>
-                <div className="font-display tracking-wide leading-none" style={{ fontSize: 32, color: '#f0f0eb' }}>{student.name.toUpperCase()}</div>
-                <div className="text-xs mt-1.5 font-semibold" style={{ color: '#4a4a70' }}>
-                  {student.location ?? 'No location'} · Started {formatDate(student.start_date)}
-                </div>
-                <div className="text-xs mt-2 font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>TAP TO VIEW PROFILE →</div>
-              </div>
-              <div className="text-right flex-shrink-0 ml-3">
-                <div className="text-xs uppercase tracking-widest font-bold" style={{ color: '#3a3a5c' }}>Last active</div>
-                <div className="text-sm font-bold mt-1" style={{ color: '#4ecdc4' }}>{timeAgo(lastSession?.started_at)}</div>
-              </div>
-            </div>
-
-            {/* Stage rows */}
-            {[0,1,2].map(si => {
-              const { total, done, pct } = countTasks(student.id, si)
-              const signed = !!getSignoff(student.id, si)
-              const unlocked = si === 0 || !!getSignoff(student.id, si - 1)
-              return (
-                <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid #1a1a2e' }}>
-                  <div className="font-display flex-shrink-0 text-center" style={{ color: colours[si], width: 36, fontSize: 20, letterSpacing: '0.04em' }}>S{si + 1}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between text-xs font-semibold mb-1.5" style={{ color: '#7070a0' }}>
-                      <span className="truncate mr-2">{stageNames[si]}</span><span style={{ color: colours[si], flexShrink: 0 }}>{pct}%</span>
-                    </div>
-                    <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colours[si] }} />
-                    </div>
-                  </div>
-                  {signed ? (
-                    <span className="text-xs font-bold px-3 py-2 rounded-xl flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71' }}>✓ DONE</span>
-                  ) : unlocked ? (
-                    <button onClick={() => setSignoffModal({ stageIdx: si, studentId: student.id })}
-                      className="text-xs font-bold px-3 py-2 rounded-xl flex-shrink-0 transition-all active:scale-95"
-                      style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547', minHeight: 40 }}>
-                      SIGN OFF
-                    </button>
-                  ) : (
-                    <span className="text-xs px-3 py-2 rounded-xl flex-shrink-0 font-bold" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>LOCKED</span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Action buttons */}
-          <button onClick={() => setTab('messages')}
-            className="w-full rounded-2xl font-display text-2xl tracking-wide flex items-center justify-between px-5 active:scale-[0.98] transition-all"
-            style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', borderLeft: '4px solid #e8c547', color: '#f0f0eb', letterSpacing: '0.06em', minHeight: 64 }}>
-            <span>💬 MESSAGE STUDENT</span>
-            {unreadCount > 0 && <span className="text-sm px-2.5 py-1 rounded-full font-sans font-bold" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadCount}</span>}
-          </button>
-
-          {[0,1,2].filter(si => !!getSignoff(student.id, si)).map(si => (
-            <button key={si} onClick={() => {
-              const { total, done } = countTasks(student.id, si)
-              const signoff = getSignoff(student.id, si)
-              const subject = encodeURIComponent(`RIP — Stage ${si + 1} signed off — ${student.name}`)
-              const body = encodeURIComponent(`Stage ${si + 1} — ${stageNames[si]}\n\nTasks: ${done}/${total}\nSigned off by: ${coach.name}\n${signoff?.note ? `\nNote: ${signoff.note}\n` : ''}\n— RIDE Instructor Pathway`)
-              window.location.href = `mailto:?subject=${subject}&body=${body}`
-            }}
-              className="w-full rounded-2xl font-display text-2xl tracking-wide text-left px-5 active:scale-[0.98] transition-all"
-              style={{ background: '#111120', border: `1px solid rgba(255,255,255,0.06)`, borderLeft: `4px solid ${colours[si]}`, color: colours[si], letterSpacing: '0.06em', minHeight: 64 }}>
-              ⇩ SEND STAGE {si + 1} UPDATE
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* ── TASKS ── */}
-      {tab === 'tasks' && student && (
-        <div className="px-4 mt-4 flex flex-col gap-5">
-          {[0,1,2].map(si => (
-            <div key={si}>
-              <div className="flex items-center gap-3 mb-3" style={{ borderLeft: `3px solid ${colours[si]}`, paddingLeft: 12 }}>
-                <div className="font-display text-2xl tracking-wide" style={{ color: colours[si], letterSpacing: '0.06em' }}>STAGE {si + 1}</div>
-                <div className="text-sm font-semibold" style={{ color: '#4a4a70' }}>{stageNames[si]}</div>
-              </div>
-              <div className="flex flex-col gap-2">
-                {STAGES[si].days.map((day, di) => {
-                  const rowKey = `${student.id}-${si}-${di}`
-                  const isOpen = expandedDays.has(rowKey)
-                  const doneCount = allTasks.filter(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed).length
-                  const allDone = doneCount === day.tasks.length
-                  const dayDataRow = allDayData.find(d => d.student_id === student.id && d.stage_idx === si && d.day_idx === di)
-                  const remarkRow = remarks.find(r => r.student_id === student.id && r.stage_idx === si && r.day_idx === di)
-                  const dayNum = String(si * 10 + di + 1).padStart(2, '0')
-
-                  return (
-                    <div key={di} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${allDone ? 'rgba(46,204,113,0.2)' : 'rgba(255,255,255,0.05)'}` }}>
-                      <button onClick={() => setExpandedDays(prev => { const n = new Set(prev); if (isOpen) n.delete(rowKey); else n.add(rowKey); return n })}
-                        className="flex items-center gap-3 w-full px-4 py-4 text-left active:bg-white/5" style={{ minHeight: 64 }}>
-                        <div className="font-display text-2xl flex-shrink-0 w-10 text-center" style={{ color: allDone ? '#2ecc71' : colours[si] }}>{dayNum}</div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-base font-semibold truncate" style={{ color: allDone ? '#7070a0' : '#f0f0eb' }}>{day.title}</div>
-                          <div className="text-xs mt-0.5 font-bold uppercase tracking-widest" style={{ color: allDone ? '#2ecc71' : '#4a4a70' }}>
-                            {doneCount}/{day.tasks.length} tasks{remarkRow ? ' · ✓ note' : ''}{dayDataRow?.manual_read_at ? ' · 📖 read' : ''}
-                          </div>
-                        </div>
-                        <span style={{ color: '#4a4a70', fontSize: 16, transform: isOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s', flexShrink: 0 }}>▾</span>
-                      </button>
-
-                      {isOpen && (
-                        <div className="px-4 pb-5" style={{ borderTop: '1px solid #1a1a2e' }}>
-                          {/* Manual read */}
-                          <div className="flex items-center gap-2 mt-4">
-                            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: dayDataRow?.manual_read_at ? '#2ecc71' : '#3a3a5c' }}>📖 Manual</span>
-                            {dayDataRow?.manual_read_at
-                              ? <span className="text-xs px-2 py-1 rounded-lg font-bold" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.2)' }}>
-                                  Read {new Date(dayDataRow.manual_read_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
-                                </span>
-                              : <span className="text-xs px-2 py-1 rounded-lg font-bold" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>Not opened</span>}
-                          </div>
-
-                          {dayDataRow?.reflection && (
-                            <div className="mt-4">
-                              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Student Reflection</div>
-                              <div className="text-sm italic leading-relaxed px-4 py-3 rounded-xl" style={{ background: '#0c0c18', color: '#a0a0c0', borderLeft: '2px solid rgba(255,255,255,0.07)' }}>{dayDataRow.reflection}</div>
-                            </div>
-                          )}
-                          {dayDataRow?.video_url && (
-                            <div className="mt-4">
-                              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Video Submission</div>
-                              <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer"
-                                className="text-sm font-semibold underline block truncate" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
-                            </div>
-                          )}
-
-                          <div className="text-xs font-bold uppercase tracking-widest mt-4 mb-2" style={{ color: '#4a4a70' }}>Coach Note</div>
-                          <textarea className="inp" placeholder="Leave a coaching note for this day…" defaultValue={remarkRow?.remark ?? ''} style={{ minHeight: 80, fontSize: 15 }} id={`remark-${rowKey}`} />
-                          <button onClick={() => { const ta = document.getElementById(`remark-${rowKey}`) as HTMLTextAreaElement; if (ta) saveRemark(student.id, si, di, ta.value) }}
-                            className="w-full mt-3 rounded-xl font-display text-2xl tracking-wide active:scale-[0.98] transition-all"
-                            style={{ background: saving === rowKey ? 'rgba(255,255,255,0.07)' : '#e8c547', color: saving === rowKey ? '#7070a0' : '#0a0a12', letterSpacing: '0.04em', minHeight: 56 }}>
-                            {saving === rowKey ? 'SAVING…' : '✓ TICK & SAVE'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── MESSAGES ── */}
-      {tab === 'messages' && student && (
-        <div className="flex flex-col mt-4" style={{ height: 'calc(100dvh - 300px)' }}>
-          <div className="px-4 mb-3 flex items-center gap-3">
+      {tab === 'messages' && student ? (
+        /* ── MESSAGES FULL SCREEN ── */
+        <div className="flex flex-col" style={{ height: 'calc(100dvh - 56px)' }}>
+          <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid #1a1a2e', flexShrink: 0 }}>
             <button onClick={() => setTab('overview')}
               className="flex items-center justify-center rounded-xl flex-shrink-0 font-bold active:scale-95 transition-all"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#7070a0', minWidth: 44, minHeight: 44, fontSize: 20 }}>
               ←
             </button>
-            <div className="font-display tracking-wide" style={{ fontSize: 28, color: '#f0f0eb', letterSpacing: '0.06em' }}>
+            <div className="font-display tracking-wide" style={{ fontSize: 26, color: '#f0f0eb', letterSpacing: '0.06em' }}>
               MESSAGES — <span style={{ color: '#e8c547' }}>{student.name.split(' ')[0].toUpperCase()}</span>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-4 flex flex-col gap-3">
-            {studentMessages.length === 0
+          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+            {messages.filter(m => m.student_id === selectedStudentId).length === 0
               ? <div className="flex-1 flex items-center justify-center text-base" style={{ color: '#4a4a70' }}>No messages yet</div>
-              : studentMessages.map(m => {
+              : messages.filter(m => m.student_id === selectedStudentId).map(m => {
                 const fromMe = m.from_role === 'coach'
                 const stageName = m.stage_ref !== null && m.day_ref !== null ? `Stage ${m.stage_ref + 1} · Day ${m.stage_ref * 10 + (m.day_ref ?? 0) + 1}` : null
                 return (
@@ -475,7 +247,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               })}
             <div ref={messagesEndRef} />
           </div>
-          <div className="flex gap-2 px-4 pt-3 pb-2 items-end" style={{ borderTop: '1px solid #1a1a2e', flexShrink: 0 }}>
+          <div className="flex gap-2 px-4 pt-3 pb-4 items-end" style={{ borderTop: '1px solid #1a1a2e', flexShrink: 0 }}>
             <textarea value={chatText} onChange={e => setChatText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
               placeholder={`Message ${student.name.split(' ')[0]}…`} rows={1} className="inp flex-1"
@@ -486,6 +258,249 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
               SEND
             </button>
           </div>
+        </div>
+      ) : tab === 'tasks' && student ? (
+        /* ── TASKS FULL SCREEN ── */
+        <div className="px-4 mt-4 flex flex-col gap-5 pb-10">
+          <div className="flex items-center gap-3 mb-2">
+            <button onClick={() => setTab('overview')}
+              className="flex items-center justify-center rounded-xl flex-shrink-0 font-bold active:scale-95 transition-all"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#7070a0', minWidth: 44, minHeight: 44, fontSize: 20 }}>
+              ←
+            </button>
+            <div className="font-display tracking-wide" style={{ fontSize: 26, color: '#f0f0eb', letterSpacing: '0.06em' }}>
+              TASKS — <span style={{ color: '#e8c547' }}>{student.name.split(' ')[0].toUpperCase()}</span>
+            </div>
+          </div>
+          {[0,1,2].map(si => (
+            <div key={si}>
+              <div className="flex items-center gap-3 mb-3" style={{ borderLeft: `3px solid ${colours[si]}`, paddingLeft: 12 }}>
+                <div className="font-display text-2xl tracking-wide" style={{ color: colours[si], letterSpacing: '0.06em' }}>STAGE {si + 1}</div>
+                <div className="text-sm font-semibold" style={{ color: '#4a4a70' }}>{stageNames[si]}</div>
+              </div>
+              <div className="flex flex-col gap-2">
+                {STAGES[si].days.map((day, di) => {
+                  const rowKey = `${student.id}-${si}-${di}`
+                  const isOpen = expandedDays.has(rowKey)
+                  const doneCount = allTasks.filter(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed).length
+                  const allDone = doneCount === day.tasks.length
+                  const dayDataRow = allDayData.find(d => d.student_id === student.id && d.stage_idx === si && d.day_idx === di)
+                  const remarkRow = remarks.find(r => r.student_id === student.id && r.stage_idx === si && r.day_idx === di)
+                  const dayNum = String(si * 10 + di + 1).padStart(2, '0')
+                  return (
+                    <div key={di} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${allDone ? 'rgba(46,204,113,0.2)' : 'rgba(255,255,255,0.05)'}` }}>
+                      <button onClick={() => setExpandedDays(prev => { const n = new Set(prev); if (isOpen) n.delete(rowKey); else n.add(rowKey); return n })}
+                        className="flex items-center gap-3 w-full px-4 py-4 text-left active:bg-white/5" style={{ minHeight: 64 }}>
+                        <div className="font-display text-2xl flex-shrink-0 w-10 text-center" style={{ color: allDone ? '#2ecc71' : colours[si] }}>{dayNum}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-base font-semibold truncate" style={{ color: allDone ? '#7070a0' : '#f0f0eb' }}>{day.title}</div>
+                          <div className="text-xs mt-0.5 font-bold uppercase tracking-widest" style={{ color: allDone ? '#2ecc71' : '#4a4a70' }}>
+                            {doneCount}/{day.tasks.length} tasks{remarkRow ? ' · ✓ note' : ''}{dayDataRow?.manual_read_at ? ' · 📖 read' : ''}
+                          </div>
+                        </div>
+                        <span style={{ color: '#4a4a70', fontSize: 16, transform: isOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s', flexShrink: 0 }}>▾</span>
+                      </button>
+                      {isOpen && (
+                        <div className="px-4 pb-5" style={{ borderTop: '1px solid #1a1a2e' }}>
+                          <div className="flex items-center gap-2 mt-4">
+                            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: dayDataRow?.manual_read_at ? '#2ecc71' : '#3a3a5c' }}>📖 Manual</span>
+                            {dayDataRow?.manual_read_at
+                              ? <span className="text-xs px-2 py-1 rounded-lg font-bold" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.2)' }}>Read {new Date(dayDataRow.manual_read_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}</span>
+                              : <span className="text-xs px-2 py-1 rounded-lg font-bold" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>Not opened</span>}
+                          </div>
+                          {dayDataRow?.reflection && (
+                            <div className="mt-4">
+                              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Student Reflection</div>
+                              <div className="text-sm italic leading-relaxed px-4 py-3 rounded-xl" style={{ background: '#0c0c18', color: '#a0a0c0', borderLeft: '2px solid rgba(255,255,255,0.07)' }}>{dayDataRow.reflection}</div>
+                            </div>
+                          )}
+                          {dayDataRow?.video_url && (
+                            <div className="mt-4">
+                              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Video Submission</div>
+                              <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold underline block truncate" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
+                            </div>
+                          )}
+                          <div className="text-xs font-bold uppercase tracking-widest mt-4 mb-2" style={{ color: '#4a4a70' }}>Coach Note</div>
+                          <textarea className="inp" placeholder="Leave a coaching note for this day…" defaultValue={remarkRow?.remark ?? ''} style={{ minHeight: 80, fontSize: 15 }} id={`remark-${rowKey}`} />
+                          <button onClick={() => { const ta = document.getElementById(`remark-${rowKey}`) as HTMLTextAreaElement; if (ta) saveRemark(student.id, si, di, ta.value) }}
+                            className="w-full mt-3 rounded-xl font-display text-2xl tracking-wide active:scale-[0.98] transition-all"
+                            style={{ background: saving === rowKey ? 'rgba(255,255,255,0.07)' : '#e8c547', color: saving === rowKey ? '#7070a0' : '#0a0a12', letterSpacing: '0.04em', minHeight: 56 }}>
+                            {saving === rowKey ? 'SAVING…' : '✓ TICK & SAVE'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* ── HOME: Summary → Messages → Students ── */
+        <div className="px-4 flex flex-col gap-6 pt-5">
+
+          {/* Hero */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#3a3a5c' }}>COACH DASHBOARD</div>
+              <h1 className="font-display leading-none" style={{ fontSize: 44, letterSpacing: '0.02em', color: '#f0f0eb', lineHeight: 0.9 }}>
+                HELLO,<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
+              </h1>
+            </div>
+            <div className="text-right flex-shrink-0 pt-1">
+              <div className="font-display" style={{ fontSize: 28, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
+              <div className="text-xs mt-1 font-semibold" style={{ color: '#4a4a70' }}>{today}</div>
+            </div>
+          </div>
+
+          {/* ① Summary */}
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>SUMMARY</div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: 'STUDENTS', value: totalStudents, color: '#e8c547' },
+                { label: 'SIGN-OFFS', value: totalSignoffs, color: '#2ecc71' },
+                { label: 'PENDING', value: pendingSignoffs, color: '#ff6b9d' },
+              ].map(s => (
+                <div key={s.label} className="rounded-2xl px-3 py-4 flex flex-col items-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="font-display" style={{ fontSize: 40, color: s.color, lineHeight: 1 }}>{s.value}</div>
+                  <div className="text-[10px] font-bold tracking-widest mt-1.5 text-center" style={{ color: '#3a3a5c' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ② Messages */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#3a3a5c' }}>MESSAGES</div>
+              {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length} UNREAD</span>}
+            </div>
+            {localStudents.length === 0 ? (
+              <div className="rounded-2xl px-4 py-5 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#4a4a70' }}>No students yet</div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {localStudents.map(s => {
+                  const lastMsg = messages.filter(m => m.student_id === s.id).slice(-1)[0]
+                  const unread = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
+                  return (
+                    <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
+                      className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl text-left active:scale-[0.98] transition-all"
+                      style={{ background: '#111120', border: `1px solid ${unread ? 'rgba(255,107,157,0.3)' : 'rgba(255,255,255,0.06)'}`, borderLeft: `4px solid ${unread ? '#ff6b9d' : '#e8c547'}` }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
+                        style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
+                        {s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
+                        <div className="text-xs truncate mt-0.5" style={{ color: '#4a4a70' }}>{lastMsg ? lastMsg.text : 'No messages yet'}</div>
+                      </div>
+                      {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ③ Student overview — one card per student */}
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: '#3a3a5c' }}>STUDENT OVERVIEW</div>
+            {localStudents.length === 0 ? (
+              <div className="rounded-2xl px-4 py-8 text-center" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="font-display text-3xl mb-2" style={{ color: 'rgba(255,255,255,0.07)' }}>NO STUDENTS</div>
+                <p className="text-sm" style={{ color: '#7070a0' }}>Students link to you by entering your email during sign-up.</p>
+                <div className="mt-4 px-5 py-3 rounded-2xl inline-block" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>Your coach email</div>
+                  <div className="text-sm font-semibold" style={{ color: '#e8c547' }}>{coach.email}</div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {localStudents.map(s => {
+                  const sLastSession = lastSessions.find(x => x.user_id === s.id)
+                  return (
+                    <div key={s.id} className="rounded-2xl p-5" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      {/* Student header */}
+                      <div className="flex items-start justify-between mb-4 cursor-pointer" onClick={() => openProfile(s.id)}>
+                        <div>
+                          <div className="font-display tracking-wide leading-none" style={{ fontSize: 28, color: '#f0f0eb' }}>{s.name.toUpperCase()}</div>
+                          <div className="text-xs mt-1.5 font-semibold" style={{ color: '#4a4a70' }}>
+                            {s.location ?? 'No location'} · Started {formatDate(s.start_date)}
+                          </div>
+                          <div className="text-xs mt-1.5 font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>TAP TO VIEW PROFILE →</div>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <div className="text-[10px] uppercase tracking-widest font-bold" style={{ color: '#3a3a5c' }}>Last active</div>
+                          <div className="text-sm font-bold mt-1" style={{ color: '#4ecdc4' }}>{timeAgo(sLastSession?.started_at)}</div>
+                        </div>
+                      </div>
+
+                      {/* Stage rows */}
+                      {[0,1,2].map(si => {
+                        const { total, done, pct } = countTasks(s.id, si)
+                        const signed = !!getSignoff(s.id, si)
+                        const unlocked = si === 0 || !!getSignoff(s.id, si - 1)
+                        return (
+                          <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid #1a1a2e' }}>
+                            <div className="font-display flex-shrink-0 text-center" style={{ color: colours[si], width: 32, fontSize: 18 }}>S{si + 1}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between text-xs font-semibold mb-1.5" style={{ color: '#7070a0' }}>
+                                <span className="truncate mr-2">{stageNames[si]}</span><span style={{ color: colours[si], flexShrink: 0 }}>{pct}%</span>
+                              </div>
+                              <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+                                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colours[si] }} />
+                              </div>
+                            </div>
+                            {signed ? (
+                              <span className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71' }}>✓ DONE</span>
+                            ) : unlocked ? (
+                              <button onClick={() => setSignoffModal({ stageIdx: si, studentId: s.id })}
+                                className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0 transition-all active:scale-95"
+                                style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547', minHeight: 36 }}>
+                                SIGN OFF
+                              </button>
+                            ) : (
+                              <span className="text-xs px-2 py-1.5 rounded-lg flex-shrink-0 font-bold" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>LOCKED</span>
+                            )}
+                          </div>
+                        )
+                      })}
+
+                      {/* Quick actions */}
+                      <div className="flex gap-2 mt-4 pt-4" style={{ borderTop: '1px solid #1a1a2e' }}>
+                        <button onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
+                          className="flex-1 py-3 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
+                          style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.25)', color: '#e8c547', letterSpacing: '0.04em' }}>
+                          💬 MSG
+                        </button>
+                        <button onClick={() => { setSelectedStudentId(s.id); setTab('tasks') }}
+                          className="flex-1 py-3 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
+                          style={{ background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.25)', color: '#4ecdc4', letterSpacing: '0.04em' }}>
+                          📋 TASKS
+                        </button>
+                        {[0,1,2].filter(si => !!getSignoff(s.id, si)).map(si => (
+                          <button key={si} onClick={() => {
+                            const { total, done } = countTasks(s.id, si)
+                            const signoff = getSignoff(s.id, si)
+                            const subject = encodeURIComponent(`RIP — Stage ${si + 1} signed off — ${s.name}`)
+                            const body = encodeURIComponent(`Stage ${si + 1} — ${stageNames[si]}\n\nTasks: ${done}/${total}\nSigned off by: ${coach.name}\n${signoff?.note ? `\nNote: ${signoff.note}\n` : ''}\n— RIDE Instructor Pathway`)
+                            window.location.href = `mailto:?subject=${subject}&body=${body}`
+                          }}
+                            className="flex-1 py-3 rounded-xl font-display text-lg tracking-wide active:scale-[0.98] transition-all"
+                            style={{ background: `rgba(${si===0?'232,197,71':si===1?'78,205,196':'255,107,157'},0.08)`, border: `1px solid ${colours[si]}40`, color: colours[si], letterSpacing: '0.04em' }}>
+                            ⇩ S{si+1}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
         </div>
       )}
 
