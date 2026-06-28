@@ -497,11 +497,11 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                                     className="active:scale-95 transition-all flex-shrink-0 rounded-lg px-1.5 py-0.5 -mr-1"
                                     style={{
                                       color: stageComplete ? '#2ecc71' : completed < total ? colours[si] : '#ff6b9d',
-                                      background: completed > done ? 'rgba(255,107,157,0.08)' : 'transparent',
-                                      border: completed > done ? '1px solid rgba(255,107,157,0.25)' : '1px solid transparent',
+                                      background: !signed && completed > done ? 'rgba(255,107,157,0.08)' : 'transparent',
+                                      border: !signed && completed > done ? '1px solid rgba(255,107,157,0.25)' : '1px solid transparent',
                                     }}
                                   >
-                                    {done}/{total}{completed > done ? ` · ${completed - done} to review ↗` : ''}
+                                    {done}/{total}{!signed && completed > done ? ` · ${completed - done} to review ↗` : ''}
                                   </button>
                                 </div>
                                 <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
