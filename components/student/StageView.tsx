@@ -39,10 +39,11 @@ function extractKeywords(text: string): string[] {
 // Self-assess a written answer against keywords from manual note + task text
 function selfAssess(answer: string, manualNote: string, taskText: string): { hits: string[]; misses: string[]; score: number } {
   const answerLower = answer.toLowerCase()
-  const keywords = [...new Set([...extractKeywords(manualNote), ...extractKeywords(taskText)])]
+  // Cap pool at 10 so scoring reflects the concepts actually shown, not every word extracted
+  const keywords = [...new Set([...extractKeywords(manualNote), ...extractKeywords(taskText)])].slice(0, 10)
   const hits = keywords.filter(k => answerLower.includes(k))
   const misses = keywords.filter(k => !answerLower.includes(k)).slice(0, 4)
-  const score = keywords.length > 0 ? Math.min(100, Math.round((hits.length / Math.max(keywords.length, 1)) * 100)) : 0
+  const score = keywords.length > 0 ? Math.min(100, Math.round((hits.length / keywords.length) * 100)) : 0
   return { hits: hits.slice(0, 6), misses, score }
 }
 
