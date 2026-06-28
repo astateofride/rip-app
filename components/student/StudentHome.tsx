@@ -99,6 +99,10 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
 
   const unreadFromCoach = messages.filter(m => m.from_role === 'coach' && !m.read).length
   const latestCoachMsg = [...messages].reverse().find(m => m.from_role === 'coach' && !m.read)
+  const stagesAwaitingSignoff = [0, 1, 2].filter(si => {
+    const { done, total } = countStageTasks(tasks, si)
+    return done === total && total > 0 && !signoffs.some(s => s.stage_idx === si)
+  })
   const totalTasks = STAGES.reduce((a, s) => a + s.days.reduce((b, d) => b + d.tasks.length, 0), 0)
   const doneTasks = tasks.filter(t => t.completed).length
 
@@ -218,6 +222,30 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
             </button>
           )
         })()}
+
+        {/* ── AWAITING SIGN-OFF ── */}
+        {stagesAwaitingSignoff.length > 0 && (
+          <div className="mb-4 flex flex-col gap-2">
+            {stagesAwaitingSignoff.map(si => {
+              const { done, total } = countStageTasks(tasks, si)
+              const c = COLOURS[si]
+              return (
+                <div key={si} className="rounded-2xl px-4 py-3 flex items-center gap-3"
+                  style={{ background: 'rgba(78,205,196,0.06)', border: '1px solid rgba(78,205,196,0.25)', borderLeft: `4px solid ${c}` }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: c }}>
+                      {STAGES[si].eyebrow} — {STAGES[si].name.replace('\n', ' ')}
+                    </div>
+                    <div className="text-sm font-semibold" style={{ color: '#f0f0eb' }}>
+                      ✓ All {done} tasks submitted — waiting for coach sign-off
+                    </div>
+                  </div>
+                  <div className="text-2xl flex-shrink-0">⏳</div>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* ── PRIMARY CTA ── */}
         {!allComplete && activeStageIdx >= 0 && (() => {
