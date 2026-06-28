@@ -219,6 +219,7 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
         </div>
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-full flex items-center justify-center font-display text-base flex-shrink-0" style={{ background: 'rgba(232,197,71,0.15)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547' }}>{coachInitials}</div>
+          <a href="/coach/preview" className="text-xs font-bold px-3 py-2 rounded-lg" style={{ border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547', background: 'rgba(232,197,71,0.06)', minHeight: 36, display: 'flex', alignItems: 'center' }}>👁 Student View</a>
           <button onClick={signOut} className="text-xs font-bold px-3 py-2 rounded-lg" style={{ border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', background: 'none', minHeight: 36 }}>Sign out</button>
         </div>
       </div>
