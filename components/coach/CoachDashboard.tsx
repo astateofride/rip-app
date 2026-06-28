@@ -394,6 +394,18 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                               <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer" className="text-xs underline" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
                             </>
                           )}
+                          {/* Manual read indicator — coach only, not shown to student */}
+                          <div className="flex items-center gap-2 mt-3 mb-2">
+                            <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: dayDataRow?.manual_read_at ? '#2ecc71' : '#3a3a5c' }}>
+                              📖 Manual read
+                            </div>
+                            {dayDataRow?.manual_read_at
+                              ? <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.2)' }}>
+                                  ✓ {new Date(dayDataRow.manual_read_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                                </span>
+                              : <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'rgba(255,255,255,0.04)', color: '#3a3a5c', border: '1px solid #2a2a45' }}>Not yet</span>
+                            }
+                          </div>
                           <div className="text-[9px] font-bold uppercase tracking-widest mt-3 mb-1" style={{ color: '#7070a0' }}>Coach Note</div>
                           <textarea className="inp" placeholder="Add your coaching note…" defaultValue={remarkRow?.remark ?? ''} style={{ minHeight: 64 }} id={`remark-${rowKey}`} />
                           <button onClick={() => { const ta = document.getElementById(`remark-${rowKey}`) as HTMLTextAreaElement; if (ta) saveRemark(student.id, si, di, ta.value) }}

@@ -79,6 +79,24 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   const [assessments, setAssessments] = useState<Record<string, { hits: string[]; misses: string[]; score: number }>>({})
   const [saving, setSaving] = useState<string | null>(null)
   const [manualPopup, setManualPopup] = useState<ManualPopup | null>(null)
+  const [manualExpanded, setManualExpanded] = useState<Set<number>>(new Set())
+
+  async function expandManual(di: number) {
+    setManualExpanded(prev => { const n = new Set(prev); n.add(di); return n })
+    const dd = getDayData(di)
+    if (!dd?.manual_read_at) {
+      const now = new Date().toISOString()
+      setLocalDayData(prev => {
+        const idx = prev.findIndex(d => d.stage_idx === stageIdx && d.day_idx === di)
+        if (idx >= 0) { const n = [...prev]; n[idx] = { ...n[idx], manual_read_at: now }; return n }
+        return [...prev, { id: `temp-${di}`, student_id: userId, stage_idx: stageIdx, day_idx: di, reflection: null, video_url: null, opened_at: null, manual_read_at: now }]
+      })
+      await supabase.from('day_data').upsert(
+        { student_id: userId, stage_idx: stageIdx, day_idx: di, manual_read_at: now },
+        { onConflict: 'student_id,stage_idx,day_idx' }
+      )
+    }
+  }
 
   const colour = stage.colour
   const signoff = signoffs.find(s => s.stage_idx === stageIdx)
@@ -232,10 +250,23 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                 {isOpen && (
                   <div style={{ borderTop: '1px solid #2a2a45' }}>
 
-                    {/* Manual note */}
-                    <div className="mx-4 mt-4 px-4 py-3 rounded-xl" style={{ background: '#0d0d1a', borderLeft: '3px solid #e8c547' }}>
-                      <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#e8c547' }}>Manual Reference</div>
-                      <div className="text-sm leading-relaxed" style={{ color: '#7070a0' }}>{day.manualNote}</div>
+                    {/* Manual reference — tap to expand, logs read silently */}
+                    <div className="mx-4 mt-4">
+                      <button
+                        onClick={() => manualExpanded.has(di) ? setManualExpanded(prev => { const n = new Set(prev); n.delete(di); return n }) : expandManual(di)}
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all"
+                        style={{ background: '#0d0d1a', border: `1px solid ${manualExpanded.has(di) ? 'rgba(232,197,71,0.4)' : 'rgba(232,197,71,0.15)'}`, borderLeft: '3px solid #e8c547' }}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>📖 Manual Reference</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-widest" style={{ background: 'rgba(232,197,71,0.1)', color: '#e8c547' }}>{day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ?? stage.ref}</span>
+                        </div>
+                        <span style={{ color: '#e8c547', fontSize: 14, transform: manualExpanded.has(di) ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>▾</span>
+                      </button>
+                      {manualExpanded.has(di) && (
+                        <div className="px-4 py-3 rounded-b-xl" style={{ background: '#0a0a18', borderLeft: '3px solid #e8c547', borderRight: '1px solid rgba(232,197,71,0.15)', borderBottom: '1px solid rgba(232,197,71,0.15)' }}>
+                          <p className="text-sm leading-relaxed" style={{ color: '#c0c0d8' }}>{day.manualNote}</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Coach remark */}
