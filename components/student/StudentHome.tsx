@@ -92,6 +92,44 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
   const s3c = isStageComplete(tasks, signoffs, 2)
   const allComplete = pct === 100 && s1c && s2c && s3c
 
+  const [passwordPrompt, setPasswordPrompt] = useState<number | null>(null)
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordError, setPasswordError] = useState(false)
+  const UNLOCK_PASSWORD = 'RIDE2025'
+
+  function stagePct(si: number) {
+    const { done, total } = countStageTasks(tasks, si)
+    return total ? Math.round(done / total * 100) : 0
+  }
+
+  function stageUnlocked(i: number) {
+    if (i === 0) return true
+    return stagePct(i - 1) >= 70
+  }
+
+  function navigateToStage(i: number) {
+    if (onNavigateToStage) onNavigateToStage(i)
+    else router.push(`/pathway/stage/${i}`)
+  }
+
+  function handleStagePress(i: number) {
+    if (i === 0) { navigateToStage(i); return }
+    if (stageUnlocked(i)) { navigateToStage(i); return }
+    setPasswordPrompt(i)
+    setPasswordInput('')
+    setPasswordError(false)
+  }
+
+  function submitPassword() {
+    if (passwordInput.trim().toUpperCase() === UNLOCK_PASSWORD) {
+      const i = passwordPrompt!
+      setPasswordPrompt(null)
+      navigateToStage(i)
+    } else {
+      setPasswordError(true)
+    }
+  }
+
   const activeStageIdx = s3c ? -1 : s2c ? 2 : s1c ? 1 : 0
   const { done: activeDone, total: activeTotal } = activeStageIdx >= 0
     ? countStageTasks(tasks, activeStageIdx)
@@ -300,22 +338,17 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           {STAGES.map((s, i) => {
             const { total, done, pct: sp } = countStageTasks(tasks, i)
             const complete = isStageComplete(tasks, signoffs, i)
-            const unlocked = i === 0 || isStageComplete(tasks, signoffs, i - 1)
-            const isActive = unlocked && !complete
+            const unlocked = stageUnlocked(i)
+            const isActive = !complete
             const c = COLOURS[i]
 
             return (
               <button key={s.id}
-                onClick={() => {
-                  if (!unlocked) return
-                  if (onNavigateToStage) onNavigateToStage(i)
-                  else router.push(`/pathway/stage/${i}`)
-                }}
+                onClick={() => handleStagePress(i)}
                 className="w-full rounded-2xl overflow-hidden text-left transition-all active:scale-[0.98]"
                 style={{
                   background: '#111120',
-                  border: `1px solid ${isActive ? BORDERS[i] : complete ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
-                  opacity: unlocked ? 1 : 0.3,
+                  border: `1px solid ${complete ? BORDERS[i] : unlocked ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
                   borderLeft: `4px solid ${c}`,
                 }}>
                 <div className="px-4 py-4 flex items-center gap-4">
@@ -333,11 +366,11 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
                   </div>
                   <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-display text-xl"
                     style={{
-                      background: complete ? 'rgba(46,204,113,0.12)' : isActive ? GLOWS[i] : 'rgba(255,255,255,0.03)',
-                      color: complete ? '#2ecc71' : isActive ? c : '#8888b0',
-                      border: `1px solid ${complete ? 'rgba(46,204,113,0.3)' : isActive ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
+                      background: complete ? 'rgba(46,204,113,0.12)' : unlocked ? GLOWS[i] : 'rgba(255,255,255,0.03)',
+                      color: complete ? '#2ecc71' : unlocked ? c : '#8888b0',
+                      border: `1px solid ${complete ? 'rgba(46,204,113,0.3)' : unlocked ? BORDERS[i] : 'rgba(255,255,255,0.05)'}`,
                     }}>
-                    {complete ? '✓' : unlocked ? '→' : '🔒'}
+                    {complete ? '✓' : unlocked ? '→' : '🔑'}
                   </div>
                 </div>
               </button>
@@ -380,6 +413,38 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
 
       <p className="text-center text-[10px] uppercase tracking-widest pb-2" style={{ color: '#2a2a4a' }}>BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}</p>
       <BottomNav unreadCoach={unreadFromCoach} />
+
+      {/* Password unlock modal */}
+      {passwordPrompt !== null && (
+        <div className="fixed inset-0 z-[500] flex items-end" style={{ background: 'rgba(0,0,0,0.85)' }} onClick={() => setPasswordPrompt(null)}>
+          <div className="w-full rounded-t-3xl pb-10 px-5 pt-4" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>Early Access</div>
+            <div className="font-display text-3xl mb-1" style={{ color: COLOURS[passwordPrompt], letterSpacing: '0.04em' }}>
+              {STAGES[passwordPrompt].eyebrow.toUpperCase()}
+            </div>
+            <p className="text-sm mb-5" style={{ color: '#7878a8' }}>
+              You're under 70% on the previous stage. Enter your access code to unlock early.
+            </p>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={e => { setPasswordInput(e.target.value); setPasswordError(false) }}
+              onKeyDown={e => e.key === 'Enter' && submitPassword()}
+              placeholder="Access code…"
+              autoFocus
+              className="w-full px-4 py-3 rounded-2xl text-base mb-3 outline-none"
+              style={{ background: '#0c0c18', border: `1px solid ${passwordError ? '#ff6b9d' : 'rgba(255,255,255,0.1)'}`, color: '#f0f0eb' }}
+            />
+            {passwordError && <p className="text-xs mb-3" style={{ color: '#ff6b9d' }}>Incorrect code — check with your coach.</p>}
+            <button onClick={submitPassword}
+              className="w-full py-4 rounded-2xl font-display text-xl tracking-widest active:scale-[0.98] transition-all"
+              style={{ background: COLOURS[passwordPrompt], color: '#080810' }}>
+              UNLOCK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
