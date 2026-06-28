@@ -531,9 +531,20 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
         {/* All stage done */}
         {allStageDone && !signoff && (
-          <div className="mx-4 mb-6 p-5 rounded-2xl text-center" style={{ background: 'rgba(78,205,196,0.05)', border: '1px solid rgba(78,205,196,0.2)' }}>
-            <div className="font-display text-3xl mb-1" style={{ color: '#4ecdc4', letterSpacing: '0.05em' }}>STAGE COMPLETE</div>
-            <p className="text-sm" style={{ color: '#9898c0' }}>Waiting for your coach to sign off. Keep training!</p>
+          <div className="mx-4 mb-6 p-5 rounded-2xl text-center flex flex-col gap-4" style={{ background: 'rgba(78,205,196,0.05)', border: '1px solid rgba(78,205,196,0.2)' }}>
+            <div>
+              <div className="font-display text-3xl mb-1" style={{ color: '#4ecdc4', letterSpacing: '0.05em' }}>STAGE COMPLETE</div>
+              <p className="text-sm" style={{ color: '#9898c0' }}>Waiting for your coach to sign off. Keep training!</p>
+            </div>
+            {stageIdx < 2 && (
+              <button
+                onClick={() => onBack ? onBack() : router.push(`/pathway/stage/${stageIdx + 1}`)}
+                className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}
+              >
+                GO TO NEXT SECTION →
+              </button>
+            )}
           </div>
         )}
       </div>
