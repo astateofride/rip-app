@@ -305,7 +305,6 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
           <div className="absolute inset-y-0 rounded-full transition-all duration-300"
             style={{ left: `${(activeTaskFlat / flatTasks.length) * 100}%`, width: `${(1 / flatTasks.length) * 100}%`, background: colour, opacity: 0.9 }} />
         </div>
-        </div>
       </div>
 
       {/* MAIN CONTENT */}
