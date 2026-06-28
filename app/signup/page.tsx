@@ -83,18 +83,25 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ background: '#080810' }}>
-      <div className="w-full max-w-sm">
-        <div className="mb-6">
-          <h1 className="font-display text-5xl tracking-wide" style={{ color: '#e8c547', lineHeight: 0.92 }}>
-            BEGIN YOUR<br />PATHWAY
-          </h1>
-          <p className="text-xs uppercase tracking-widest mt-3 mb-5" style={{ color: '#7070a0' }}>
-            RIDE Instructor Pathway · Ver 1.0
-          </p>
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12" style={{ background: '#080810' }}>
+      <div className="w-full flex flex-col gap-6" style={{ maxWidth: 420 }}>
 
+        {/* Brand — matches login */}
+        <div style={{ paddingTop: 8, paddingBottom: 4 }}>
+          <div className="font-display leading-none mb-3" style={{ letterSpacing: '0.03em' }}>
+            <div style={{ fontSize: 72, color: '#f0f0eb', lineHeight: 0.88 }}>RIDE</div>
+            <div style={{ fontSize: 72, color: '#e8c547', lineHeight: 0.88 }}>INSTRUCTOR</div>
+            <div style={{ fontSize: 72, color: '#f0f0eb', lineHeight: 0.88 }}>PATHWAY</div>
+          </div>
+          <div style={{ width: 48, height: 3, background: '#e8c547', borderRadius: 2, marginBottom: 16 }} />
+          <p className="text-sm leading-relaxed" style={{ color: '#4a4a70' }}>
+            Create your account to begin the RIDE certification pathway.
+          </p>
+        </div>
+
+        <div>
           {/* Instruction set */}
-          <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="rounded-2xl p-4 flex flex-col gap-3 mb-6" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
             <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>Before you start</div>
 
             <div className="flex gap-3">
@@ -145,18 +152,20 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSignup} className="flex flex-col gap-4">
+        <form onSubmit={handleSignup} className="flex flex-col gap-4 rounded-3xl p-5"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+
           <div className="flex gap-2">
             {(['student', 'coach'] as const).map(r => (
               <button
                 key={r}
                 type="button"
                 onClick={() => update('role', r)}
-                className="flex-1 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all"
+                className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
                 style={{
-                  background: form.role === r ? '#e8c547' : '#111120',
+                  background: form.role === r ? '#e8c547' : 'rgba(255,255,255,0.04)',
                   color: form.role === r ? '#080810' : '#7070a0',
-                  border: form.role === r ? '1px solid #e8c547' : '1px solid rgba(255,255,255,0.1)',
+                  border: form.role === r ? '1px solid #e8c547' : '1px solid rgba(255,255,255,0.07)',
                 }}
               >
                 {r === 'student' ? '🎓 Student' : '🏆 Coach'}
@@ -165,52 +174,58 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>Full name</label>
-            <input className="inp" value={form.name} onChange={e => update('name', e.target.value)} placeholder="Your name" required />
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Full name</label>
+            <input className="inp" value={form.name} onChange={e => update('name', e.target.value)} placeholder="Your name" required style={{ fontSize: 16 }} />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>Email</label>
-            <input type="email" className="inp" value={form.email} onChange={e => update('email', e.target.value)} placeholder="you@example.com" required />
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Email</label>
+            <input type="email" className="inp" value={form.email} onChange={e => update('email', e.target.value)} placeholder="you@example.com" required style={{ fontSize: 16 }} />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>Location / Club</label>
-            <input className="inp" value={form.location} onChange={e => update('location', e.target.value)} placeholder="Your studio or club" />
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Location / Club</label>
+            <input className="inp" value={form.location} onChange={e => update('location', e.target.value)} placeholder="Your studio or club" style={{ fontSize: 16 }} />
           </div>
 
           {form.role === 'student' && (
             <div>
-              <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>
-                Coach email <span style={{ color: '#7070a0', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>
+                Coach email <span style={{ color: '#3a3a5c', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
               </label>
-              <input type="email" className="inp" value={form.coachEmail} onChange={e => update('coachEmail', e.target.value)} placeholder="coach@astateofride.com" />
+              <input type="email" className="inp" value={form.coachEmail} onChange={e => update('coachEmail', e.target.value)} placeholder="coach@astateofride.com" style={{ fontSize: 16 }} />
             </div>
           )}
 
           <div>
-            <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>Password</label>
-            <input type="password" className="inp" value={form.password} onChange={e => update('password', e.target.value)} placeholder="Min 8 characters" required minLength={8} />
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Password</label>
+            <input type="password" className="inp" value={form.password} onChange={e => update('password', e.target.value)} placeholder="Min 8 characters" required minLength={8} style={{ fontSize: 16 }} />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: '#7070a0' }}>Confirm password</label>
-            <input type="password" className="inp" value={form.confirmPassword} onChange={e => update('confirmPassword', e.target.value)} placeholder="Repeat password" required />
+            <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4a4a70' }}>Confirm password</label>
+            <input type="password" className="inp" value={form.confirmPassword} onChange={e => update('confirmPassword', e.target.value)} placeholder="Repeat password" required style={{ fontSize: 16 }} />
           </div>
 
-          {error && <p className="text-sm" style={{ color: '#ff6b9d' }}>{error}</p>}
+          {error && (
+            <div className="px-4 py-3 rounded-xl text-sm font-semibold" style={{ background: 'rgba(255,107,157,0.08)', border: '1px solid rgba(255,107,157,0.25)', color: '#ff6b9d' }}>
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="font-display text-xl tracking-widest py-4 rounded-xl mt-2 transition-opacity disabled:opacity-40"
-            style={{ background: '#f0f0eb', color: '#080810', letterSpacing: '0.06em' }}
+            className="font-display tracking-widest py-4 rounded-2xl transition-all disabled:opacity-30 active:scale-[0.98]"
+            style={{ fontSize: 24, background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}
           >
-            {loading ? 'CREATING…' : 'CREATE ACCOUNT'}
+            {loading ? 'CREATING…' : 'CREATE ACCOUNT →'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm" style={{ color: '#7070a0' }}>
+        <p className="text-center text-sm" style={{ color: '#7070a0' }}>
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold" style={{ color: '#e8c547' }}>Sign in</Link>
+          <Link href="/login" className="font-semibold" style={{ color: '#e8c547' }}>Sign in →</Link>
         </p>
+
+        <p className="text-center text-[10px] uppercase tracking-widest" style={{ color: '#2a2a3c' }}>BETA · VER 1.0</p>
       </div>
     </div>
   )
