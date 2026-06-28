@@ -60,7 +60,7 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
           <button
             onClick={() => setShowInstructions(true)}
             className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all active:scale-95"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: '#4a4a70' }}
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: '#7878a8' }}
           >
             ? Help
           </button>
@@ -69,7 +69,7 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
             className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0"
             style={mode === 'coach'
               ? { background: '#e8c547', color: '#080810' }
-              : { background: 'transparent', color: '#4a4a70', border: '1px solid rgba(255,255,255,0.08)' }
+              : { background: 'transparent', color: '#7878a8', border: '1px solid rgba(255,255,255,0.08)' }
             }
           >
             {mode}
@@ -83,7 +83,7 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
                     style={{ background: pct >= (i + 1) * 20 ? '#e8c547' : pct > i * 20 ? 'rgba(232,197,71,0.35)' : 'rgba(255,255,255,0.07)' }} />
                 ))}
               </div>
-              <span className="text-[10px] font-bold" style={{ color: '#4a4a70', minWidth: 28, textAlign: 'right' }}>
+              <span className="text-[10px] font-bold" style={{ color: '#7878a8', minWidth: 28, textAlign: 'right' }}>
                 {pct}%
               </span>
             </div>
@@ -104,12 +104,12 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
             <div className="px-6">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#4a4a70' }}>How this works</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>How this works</div>
                   <div className="font-display text-3xl" style={{ color: '#e8c547', letterSpacing: '0.06em' }}>INSTRUCTIONS</div>
                 </div>
                 <button onClick={() => setShowInstructions(false)}
                   className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
-                  style={{ background: 'rgba(255,255,255,0.06)', color: '#7070a0' }}>✕</button>
+                  style={{ background: 'rgba(255,255,255,0.06)', color: '#9898c0' }}>✕</button>
               </div>
 
               <div className="flex flex-col gap-4">
@@ -151,14 +151,14 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
                     <span className="text-lg flex-shrink-0">📁</span>
                     <div>
                       <div className="text-xs font-bold mb-0.5" style={{ color: '#4ecdc4' }}>Google Drive</div>
-                      <div className="text-xs leading-relaxed" style={{ color: '#4a4a70' }}>Record → upload → right-click → Share → "Anyone with the link" → paste link</div>
+                      <div className="text-xs leading-relaxed" style={{ color: '#7878a8' }}>Record → upload → right-click → Share → "Anyone with the link" → paste link</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,107,157,0.07)', border: '1px solid rgba(255,107,157,0.18)' }}>
                     <span className="text-lg flex-shrink-0">▶</span>
                     <div>
                       <div className="text-xs font-bold mb-0.5" style={{ color: '#ff6b9d' }}>YouTube</div>
-                      <div className="text-xs leading-relaxed" style={{ color: '#4a4a70' }}>Upload → set to <strong style={{ color: '#f0f0eb' }}>"Unlisted"</strong> (not Private) → paste link</div>
+                      <div className="text-xs leading-relaxed" style={{ color: '#7878a8' }}>Upload → set to <strong style={{ color: '#f0f0eb' }}>"Unlisted"</strong> (not Private) → paste link</div>
                     </div>
                   </div>
                 </div>
