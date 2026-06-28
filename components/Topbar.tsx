@@ -80,7 +80,7 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
               className="h-full transition-all duration-700"
               style={{
                 width: `${pct}%`,
-                background: pct === 100 ? '#2ecc71' : 'linear-gradient(90deg, #e8c547 0%, #4ecdc4 60%, #ff6b9d 100%)',
+                background: 'linear-gradient(90deg, #ffffff 0%, #3b82f6 20%, #22c55e 40%, #eab308 60%, #f97316 80%, #ef4444 100%)',
               }}
             />
           </div>
