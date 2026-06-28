@@ -70,7 +70,7 @@ function useLiveClock() {
   return time
 }
 
-const COLOURS = ['#e8c547', '#4ecdc4', '#ff6b9d']
+const COLOURS = ['#e8c547', '#4ecdc4', '#c0bfe0']
 const GLOWS = ['rgba(232,197,71,0.18)', 'rgba(78,205,196,0.18)', 'rgba(255,107,157,0.18)']
 const BORDERS = ['rgba(232,197,71,0.4)', 'rgba(78,205,196,0.4)', 'rgba(255,107,157,0.4)']
 
@@ -216,7 +216,7 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           {[
             { label: 'TASKS DONE', value: doneTasks, sub: `/ ${totalTasks}`, colour: '#e8c547' },
             { label: 'COMPLETE', value: `${pct}%`, sub: 'overall', colour: '#4ecdc4' },
-            { label: 'STAGE', value: activeStageIdx >= 0 ? activeStageIdx + 1 : '✓', sub: `of ${STAGES.length}`, colour: '#ff6b9d' },
+            { label: 'STAGE', value: activeStageIdx >= 0 ? activeStageIdx + 1 : '✓', sub: `of ${STAGES.length}`, colour: '#c0bfe0' },
           ].map(card => (
             <div key={card.label} className="rounded-2xl p-3 flex flex-col items-center justify-center"
               style={{ background: '#111120', border: `1px solid rgba(255,255,255,0.06)`, minHeight: 80 }}>
