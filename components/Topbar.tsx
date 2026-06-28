@@ -55,26 +55,21 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
             </div>
           </div>
 
-          {/* Right: help + mode badge */}
+          {/* Right: help (student only) or coach badge */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {mode === 'student' && (
+            {mode === 'student' ? (
               <button
                 onClick={() => setShowInstructions(true)}
-                className="w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all active:scale-95"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', color: '#9898c0', fontSize: 13 }}
+                className="w-9 h-9 rounded-full flex items-center justify-center font-bold transition-all active:scale-95"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', color: '#9898c0', fontSize: 15 }}
               >
                 ?
               </button>
+            ) : (
+              <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full" style={{ background: '#e8c547', color: '#080810' }}>
+                COACH
+              </span>
             )}
-            <span
-              className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0"
-              style={mode === 'coach'
-                ? { background: '#e8c547', color: '#080810' }
-                : { background: 'transparent', color: '#9898c0', border: '1px solid rgba(255,255,255,0.08)' }
-              }
-            >
-              {mode}
-            </span>
           </div>
         </div>
 
