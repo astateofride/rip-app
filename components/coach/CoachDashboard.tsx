@@ -104,10 +104,13 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
   function countTasks(studentId: string, si: number) {
     const total = STAGES[si].days.reduce((a, d) => a + d.tasks.length, 0)
     const stageTasks = allTasks.filter(t => t.student_id === studentId && t.stage_idx === si)
-    // "done" = completed practical tasks OR written tasks with score >= 60
+    // "done" = completed practical tasks OR written tasks with score >= 60 OR coach has remarked on that day
     const done = stageTasks.filter(t => {
       if (!t.completed) return false
-      if (t.answer !== null) return (t.score ?? 0) >= 60
+      if (t.answer !== null) {
+        const coachReviewed = remarks.some(r => r.student_id === studentId && r.stage_idx === si && r.day_idx === t.day_idx)
+        return coachReviewed || (t.score ?? 0) >= 60
+      }
       return true
     }).length
     const completed = stageTasks.filter(t => t.completed).length
