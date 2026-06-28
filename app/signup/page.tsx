@@ -225,7 +225,7 @@ export default function SignupPage() {
           <Link href="/login" className="font-semibold" style={{ color: '#e8c547' }}>Sign in →</Link>
         </p>
 
-        <p className="text-center text-[10px] uppercase tracking-widest" style={{ color: '#2a2a3c' }}>BETA · VER 1.0</p>
+        <p className="text-center text-[10px] uppercase tracking-widest" style={{ color: '#2a2a3c' }}>BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}</p>
       </div>
     </div>
   )
