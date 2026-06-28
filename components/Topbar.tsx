@@ -28,58 +28,59 @@ export default function Topbar({ name, initials, progress, mode = 'student' }: P
   return (
     <>
       <div
-        className="sticky top-0 z-50 flex items-center justify-between px-4 gap-2"
-        style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.08)', height: 52 }}
+        className="sticky top-0 z-50 flex items-center justify-between px-4 gap-3"
+        style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)', height: 62 }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={signOut}
-            className="w-8 h-8 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
-            style={{ background: 'rgba(232,197,71,0.1)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547' }}
+            className="w-9 h-9 rounded-full flex items-center justify-center font-display flex-shrink-0"
+            style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.45)', color: '#e8c547', fontSize: 16 }}
             title={`Sign out ${name ?? ''}`}
           >
             {initials ?? '?'}
           </button>
-          <div className="leading-none">
-            <div className="font-display" style={{ fontSize: 22, color: '#f0f0eb', letterSpacing: '0.08em', lineHeight: 1 }}>
-              RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-0.5 h-9 rounded-full flex-shrink-0" style={{ background: '#e8c547' }} />
+            <div className="leading-none">
+              <div className="font-display" style={{ fontSize: 26, color: '#f0f0eb', letterSpacing: '0.07em', lineHeight: 1 }}>
+                RIDE <span style={{ color: '#e8c547' }}>INSTRUCTOR</span> PATHWAY
+              </div>
+              <div className="text-[9px] font-bold tracking-widest mt-1" style={{ color: '#3a3a5c', letterSpacing: '0.14em' }}>
+                {mode === 'coach' ? '— COACH PORTAL —' : 'BETA · VER 1.0'}
+              </div>
             </div>
-            <div className="text-[10px] font-bold tracking-widest mt-0.5" style={{ color: '#4a4a70', letterSpacing: '0.12em' }}>BETA · VER 1.0</div>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Instructions button — always visible */}
           <button
             onClick={() => setShowInstructions(true)}
-            className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg transition-all active:scale-95"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#7070a0' }}
+            className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: '#4a4a70' }}
           >
             ? Help
           </button>
 
           <span
-            className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+            className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0"
             style={mode === 'coach'
-              ? { background: '#e8c547', color: '#080810', border: '1px solid #e8c547' }
-              : { background: 'transparent', color: '#7070a0', border: '1px solid rgba(255,255,255,0.08)' }
+              ? { background: '#e8c547', color: '#080810' }
+              : { background: 'transparent', color: '#4a4a70', border: '1px solid rgba(255,255,255,0.08)' }
             }
           >
             {mode}
           </span>
 
           {mode === 'student' && (
-            <div className="flex items-center gap-1">
-              <div className="flex rounded-full overflow-hidden gap-px" style={{ width: 80, height: 5, background: 'rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center gap-1.5">
+              <div className="flex rounded-full overflow-hidden gap-px" style={{ width: 72, height: 4, background: 'rgba(255,255,255,0.07)' }}>
                 {segs.map(i => (
-                  <div
-                    key={i}
-                    className="flex-1 h-full transition-all duration-300"
-                    style={{ background: pct >= (i + 1) * 20 ? '#e8c547' : (pct > i * 20 ? 'rgba(232,197,71,0.45)' : 'rgba(255,255,255,0.08)') }}
-                  />
+                  <div key={i} className="flex-1 h-full transition-all duration-300"
+                    style={{ background: pct >= (i + 1) * 20 ? '#e8c547' : pct > i * 20 ? 'rgba(232,197,71,0.35)' : 'rgba(255,255,255,0.07)' }} />
                 ))}
               </div>
-              <span className="text-[9px] tracking-wide" style={{ color: '#7070a0', minWidth: 24, textAlign: 'right' }}>
+              <span className="text-[10px] font-bold" style={{ color: '#4a4a70', minWidth: 28, textAlign: 'right' }}>
                 {pct}%
               </span>
             </div>
