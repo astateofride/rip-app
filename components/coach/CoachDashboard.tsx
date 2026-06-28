@@ -443,101 +443,129 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                   </div>
                 </div>
 
-                {/* Day title */}
-                <div className="rounded-2xl px-4 py-4" style={{ background: '#111120', border: `1px solid rgba(255,255,255,0.06)`, borderLeft: `4px solid ${colour}` }}>
-                  <div className="font-display text-2xl leading-tight mb-1" style={{ color: colour, letterSpacing: '0.04em' }}>{day.title}</div>
-                  <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>
-                    {completedTasks.length}/{day.tasks.length} tasks · {stageNames[si]}
-                    {dayDataRow?.manual_read_at ? ' · 📖 manual read' : ''}
-                    {existingRemark ? ' · ✓ note left' : ''}
+                {/* Day title card */}
+                <div className="rounded-2xl px-4 py-4" style={{ background: '#111120', borderLeft: `4px solid ${colour}`, border: `1px solid rgba(255,255,255,0.06)`, borderLeftWidth: 4, borderLeftColor: colour }}>
+                  <div className="font-display text-2xl leading-tight mb-2" style={{ color: colour, letterSpacing: '0.04em' }}>{day.title}</div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest" style={{ background: 'rgba(255,255,255,0.06)', color: '#9898c0' }}>
+                      {completedTasks.length}/{day.tasks.length} tasks done
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest`}
+                      style={dayDataRow?.manual_read_at
+                        ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.3)' }
+                        : { background: 'rgba(255,255,255,0.04)', color: '#5a5a7a', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      📖 {dayDataRow?.manual_read_at ? 'Manual read ✓' : 'Manual NOT read'}
+                    </span>
+                    {existingRemark && (
+                      <span className="text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>
+                        ✓ Note saved
+                      </span>
+                    )}
                   </div>
                 </div>
 
+                {/* Written answers — main content */}
+                {writtenAnswers.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
+                      <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>Written Answers</div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,107,157,0.12)', color: '#ff6b9d' }}>{writtenAnswers.length}</span>
+                    </div>
+                    {writtenAnswers.map(item => {
+                      if (!item) return null
+                      const { ti, task, prog, needsWork } = item
+                      return (
+                        <div key={ti} className="rounded-2xl overflow-hidden" style={{ background: '#0c0c18', border: `1px solid ${needsWork ? 'rgba(255,107,157,0.35)' : 'rgba(46,204,113,0.25)'}` }}>
+                          {/* Question */}
+                          <div className="px-4 pt-3 pb-2" style={{ borderBottom: `1px solid ${needsWork ? 'rgba(255,107,157,0.12)' : 'rgba(46,204,113,0.1)'}` }}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>Task {ti + 1} — Question</span>
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={needsWork
+                                ? { background: 'rgba(255,107,157,0.15)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }
+                                : { background: 'rgba(46,204,113,0.12)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.3)' }}>
+                                {prog.score ?? 0}% {needsWork ? '· needs work' : '· passed'}
+                              </span>
+                            </div>
+                            <p className="text-sm leading-snug font-medium" style={{ color: '#c0c0d8' }}>{task.text}</p>
+                          </div>
+                          {/* Answer */}
+                          <div className="px-4 py-3">
+                            <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: needsWork ? '#ff6b9d' : '#2ecc71' }}>Student's Answer</div>
+                            <p className="text-base leading-relaxed" style={{ color: '#f0f0eb' }}>{prog.answer}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-xl px-4 py-3 text-sm" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.05)', color: '#5a5a7a' }}>
+                    No written answers for this day
+                  </div>
+                )}
+
                 {/* Video submission */}
                 {dayDataRow?.video_url && (
-                  <div className="rounded-xl px-4 py-3" style={{ background: '#0c0c18', border: '1px solid rgba(78,205,196,0.2)' }}>
-                    <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#4ecdc4' }}>▶ Video Submission</div>
-                    <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold underline truncate block" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
+                  <div className="rounded-xl px-4 py-3" style={{ background: '#0c0c18', border: '1px solid rgba(78,205,196,0.25)' }}>
+                    <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#4ecdc4' }}>▶ VIDEO SUBMISSION</div>
+                    <a href={dayDataRow.video_url} target="_blank" rel="noopener noreferrer"
+                      className="text-sm font-semibold underline truncate block" style={{ color: '#4ecdc4' }}>{dayDataRow.video_url}</a>
                   </div>
                 )}
 
                 {/* Student reflection */}
                 {dayDataRow?.reflection && (
-                  <div className="rounded-xl px-4 py-3" style={{ background: '#0c0c18', border: '1px solid rgba(255,255,255,0.06)', borderLeft: '2px solid rgba(255,255,255,0.12)' }}>
-                    <div className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#8888b0' }}>Student Reflection</div>
-                    <p className="text-sm italic leading-relaxed" style={{ color: '#c0c0d8' }}>{dayDataRow.reflection}</p>
-                  </div>
-                )}
-
-                {/* Written answers */}
-                {writtenAnswers.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>Written Answers</div>
-                    {writtenAnswers.map(item => {
-                      if (!item) return null
-                      const { ti, task, prog, needsWork } = item
-                      return (
-                        <div key={ti} className="rounded-xl p-4" style={{ background: '#0c0c18', border: `1px solid ${needsWork ? 'rgba(255,107,157,0.3)' : 'rgba(46,204,113,0.2)'}` }}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>Task {ti + 1}</span>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={needsWork
-                              ? { background: 'rgba(255,107,157,0.12)', color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.3)' }
-                              : { background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>
-                              {prog.score ?? 0}% {needsWork ? '· needs work' : '✓ passed'}
-                            </span>
-                          </div>
-                          <p className="text-[11px] leading-snug mb-2.5" style={{ color: '#6868a0' }}>{task.text}</p>
-                          <p className="text-sm leading-relaxed" style={{ color: needsWork ? '#f0f0eb' : '#a0a0c0' }}>{prog.answer}</p>
-                        </div>
-                      )
-                    })}
+                  <div className="rounded-xl px-4 py-3" style={{ background: '#0c0c18', borderLeft: '3px solid rgba(255,255,255,0.15)' }}>
+                    <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>STUDENT REFLECTION</div>
+                    <p className="text-sm italic leading-relaxed" style={{ color: '#d4d4ea' }}>{dayDataRow.reflection}</p>
                   </div>
                 )}
 
                 {/* Incomplete tasks still to do */}
                 {incompleteTasks.length > 0 && (
-                  <div className="flex flex-col gap-1.5">
-                    <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#8888b0' }}>Still to complete</div>
-                    {incompleteTasks.map((task, i) => (
-                      <div key={i} className="flex items-start gap-3 px-3 py-2.5 rounded-xl" style={{ background: '#0c0c18', border: '1px solid #1a1a2e', opacity: 0.7 }}>
-                        <div className="w-5 h-5 rounded-full border flex-shrink-0 mt-0.5" style={{ borderColor: '#2a2a4a' }} />
-                        <p className="text-sm leading-snug" style={{ color: '#9898c0' }}>{task.text}</p>
-                      </div>
-                    ))}
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#8888b0' }}>Still to complete</div>
+                    <div className="flex flex-col gap-1.5">
+                      {incompleteTasks.map((task, i) => (
+                        <div key={i} className="flex items-start gap-3 px-3 py-2.5 rounded-xl" style={{ background: '#0c0c18', border: '1px solid #1a1a2e' }}>
+                          <div className="w-5 h-5 rounded-full border flex-shrink-0 mt-0.5" style={{ borderColor: '#2a2a4a' }} />
+                          <p className="text-sm leading-snug" style={{ color: '#9898c0' }}>{task.text}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {/* Coach note */}
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#8888b0' }}>
-                    {existingRemark ? 'Your note (edit to update)' : 'Leave a coaching note'}
-                  </div>
-                  <textarea
-                    className="inp"
-                    value={queueNote}
-                    onChange={e => setQueueNote(e.target.value)}
-                    placeholder="What feedback do you have for this day?…"
-                    style={{ minHeight: 90, fontSize: 15 }}
-                  />
-                </div>
-
                 {/* Sign off prompt */}
                 {stageComplete && (
-                  <div className="rounded-2xl px-4 py-4 flex items-center justify-between gap-3" style={{ background: 'rgba(46,204,113,0.06)', border: '1px solid rgba(46,204,113,0.25)' }}>
+                  <div className="rounded-2xl px-4 py-4 flex items-center justify-between gap-3" style={{ background: 'rgba(46,204,113,0.07)', border: '1px solid rgba(46,204,113,0.3)' }}>
                     <div>
-                      <div className="text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: '#2ecc71' }}>Stage {si + 1} complete</div>
-                      <div className="text-sm" style={{ color: '#9898c0' }}>Ready to sign off {qs.name.split(' ')[0]}?</div>
+                      <div className="text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: '#2ecc71' }}>Stage {si + 1} complete!</div>
+                      <div className="text-sm" style={{ color: '#c0c0d8' }}>Ready to sign off {qs.name.split(' ')[0]}?</div>
                     </div>
                     <button onClick={() => { setTab('overview'); setSignoffModal({ stageIdx: si, studentId: qs.id }) }}
-                      className="text-xs font-bold px-4 py-2.5 rounded-xl flex-shrink-0 active:scale-95 transition-all"
+                      className="text-sm font-bold px-4 py-3 rounded-xl flex-shrink-0 active:scale-95 transition-all"
                       style={{ background: 'rgba(46,204,113,0.15)', border: '1px solid rgba(46,204,113,0.4)', color: '#2ecc71' }}>
                       SIGN OFF →
                     </button>
                   </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex flex-col gap-3 mt-auto pt-2">
+                {/* Coach note */}
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: existingRemark ? '#2ecc71' : '#9898c0' }}>
+                    {existingRemark ? '✓ Your note (tap to edit)' : 'Leave a coaching note'}
+                  </div>
+                  <textarea
+                    className="inp"
+                    value={queueNote}
+                    onChange={e => setQueueNote(e.target.value)}
+                    placeholder="Feedback for this day…"
+                    style={{ minHeight: 80, fontSize: 15 }}
+                  />
+                </div>
+
+                {/* Sticky action buttons */}
+                <div className="flex flex-col gap-3 pb-2">
                   <button
                     onClick={saveAndNext}
                     disabled={saving === savingKey}
@@ -547,9 +575,9 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                   </button>
                   <button
                     onClick={skip}
-                    className="w-full font-display text-lg tracking-wide py-3.5 rounded-2xl active:scale-[0.98] transition-all"
+                    className="w-full font-display text-lg tracking-wide py-4 rounded-2xl active:scale-[0.98] transition-all"
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.04em' }}>
-                    {queueIdx + 1 >= reviewQueue.length ? 'SKIP & FINISH' : 'SKIP →'}
+                    {queueIdx + 1 >= reviewQueue.length ? 'SKIP & FINISH' : 'SKIP — COME BACK LATER'}
                   </button>
                 </div>
               </div>
