@@ -16,6 +16,8 @@ interface Props {
   remarks: CoachRemark[]
   signoffs: StageSignoff[]
   unreadCount: number
+  previewMode?: boolean
+  onBack?: () => void
 }
 
 // Tasks that need written answers (not just a checkbox)
@@ -70,7 +72,7 @@ function renderWithSectionLinks(text: string, onSection: (match: string) => void
   })
 }
 
-export default function StageView({ stageIdx, userId, tasks, dayData, remarks, signoffs, unreadCount }: Props) {
+export default function StageView({ stageIdx, userId, tasks, dayData, remarks, signoffs, unreadCount, previewMode, onBack }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const stage = STAGES[stageIdx]
@@ -243,15 +245,15 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
       {/* STAGE HEADER */}
       <div style={{ background: '#080810', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3 px-4 py-3" style={{ maxWidth: 480, margin: '0 auto' }}>
-          <button onClick={() => router.push('/pathway')}
+          <button onClick={() => onBack ? onBack() : router.push('/pathway')}
             style={{ color: '#9898c0', minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>←</button>
           <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#7878a8' }}>{stage.eyebrow}</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>{stage.eyebrow}</div>
             <div className="font-display leading-none" style={{ fontSize: 20, color: colour, letterSpacing: '0.04em' }}>{stage.name}</div>
           </div>
           <div className="text-right flex-shrink-0">
             <div className="font-display text-xl" style={{ color: overallPct() === 100 ? '#2ecc71' : colour }}>{overallPct()}%</div>
-            <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#7878a8' }}>
+            <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>
               {localTasks.filter(t => t.stage_idx === stageIdx && t.completed).length}/{stage.days.reduce((a, d) => a + d.tasks.length, 0)} tasks
             </div>
           </div>
@@ -302,7 +304,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
               {String(dayNum).padStart(2, '0')}
             </div>
             <div className="mb-1 flex-1 min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>Day {dayNum} · {day.focus}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>Day {dayNum} · {day.focus}</div>
               <div className="font-display leading-tight" style={{ fontSize: 26, color: '#f0f0eb', letterSpacing: '0.02em' }}>{day.title}</div>
             </div>
           </div>
@@ -312,7 +314,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
               <div key={ti} className="h-1.5 flex-1 rounded-full transition-all duration-500"
                 style={{ background: getTask(di, ti)?.completed ? colour : '#1a1a2e', maxWidth: 36 }} />
             ))}
-            <span className="text-xs font-bold ml-2 flex-shrink-0" style={{ color: allDayDone ? '#2ecc71' : '#7878a8' }}>{taskCount}/{day.tasks.length}</span>
+            <span className="text-xs font-bold ml-2 flex-shrink-0" style={{ color: allDayDone ? '#2ecc71' : '#9898c0' }}>{taskCount}/{day.tasks.length}</span>
           </div>
         </div>
 
@@ -340,7 +342,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                 <div className="text-sm font-bold uppercase tracking-widest" style={{ color: '#e8c547' }}>
                   {dd?.manual_read_at ? 'Manual Reference' : 'Read This First'}
                 </div>
-                <div className="text-[10px] mt-0.5" style={{ color: '#7878a8' }}>{day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ?? stage.ref}</div>
+                <div className="text-[10px] mt-0.5" style={{ color: '#9898c0' }}>{day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ?? stage.ref}</div>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -350,7 +352,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
           </button>
           {manualExpanded.has(di) && (
             <div className="px-5 py-4 rounded-b-2xl -mt-2" style={{ background: '#0a0a18', border: '2px solid #e8c547', borderTop: 'none' }}>
-              <p className="text-sm leading-relaxed" style={{ color: '#c0c0d8' }}>{day.manualNote}</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#d4d4ea' }}>{day.manualNote}</p>
             </div>
           )}
         </div>
@@ -379,14 +381,14 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                   style={{ background: 'rgba(46,204,113,0.05)', border: '1px solid rgba(46,204,113,0.18)' }}>
                   <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold" style={{ background: '#2ecc71', color: '#080810' }}>✓</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate" style={{ color: '#7878a8' }}>{task.text}</p>
+                    <p className="text-sm truncate" style={{ color: '#9898c0' }}>{task.text}</p>
                     {written && prog?.score !== null && (
                       <div className="text-[10px] mt-0.5 font-bold" style={{ color: (prog?.score ?? 0) >= 60 ? '#2ecc71' : '#e8c547' }}>
                         Score: {prog?.score}% {(prog?.score ?? 0) >= 60 ? '✓' : '— tap to improve'}
                       </div>
                     )}
                   </div>
-                  {written && <span className="text-[10px] font-bold uppercase tracking-widest flex-shrink-0" style={{ color: '#7878a8' }}>edit</span>}
+                  {written && <span className="text-[10px] font-bold uppercase tracking-widest flex-shrink-0" style={{ color: '#9898c0' }}>edit</span>}
                 </button>
               )
             }
@@ -399,7 +401,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: '#2ecc71', color: '#080810' }}>✓</div>
                     <p className="text-sm flex-1 leading-snug" style={{ color: '#9898c0' }}>{task.text}</p>
                     <button onClick={() => setExpandedTasks(prev => { const n = new Set(prev); n.delete(key); return n })}
-                      className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ color: '#7878a8', background: 'rgba(255,255,255,0.05)' }}>▲</button>
+                      className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ color: '#9898c0', background: 'rgba(255,255,255,0.05)' }}>▲</button>
                   </div>
                   <div className="px-4 pb-4">
                     {(assessment ? assessment.score < 60 : (prog?.score ?? 100) < 60) && (
@@ -445,7 +447,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                   <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: colour, color: '#080810', letterSpacing: '0.08em' }}>YOUR TURN</div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#7878a8' }}>Task {ti + 1} of {day.tasks.length}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9898c0' }}>Task {ti + 1} of {day.tasks.length}</span>
                       <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto flex-shrink-0"
                         style={written
                           ? { background: 'rgba(78,205,196,0.12)', color: '#4ecdc4', border: '1px solid rgba(78,205,196,0.25)' }
@@ -456,7 +458,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                     <p className="text-base leading-relaxed font-medium" style={{ color: '#f0f0eb' }}>
                       {renderWithSectionLinks(task.text, () => setManualPopup({ ref: task.ref, note: day.manualNote, pageRef: task.ref }))}
                     </p>
-                    <div className="text-[10px] font-bold mt-1" style={{ color: '#7878a8' }}>{task.ref}</div>
+                    <div className="text-[10px] font-bold mt-1" style={{ color: '#9898c0' }}>{task.ref}</div>
                   </div>
                   <div className="p-4">
                     {written ? (
@@ -488,9 +490,9 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             /* ── PENDING / UPCOMING TASK ── */
             return (
               <div key={ti} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
-                style={{ background: '#0c0c18', border: '1px solid #1a1a2e', opacity: 0.45 }}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-display text-sm" style={{ background: '#1a1a2e', color: '#7878a8' }}>{ti + 1}</div>
-                <p className="text-sm leading-snug" style={{ color: '#7878a8' }}>{task.text}</p>
+                style={{ background: '#0c0c18', border: '1px solid #1a1a2e', opacity: 0.55 }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-display text-sm" style={{ background: '#1a1a2e', color: '#b0b0cc' }}>{ti + 1}</div>
+                <p className="text-sm leading-snug" style={{ color: '#b0b0cc' }}>{task.text}</p>
               </div>
             )
           })}
@@ -508,19 +510,21 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
         <div className="mx-4 mb-5 rounded-2xl overflow-hidden" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="px-4 py-4 flex flex-col gap-4">
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Video Link (optional)</div>
+              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Video Link (optional)</div>
               <input type="url" className="inp" placeholder="https://youtube.com/..." defaultValue={dd?.video_url ?? ''} onBlur={e => saveField(di, 'video_url', e.target.value)} style={{ fontSize: 15 }} />
             </div>
             <div>
-              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Reflection for this day</div>
+              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Reflection for this day</div>
               <textarea className="inp" placeholder="What clicked? What felt hard? What surprised you?" defaultValue={dd?.reflection ?? ''} onBlur={e => saveField(di, 'reflection', e.target.value)} style={{ minHeight: 80, fontSize: 15 }} />
             </div>
-            <button onClick={() => router.push(`/pathway/chat?stage=${stageIdx}&day=${di}`)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all active:scale-[0.98]"
-              style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
-              <span style={{ color: '#e8c547' }}>💬</span>
-              <span className="text-sm font-bold" style={{ color: '#e8c547' }}>Ask your coach about this day</span>
-            </button>
+            {!previewMode && (
+              <button onClick={() => router.push(`/pathway/chat?stage=${stageIdx}&day=${di}`)}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all active:scale-[0.98]"
+                style={{ background: 'rgba(232,197,71,0.06)', border: '1px solid rgba(232,197,71,0.2)' }}>
+                <span style={{ color: '#e8c547' }}>💬</span>
+                <span className="text-sm font-bold" style={{ color: '#e8c547' }}>Ask your coach about this day</span>
+              </button>
+            )}
             {isLastDay && (
               <div className="px-4 py-3 rounded-xl text-sm font-medium"
                 style={signoff
@@ -564,7 +568,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>Manual Reference</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>Manual Reference</div>
                 <div className="font-display text-2xl leading-none" style={{ color: '#e8c547', letterSpacing: '0.04em' }}>{manualPopup.ref}</div>
               </div>
               <button onClick={() => setManualPopup(null)} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
@@ -573,7 +577,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             <div className="rounded-2xl p-4" style={{ background: '#0c0c18', borderLeft: '3px solid #e8c547' }}>
               <p className="text-sm leading-relaxed" style={{ color: '#f0f0eb' }}>{manualPopup.note}</p>
             </div>
-            <p className="text-xs mt-4 text-center" style={{ color: '#60608a' }}>Open your physical manual to {manualPopup.pageRef}</p>
+            <p className="text-xs mt-4 text-center" style={{ color: '#8888b0' }}>Open your physical manual to {manualPopup.pageRef}</p>
           </div>
         </div>
       )}
@@ -594,7 +598,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                 </div>
               ) : (
                 <>
-                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#7878a8' }}>
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>
                     Stage {stageIdx + 1} · Day {stageIdx * 10 + coachPrompt.di + 1}
                   </div>
                   <div className="font-display text-3xl mb-2" style={{ color: '#e8c547', letterSpacing: '0.05em', lineHeight: 1.1 }}>
@@ -603,7 +607,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                   <p className="text-sm leading-relaxed mb-1" style={{ color: '#f0f0eb' }}>
                     You've knocked out <strong style={{ color: '#e8c547' }}>{coachPrompt.done} of {coachPrompt.total}</strong> tasks today. You can keep going now, or ping your coach to check in on where you're at before you push on.
                   </p>
-                  <p className="text-xs mb-5" style={{ color: '#7878a8' }}>
+                  <p className="text-xs mb-5" style={{ color: '#9898c0' }}>
                     Want to finish the rest first? No pressure — your progress is saved.
                   </p>
                   <div className="flex flex-col gap-3">
@@ -630,20 +634,21 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
         </div>
       )}
 
-      {/* Floating chat */}
-      <button onClick={() => router.push('/pathway/chat')} className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center"
-        style={{ background: '#e8c547', boxShadow: '0 4px 20px rgba(232,197,71,0.35)', zIndex: 200 }}>
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#080810" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: '#ff6b9d', color: '#fff' }}>
-            {unreadCount}
-          </span>
-        )}
-      </button>
+      {!previewMode && (
+        <button onClick={() => router.push('/pathway/chat')} className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center"
+          style={{ background: '#e8c547', boxShadow: '0 4px 20px rgba(232,197,71,0.35)', zIndex: 200 }}>
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#080810" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: '#ff6b9d', color: '#fff' }}>
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      )}
 
-      <BottomNav unreadCoach={unreadCount} />
+      {!previewMode && <BottomNav unreadCoach={unreadCount} />}
     </div>
   )
 }

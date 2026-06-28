@@ -1,17 +1,32 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useEffect, useState } from 'react'
 import StudentHome from '@/components/student/StudentHome'
+import StageView from '@/components/student/StageView'
 import type { Profile } from '@/lib/types'
+import { createClient } from '@/lib/supabase/client'
 
-export default async function CoachPreviewPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+export default function CoachPreviewPage() {
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [activeStage, setActiveStage] = useState<number | null>(null)
+  const supabase = createClient()
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-  if (!profile) return null
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
+        if (data) setProfile({ ...data as Profile, role: 'student' })
+      })
+    })
+  }, [])
 
-  // Render student pathway with empty data so coach sees the full UX
-  const previewProfile: Profile = { ...profile as Profile, role: 'student' }
+  if (!profile) {
+    return (
+      <div style={{ background: '#080810', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#9898c0', fontSize: 14 }}>Loading preview…</div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -21,22 +36,46 @@ export default async function CoachPreviewPage() {
         <div className="font-display text-sm tracking-widest" style={{ letterSpacing: '0.1em' }}>
           👁 PREVIEW — STUDENT VIEW
         </div>
-        <a href="/coach"
-          className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg"
-          style={{ background: 'rgba(0,0,0,0.15)', color: '#080810' }}>
-          ← EXIT
-        </a>
+        <div className="flex items-center gap-2">
+          {activeStage !== null && (
+            <button onClick={() => setActiveStage(null)}
+              className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg"
+              style={{ background: 'rgba(0,0,0,0.12)', color: '#080810' }}>
+              ← Home
+            </button>
+          )}
+          <a href="/coach"
+            className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg"
+            style={{ background: 'rgba(0,0,0,0.15)', color: '#080810' }}>
+            Exit
+          </a>
+        </div>
       </div>
-      {/* Push content below banner */}
+
       <div style={{ paddingTop: 36 }}>
-        <StudentHome
-          profile={previewProfile}
-          tasks={[]}
-          signoffs={[]}
-          messages={[]}
-          lastSession={null}
-          userId={user.id}
-        />
+        {activeStage !== null ? (
+          <StageView
+            stageIdx={activeStage}
+            userId={profile.id}
+            tasks={[]}
+            dayData={[]}
+            remarks={[]}
+            signoffs={[]}
+            unreadCount={0}
+            previewMode
+            onBack={() => setActiveStage(null)}
+          />
+        ) : (
+          <StudentHome
+            profile={profile}
+            tasks={[]}
+            signoffs={[]}
+            messages={[]}
+            lastSession={null}
+            userId={profile.id}
+            onNavigateToStage={setActiveStage}
+          />
+        )}
       </div>
     </div>
   )
