@@ -672,39 +672,40 @@ export default function CoachDashboard({ coach, students, pendingStudents, allTa
           </div>
 
           {/* ② Messages — always shown */}
-          {localStudents.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
-                <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
-                {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length}</span>}
+          <div>
+            <div className="flex items-center gap-2 mb-3" style={{ paddingLeft: 4, borderLeft: '3px solid #ff6b9d' }}>
+              <div className="text-sm font-bold uppercase tracking-widest pl-2" style={{ color: '#f0f0eb' }}>MESSAGES</div>
+              {allUnread.length > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ff6b9d', color: '#fff' }}>{allUnread.length}</span>}
+            </div>
+            {allUnread.length === 0 ? (
+              <div className="rounded-2xl px-4 py-3 text-sm" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.06)', color: '#7878a8' }}>
+                No new messages
               </div>
+            ) : (
               <div className="flex flex-col gap-2">
-                {localStudents.map(s => {
-                  const threadMsgs = messages.filter(m => m.student_id === s.id)
-                  const lastMsg = threadMsgs.slice(-1)[0]
-                  const unread = threadMsgs.filter(m => m.from_role === 'student' && !m.read).length
+                {localStudents.filter(s => messages.some(m => m.student_id === s.id && m.from_role === 'student' && !m.read)).map(s => {
+                  const unreadMsgs = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read)
+                  const lastUnread = unreadMsgs.slice(-1)[0]
                   const initials = s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()
                   return (
                     <button key={s.id} onClick={() => { setSelectedStudentId(s.id); setTab('messages') }}
                       className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left active:scale-[0.98] transition-all"
-                      style={{ background: '#111120', border: `1px solid ${unread ? 'rgba(255,107,157,0.25)' : 'rgba(255,255,255,0.06)'}`, borderLeft: `4px solid ${unread ? '#ff6b9d' : 'rgba(255,255,255,0.08)'}` }}>
+                      style={{ background: '#111120', border: '1px solid rgba(255,107,157,0.25)', borderLeft: '4px solid #ff6b9d' }}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center font-display text-base flex-shrink-0"
                         style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.3)', color: '#e8c547' }}>
                         {initials}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-base font-bold" style={{ color: '#f0f0eb' }}>{s.name}</div>
-                        <div className="text-sm truncate mt-0.5" style={{ color: '#9898c0' }}>
-                          {lastMsg ? lastMsg.text : 'No messages yet — tap to start'}
-                        </div>
+                        <div className="text-sm truncate mt-0.5" style={{ color: '#9898c0' }}>{lastUnread.text}</div>
                       </div>
-                      {unread > 0 && <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unread}</span>}
+                      <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: '#ff6b9d', color: '#fff' }}>{unreadMsgs.length}</span>
                     </button>
                   )
                 })}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
 
           {/* ③ Review CTA — shown when any student has tasks needing review */}
