@@ -22,12 +22,12 @@ export default async function CoachPage() {
     .eq('coach_id', user.id)
     .eq('role', 'student')
 
-  // Get pending students not yet assigned to any coach
+  // Get all students with no coach assigned yet (unallocated)
   const { data: pendingStudents } = await supabase
     .from('profiles')
     .select('*')
     .eq('role', 'student')
-    .eq('pending', true)
+    .is('coach_id', null)
 
   // Get all coaches (for flagging notes)
   const { data: allCoaches } = await supabase
