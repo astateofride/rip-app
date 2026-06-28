@@ -186,43 +186,6 @@ export default function StudentHome({ profile, tasks, signoffs, messages, userId
           </div>
         </div>
 
-        {/* ── MESSAGES — shown above CTA whenever there's a thread ── */}
-        {messages.length > 0 && (() => {
-          const latest = [...messages].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-          const unread = messages.filter(m => m.from_role === 'coach' && !m.read).length
-          return (
-            <button onClick={() => router.push('/pathway/chat')}
-              className="w-full rounded-2xl mb-4 text-left active:scale-[0.98] transition-all overflow-hidden"
-              style={{
-                background: unread ? 'rgba(232,197,71,0.07)' : '#111120',
-                border: `1px solid ${unread ? 'rgba(232,197,71,0.35)' : 'rgba(255,255,255,0.07)'}`,
-                borderLeft: `4px solid ${unread ? '#e8c547' : 'rgba(255,255,255,0.12)'}`,
-              }}>
-              <div className="px-4 py-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="text-xs font-bold uppercase tracking-widest" style={{ color: unread ? '#e8c547' : '#9898c0' }}>
-                      💬 Coach Messages
-                    </div>
-                    {unread > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#e8c547', color: '#080810' }}>
-                        {unread} new
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[10px]" style={{ color: '#9898c0' }}>{timeAgo(latest.created_at)}</div>
-                </div>
-                <p className="text-sm leading-snug" style={{ color: unread ? '#f0f0eb' : '#9898c0' }}>
-                  {latest.from_role === 'coach' ? '' : 'You: '}{latest.text.substring(0, 100)}{latest.text.length > 100 ? '…' : ''}
-                </p>
-                <div className="text-xs font-bold mt-2" style={{ color: unread ? '#e8c547' : '#6868a0' }}>
-                  {unread ? 'Read message →' : 'Open conversation →'}
-                </div>
-              </div>
-            </button>
-          )
-        })()}
-
         {/* ── AWAITING SIGN-OFF ── */}
         {stagesAwaitingSignoff.length > 0 && (
           <div className="mb-4 flex flex-col gap-2">
