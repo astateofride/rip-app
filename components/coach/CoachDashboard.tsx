@@ -139,6 +139,13 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
     setSignoffNote('')
   }
 
+  async function revokeSignoff(studentId: string, stageIdx: number) {
+    const signoff = signoffs.find(s => s.student_id === studentId && s.stage_idx === stageIdx)
+    if (!signoff) return
+    await supabase.from('stage_signoffs').delete().eq('id', signoff.id)
+    setSignoffs(prev => prev.filter(s => s.id !== signoff.id))
+  }
+
   async function sendMessage() {
     const trimmed = chatText.trim()
     if (!trimmed || sending || !selectedStudentId) return
@@ -450,27 +457,45 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
                         const { total, done, pct } = countTasks(s.id, si)
                         const signed = !!getSignoff(s.id, si)
                         const unlocked = si === 0 || !!getSignoff(s.id, si - 1)
+                        const stageComplete = done === total && total > 0
                         return (
-                          <div key={si} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid #1a1a2e' }}>
-                            <div className="font-display flex-shrink-0 text-center" style={{ color: colours[si], width: 32, fontSize: 18 }}>S{si + 1}</div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#7070a0' }}>
-                                <span className="truncate mr-2">{stageNames[si]}</span><span style={{ color: colours[si], flexShrink: 0 }}>{pct}%</span>
+                          <div key={si} className="flex flex-col gap-2 py-3" style={{ borderTop: '1px solid #1a1a2e' }}>
+                            <div className="flex items-center gap-3">
+                              <div className="font-display flex-shrink-0 text-center" style={{ color: colours[si], width: 32, fontSize: 18 }}>S{si + 1}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between text-sm font-semibold mb-1.5" style={{ color: '#7070a0' }}>
+                                  <span className="truncate mr-2">{stageNames[si]}</span>
+                                  <span style={{ color: stageComplete ? '#2ecc71' : colours[si], flexShrink: 0 }}>{done}/{total}</span>
+                                </div>
+                                <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
+                                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: stageComplete ? '#2ecc71' : colours[si] }} />
+                                </div>
                               </div>
-                              <div className="h-2 rounded-full overflow-hidden" style={{ background: '#1a1a2e' }}>
-                                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colours[si] }} />
-                              </div>
+                              {signed ? (
+                                <span className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71' }}>✓ SIGNED</span>
+                              ) : unlocked && stageComplete ? (
+                                <button onClick={() => setSignoffModal({ stageIdx: si, studentId: s.id })}
+                                  className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0 transition-all active:scale-95"
+                                  style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547', minHeight: 36 }}>
+                                  SIGN OFF
+                                </button>
+                              ) : unlocked && !stageComplete ? (
+                                <span className="text-xs px-2 py-1.5 rounded-lg flex-shrink-0 font-bold" style={{ color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.2)' }}>IN PROGRESS</span>
+                              ) : (
+                                <span className="text-xs px-2 py-1.5 rounded-lg flex-shrink-0 font-bold" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>LOCKED</span>
+                              )}
                             </div>
-                            {signed ? (
-                              <span className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0" style={{ background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71' }}>✓ DONE</span>
-                            ) : unlocked ? (
-                              <button onClick={() => setSignoffModal({ stageIdx: si, studentId: s.id })}
-                                className="text-xs font-bold px-2 py-1.5 rounded-lg flex-shrink-0 transition-all active:scale-95"
-                                style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.4)', color: '#e8c547', minHeight: 36 }}>
-                                SIGN OFF
-                              </button>
-                            ) : (
-                              <span className="text-xs px-2 py-1.5 rounded-lg flex-shrink-0 font-bold" style={{ color: '#3a3a5c', border: '1px solid #1a1a2e' }}>LOCKED</span>
+                            {signed && (
+                              <div className="flex items-center justify-between pl-10">
+                                <div className="text-xs" style={{ color: '#3a3a5c' }}>
+                                  Signed {formatDate(getSignoff(s.id, si)?.signed_at ?? null)}
+                                </div>
+                                <button onClick={() => revokeSignoff(s.id, si)}
+                                  className="text-xs font-bold px-2 py-1 rounded-lg transition-all active:scale-95"
+                                  style={{ color: '#ff6b9d', border: '1px solid rgba(255,107,157,0.2)', background: 'rgba(255,107,157,0.05)' }}>
+                                  UNDO
+                                </button>
+                              </div>
                             )}
                           </div>
                         )
