@@ -288,7 +288,9 @@ export default function CoachDashboard({ coach, students, allTasks, allDayData, 
             </button>
           </div>
           {[0,1,2].map(si => {
-            if (getSignoff(student.id, si)) return null
+            const { done, completed } = countTasks(student.id, si)
+            const hasReview = completed > done
+            if (getSignoff(student.id, si) && !hasReview) return null
             const daysWithWork = STAGES[si].days.filter((_, di) =>
               allTasks.some(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed)
             )
