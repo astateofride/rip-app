@@ -82,6 +82,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
   const [editForm, setEditForm] = useState({ name: '', location: '', start_date: '', email: '' })
   const [editSaving, setEditSaving] = useState(false)
   const [localStudents, setLocalStudents] = useState<Profile[]>(students)
+  const [localTasks, setLocalTasks] = useState<TaskProgress[]>(allTasks)
   const [reviewQueue, setReviewQueue] = useState<QueueItem[]>([])
   const [queueIdx, setQueueIdx] = useState(0)
   const [queueNote, setQueueNote] = useState('')
@@ -139,7 +140,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
 
   function countTasks(studentId: string, si: number) {
     const total = STAGES[si].days.reduce((a, d) => a + d.tasks.length, 0)
-    const stageTasks = allTasks.filter(t => t.student_id === studentId && t.stage_idx === si)
+    const stageTasks = localTasks.filter(t => t.student_id === studentId && t.stage_idx === si)
     // "done" = completed practical tasks OR written tasks with score >= 60 OR coach has remarked on that day
     const done = stageTasks.filter(t => {
       if (!t.completed) return false
@@ -201,6 +202,19 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
     if (!signoff) return
     await supabase.from('stage_signoffs').delete().eq('id', signoff.id)
     setSignoffs(prev => prev.filter(s => s.id !== signoff.id))
+  }
+
+  async function coachMarkTaskDone(studentId: string, si: number, di: number, ti: number) {
+    // Optimistic update — remove from incomplete list immediately
+    setLocalTasks(prev => {
+      const existing = prev.find(t => t.student_id === studentId && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
+      if (existing) return prev.map(t => t === existing ? { ...t, completed: true, completed_at: new Date().toISOString() } : t)
+      return [...prev, { id: `coach-${studentId}-${si}-${di}-${ti}`, student_id: studentId, stage_idx: si, day_idx: di, task_idx: ti, completed: true, completed_at: new Date().toISOString(), answer: null, score: null }]
+    })
+    await supabase.from('task_progress').upsert(
+      { student_id: studentId, stage_idx: si, day_idx: di, task_idx: ti, completed: true, completed_at: new Date().toISOString() },
+      { onConflict: 'student_id,stage_idx,day_idx,task_idx' }
+    )
   }
 
   async function sendMessage() {
@@ -281,7 +295,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
       for (let si = 0; si < 3; si++) {
         if (getSignoff(student.id, si)) continue
         for (let di = 0; di < STAGES[si].days.length; di++) {
-          const hasDone = allTasks.some(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed)
+          const hasDone = localTasks.some(t => t.student_id === student.id && t.stage_idx === si && t.day_idx === di && t.completed)
           if (!hasDone) continue
           items.push({ student, si, di })
         }
@@ -331,7 +345,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
       for (let di = 0; di < STAGES[si].days.length; di++) {
         const remark = remarks.find(r => r.student_id === s.id && r.stage_idx === si && r.day_idx === di)
         if (!remark) continue
-        const dayTasks = allTasks.filter(t => t.student_id === s.id && t.stage_idx === si && t.day_idx === di && t.completed && t.completed_at)
+        const dayTasks = localTasks.filter(t => t.student_id === s.id && t.stage_idx === si && t.day_idx === di && t.completed && t.completed_at)
         if (dayTasks.length === 0) continue
         const lastSubmit = Math.max(...dayTasks.map(t => new Date(t.completed_at!).getTime()))
         const reviewedAt = new Date(remark.updated_at).getTime()
@@ -483,10 +497,10 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
           const colour = colours[si]
           const dayDataRow = allDayData.find(d => d.student_id === qs.id && d.stage_idx === si && d.day_idx === di)
           const existingRemark = remarks.find(r => r.student_id === qs.id && r.stage_idx === si && r.day_idx === di)
-          const completedTasks = allTasks.filter(t => t.student_id === qs.id && t.stage_idx === si && t.day_idx === di && t.completed)
-          const incompleteTasks = day.tasks.filter((_, ti) => !allTasks.find(t => t.student_id === qs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti && t.completed))
+          const completedTasks = localTasks.filter(t => t.student_id === qs.id && t.stage_idx === si && t.day_idx === di && t.completed)
+          const incompleteTasks = day.tasks.map((task, ti) => ({ task, ti })).filter(({ ti }) => !localTasks.find(t => t.student_id === qs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti && t.completed))
           const writtenAnswers = day.tasks.map((task, ti) => {
-            const prog = allTasks.find(t => t.student_id === qs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
+            const prog = localTasks.find(t => t.student_id === qs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
             if (!prog?.answer) return null
             return { ti, task, prog, needsWork: (prog.score ?? 0) < 60 }
           }).filter(Boolean)
@@ -644,13 +658,15 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                 {/* Incomplete tasks still to do */}
                 {incompleteTasks.length > 0 && (
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#8888b0' }}>Still to complete</div>
+                    <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#8888b0' }}>Still to complete — tap to mark done</div>
                     <div className="flex flex-col gap-1.5">
-                      {incompleteTasks.map((task, i) => (
-                        <div key={i} className="flex items-start gap-3 px-3 py-2.5 rounded-xl" style={{ background: '#0c0c18', border: '1px solid #1a1a2e' }}>
-                          <div className="w-5 h-5 rounded-full border flex-shrink-0 mt-0.5" style={{ borderColor: '#2a2a4a' }} />
+                      {incompleteTasks.map(({ task, ti }) => (
+                        <button key={ti} onClick={() => coachMarkTaskDone(qs.id, si, di, ti)}
+                          className="flex items-start gap-3 px-3 py-2.5 rounded-xl w-full text-left active:scale-[0.98] transition-all"
+                          style={{ background: '#0c0c18', border: '1px solid #1a1a2e' }}>
+                          <div className="w-5 h-5 rounded-full border flex-shrink-0 mt-0.5" style={{ borderColor: '#3a3a5a' }} />
                           <p className="text-sm leading-snug" style={{ color: '#9898c0' }}>{task.text}</p>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -1217,13 +1233,13 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
         const pendingDays: { si: number; di: number }[] = []
         for (let si = 0; si < 3; si++) {
           for (let di = 0; di < STAGES[si].days.length; di++) {
-            const hasCompleted = allTasks.some(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.completed)
+            const hasCompleted = localTasks.some(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.completed)
             const alreadyReviewed = remarks.some(r => r.student_id === srs.id && r.stage_idx === si && r.day_idx === di)
             if (hasCompleted && !alreadyReviewed && !getSignoff(srs.id, si)) pendingDays.push({ si, di })
           }
         }
         const totalAnswers = pendingDays.reduce((acc, { si, di }) =>
-          acc + STAGES[si].days[di].tasks.filter((_, ti) => allTasks.find(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti && t.answer)).length, 0)
+          acc + STAGES[si].days[di].tasks.filter((_, ti) => localTasks.find(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti && t.answer)).length, 0)
         return (
           <div className="fixed inset-0 z-[200] flex flex-col" style={{ background: '#080810' }}>
             {/* Sheet header */}
@@ -1261,7 +1277,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                 const noteKey = `${si}-${di}`
                 const existingRemark = remarks.find(r => r.student_id === srs.id && r.stage_idx === si && r.day_idx === di)
                 const writtenAnswers = day.tasks.map((task, ti) => {
-                  const prog = allTasks.find(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
+                  const prog = localTasks.find(t => t.student_id === srs.id && t.stage_idx === si && t.day_idx === di && t.task_idx === ti)
                   if (!prog?.answer) return null
                   return { ti, task, prog, needsWork: (prog.score ?? 0) < 60 }
                 }).filter(Boolean)
