@@ -627,7 +627,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
               ) : (
                 <div className="flex flex-col gap-3">
                   <button
-                    onClick={() => setSelfAssessModal(null)}
+                    onClick={() => { setExpandedTasks(prev => { const n = new Set(prev); n.add(taskKey); return n }); setSelfAssessModal(null) }}
                     className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
                     style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
                     IMPROVE ANSWER →
