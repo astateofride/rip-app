@@ -919,7 +919,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                     <div className="flex-1 h-1 rounded-full" style={{ background: 'rgba(232,197,71,0.15)' }}>
                       <div className="h-full rounded-full" style={{ width: '0%', background: '#e8c547' }} />
                     </div>
-                    <span className="text-xs font-bold" style={{ color: 'rgba(255,107,157,0.7)' }}>{totalToReview} task{totalToReview !== 1 ? 's' : ''}</span>
+                    <span className="text-xs font-bold" style={{ color: 'rgba(232,197,71,0.8)' }}>{totalToReview} task{totalToReview !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
               </button>
@@ -983,7 +983,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
                   const initials = s.name.trim().split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()
                   const unreadMsgs = messages.filter(m => m.student_id === s.id && m.from_role === 'student' && !m.read).length
                   return (
-                    <div key={s.id} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${hasReview ? 'rgba(255,107,157,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
+                    <div key={s.id} className="rounded-2xl overflow-hidden" style={{ background: '#111120', border: `1px solid ${hasReview ? 'rgba(232,197,71,0.3)' : 'rgba(255,255,255,0.06)'}` }}>
                       {/* Main card body — not tappable */}
                       <div className="px-4 pt-3 pb-3">
                         {/* Name row */}

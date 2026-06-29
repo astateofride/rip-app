@@ -186,6 +186,14 @@ export default function SignupPage() {
             <input className="inp" value={form.location} onChange={e => update('location', e.target.value)} placeholder="Your studio or club" style={{ fontSize: 16 }} />
           </div>
 
+          {form.role === 'student' && (
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Coach Email <span style={{ color: '#50507a' }}>(optional)</span></label>
+              <input type="email" className="inp" value={form.coachEmail} onChange={e => update('coachEmail', e.target.value)} placeholder="your.coach@example.com" style={{ fontSize: 16 }} />
+              <p className="text-[10px] mt-1.5" style={{ color: '#50507a' }}>If you know your coach's email, enter it here to link automatically. Otherwise a coach will accept you on login.</p>
+            </div>
+          )}
+
 
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7878a8' }}>Password</label>
