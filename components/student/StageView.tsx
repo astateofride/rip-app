@@ -282,7 +282,7 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
         }
         @keyframes taskSlideOut {
           from { opacity: 1; transform: translateY(0); }
-          to   { opacity: 0; transform: translateY(40px); }
+          to   { opacity: 0; transform: translateY(calc(100% + 12px)); }
         }
       `}</style>
       <Topbar progress={overallPct()} mode="student" />
@@ -556,8 +556,8 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
       {/* Manual popup */}
       {manualPopup && (
-        <div className="fixed inset-0 z-[300] flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setManualPopup(null)}>
-          <div className="w-full rounded-t-3xl p-6 pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '70vh', overflowY: 'auto' }}
+        <div className="fixed inset-0 z-[300] flex items-end" style={{ background: 'rgba(0,0,0,0.7)', padding: '0 12px 12px' }} onClick={() => setManualPopup(null)}>
+          <div className="w-full rounded-3xl p-6 pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '70vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -578,8 +578,8 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
       {/* Self-assess modal */}
       {selfAssessModal && (
-        <div className="fixed inset-0 z-[360] flex items-end" style={{ background: 'rgba(0,0,0,0.75)' }}>
-          <div className="w-full rounded-t-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="fixed inset-0 z-[360] flex items-end" style={{ background: 'rgba(0,0,0,0.75)', padding: '0 12px 12px' }}>
+          <div className="w-full rounded-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
             <div className="px-6">
               {/* Score */}
@@ -647,9 +647,9 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
 
       {/* Coach ping prompt */}
       {coachPrompt && (
-        <div className="fixed inset-0 z-[350] flex items-end" style={{ background: 'rgba(0,0,0,0.65)' }}
+        <div className="fixed inset-0 z-[350] flex items-end" style={{ background: 'rgba(0,0,0,0.65)', padding: '0 12px 12px' }}
           onClick={() => { setCoachPrompt(null); setPromptDismissed(prev => { const n = new Set(prev); n.add(coachPrompt.di); return n }) }}>
-          <div className="w-full rounded-t-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }}
+          <div className="w-full rounded-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }}
             onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
             <div className="px-6">
