@@ -714,7 +714,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
             <div>
               <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>COACH DASHBOARD</div>
               <h1 className="font-display leading-none" style={{ fontSize: 56, letterSpacing: '0.01em', color: '#f0f0eb', lineHeight: 0.88 }}>
-                HELLO,<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
+                {(() => { const h = new Date().getHours(); return h < 12 ? 'GOOD MORNING,' : h < 17 ? 'GOOD AFTERNOON,' : 'GOOD EVENING,' })()}<br /><span style={{ color: '#e8c547' }}>{coach.name.split(' ')[0].toUpperCase()}.</span>
               </h1>
               <p className="mt-3 text-sm font-semibold" style={{ color: '#9898c0' }}>
                 {totalStudents} student{totalStudents !== 1 ? 's' : ''} · {stagesToSignOff > 0 ? `${stagesToSignOff} ready to sign off` : 'all stages up to date'}
