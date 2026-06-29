@@ -377,10 +377,6 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
               </div>
             </div>
           </div>
-          {/* Right: badge */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full" style={{ background: '#e8c547', color: '#080810' }}>COACH</span>
-          </div>
         </div>
       </div>
 
@@ -728,6 +724,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
             <div className="text-right flex-shrink-0 pt-1">
               <div className="font-display" style={{ fontSize: 30, color: '#f0f0eb', letterSpacing: '0.02em', lineHeight: 1 }}>{time}</div>
               <div className="text-xs font-bold mt-1" style={{ color: '#9898c0' }}>{today.split(',')[0].toUpperCase()}</div>
+              <span className="inline-block mt-2 text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full" style={{ background: '#e8c547', color: '#080810' }}>COACH</span>
             </div>
           </div>
 
