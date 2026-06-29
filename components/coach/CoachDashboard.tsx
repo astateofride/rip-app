@@ -385,18 +385,14 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
         <div className="fixed inset-0 z-[400] flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowAccountMenu(false)}>
           <div className="w-full rounded-t-3xl pb-8" style={{ background: '#111120', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
-            <div className="px-5">
-              <div className="flex items-center gap-3 mb-5 px-1">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-display flex-shrink-0" style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.45)', color: '#e8c547', fontSize: 17 }}>{coachInitials}</div>
-                <div>
-                  <div className="font-bold text-sm" style={{ color: '#f0f0eb' }}>{coach.name}</div>
-                  <div className="text-xs" style={{ color: '#7878a8' }}>Coach</div>
-                </div>
-              </div>
+            <div className="px-5 flex flex-col items-center">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center font-display mb-2" style={{ background: 'rgba(232,197,71,0.12)', border: '1px solid rgba(232,197,71,0.45)', color: '#e8c547', fontSize: 22 }}>{coachInitials}</div>
+              <div className="font-bold text-sm mb-0.5 text-center" style={{ color: '#f0f0eb' }}>{coach.name}</div>
+              <div className="text-xs mb-5 text-center" style={{ color: '#7878a8' }}>Coach</div>
               <a
                 href="/coach/preview"
                 className="w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-3"
-                style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.25)', color: '#e8c547', textDecoration: 'none', display: 'flex' }}
+                style={{ background: 'rgba(232,197,71,0.08)', border: '1px solid rgba(232,197,71,0.25)', color: '#e8c547', textDecoration: 'none' }}
               >
                 👁 Student Preview
               </a>
@@ -407,7 +403,7 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
               >
                 Sign Out
               </button>
-              <p className="text-center text-[10px] uppercase tracking-widest mt-3" style={{ color: '#3a3a5a' }}>
+              <p className="text-[10px] uppercase tracking-widest mt-3" style={{ color: '#3a3a5a' }}>
                 BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}
               </p>
             </div>
