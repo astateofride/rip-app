@@ -92,6 +92,18 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
     return flatTasks.length - 1
   })
   const [taskExiting, setTaskExiting] = useState(false)
+  const [dayCompleteModal, setDayCompleteModal] = useState<{ di: number } | null>(null)
+
+  const DAY_COMPLETE_MESSAGES = [
+    { head: "THAT'S A DAY DONE.", body: "Seriously good work — that section asked something of you and you showed up. Lock it in." },
+    { head: "NAILED IT.", body: "Every task ticked. That's not luck, that's effort. You're building something real here." },
+    { head: "DAY COMPLETE.", body: "You came, you worked, you delivered. That's the standard. Come back and do it again." },
+    { head: "YES. THAT.", body: "That's the version of you that gets better every single session. Remember how this feels." },
+    { head: "SOLID SESSION.", body: "Consistent work beats big moments every time. You're stacking the bricks right now." },
+    { head: "DONE AND DUSTED.", body: "Clean sweep on the tasks. That section is yours now — get out there and ride it." },
+    { head: "THAT'S HOW IT'S DONE.", body: "No shortcuts, no skipped tasks. This is what the pathway is built on. Keep going." },
+    { head: "FULL MARKS ON THE DAY.", body: "You put the time in and it shows. Your future self will thank you for exactly this." },
+  ]
   const [selfAssessModal, setSelfAssessModal] = useState<{ di: number; score: number; hits: string[]; misses: string[]; pendingPrompt: { di: number; done: number; total: number } | null } | null>(null)
   const [coachPrompt, setCoachPrompt] = useState<{ di: number; done: number; total: number } | null>(null)
   const [promptDismissed, setPromptDismissed] = useState<Set<number>>(new Set())
@@ -99,10 +111,12 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
   const [pingSent, setPingSent] = useState(false)
 
   function checkPrompt(di: number, updatedTasks: typeof localTasks) {
-    if (promptDismissed.has(di)) return
     const total = stage.days[di].tasks.length
     const done = updatedTasks.filter(t => t.stage_idx === stageIdx && t.day_idx === di && t.completed).length
-    if (done > 0 && done < total) {
+    if (done === total) {
+      setCoachPrompt(null)
+      setDayCompleteModal({ di })
+    } else if (!promptDismissed.has(di) && done > 0) {
       setCoachPrompt({ di, done, total })
     } else {
       setCoachPrompt(null)
@@ -696,6 +710,31 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
           </div>
         </div>
       )}
+
+      {/* Day complete modal */}
+      {dayCompleteModal && (() => {
+        const msg = DAY_COMPLETE_MESSAGES[dayCompleteModal.di % DAY_COMPLETE_MESSAGES.length]
+        return (
+          <div className="fixed inset-0 z-[370] flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.8)', padding: '0 12px 12px' }}
+            onClick={() => setDayCompleteModal(null)}>
+            <div className="w-full rounded-3xl pb-10" style={{ background: '#111120', border: '1px solid rgba(232,197,71,0.25)', maxWidth: 480 }}
+              onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+              <div className="px-6">
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>{stage.days[dayCompleteModal.di].title}</div>
+                <div className="font-display leading-none mb-3" style={{ fontSize: 40, color: '#e8c547', letterSpacing: '0.04em' }}>{msg.head}</div>
+                <p className="text-sm leading-relaxed mb-6" style={{ color: '#d4d4ea' }}>{msg.body}</p>
+                <button
+                  onClick={() => setDayCompleteModal(null)}
+                  className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                  style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
+                  KEEP GOING →
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {!previewMode && (
         <button onClick={() => router.push('/pathway/chat')} className="fixed bottom-20 right-4 w-14 h-14 rounded-full flex items-center justify-center"
