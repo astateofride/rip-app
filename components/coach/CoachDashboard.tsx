@@ -407,6 +407,9 @@ export default function CoachDashboard({ coach, students, pendingStudents, allCo
               >
                 Sign Out
               </button>
+              <p className="text-center text-[10px] uppercase tracking-widest mt-3" style={{ color: '#3a3a5a' }}>
+                BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? 'dev'}
+              </p>
             </div>
           </div>
         </div>
