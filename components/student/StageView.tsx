@@ -724,12 +724,20 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                 <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>{stage.days[dayCompleteModal.di].title}</div>
                 <div className="font-display leading-none mb-3" style={{ fontSize: 40, color: '#e8c547', letterSpacing: '0.04em' }}>{msg.head}</div>
                 <p className="text-sm leading-relaxed mb-6" style={{ color: '#d4d4ea' }}>{msg.body}</p>
-                <button
-                  onClick={() => setDayCompleteModal(null)}
-                  className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
-                  style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
-                  KEEP GOING →
-                </button>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => setDayCompleteModal(null)}
+                    className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                    style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
+                    KEEP GOING →
+                  </button>
+                  <button
+                    onClick={() => { setDayCompleteModal(null); onBack ? onBack() : router.push('/pathway') }}
+                    className="w-full font-display text-xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#9898c0', letterSpacing: '0.06em' }}>
+                    DONE FOR TODAY
+                  </button>
+                </div>
               </div>
             </div>
           </div>
