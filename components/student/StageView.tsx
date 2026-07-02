@@ -597,24 +597,26 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
             <div className="w-10 h-1 rounded-full mx-auto mt-4 mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
             <div className="px-6">
               {/* Score */}
-              <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9898c0' }}>Self Assessment</div>
-              <div className="font-display leading-none mb-1" style={{ fontSize: 52, color: selfAssessModal.score >= 50 ? '#2ecc71' : selfAssessModal.score >= 30 ? '#e8c547' : '#ff6b9d', letterSpacing: '0.03em' }}>
-                {selfAssessModal.score}%
+              <div className="text-center mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#9898c0' }}>Self Assessment</div>
+                <div className="font-display leading-none mb-2" style={{ fontSize: 64, color: selfAssessModal.score >= 50 ? '#2ecc71' : selfAssessModal.score >= 30 ? '#e8c547' : '#ff6b9d', letterSpacing: '0.03em' }}>
+                  {selfAssessModal.score}%
+                </div>
+                <p className="text-sm" style={{ color: '#9898c0' }}>
+                  {selfAssessModal.score >= 50
+                    ? 'Solid — you covered the key concepts.'
+                    : selfAssessModal.score >= 30
+                    ? 'Getting there — a few things to tighten up.'
+                    : selfAssessModal.score >= 20
+                    ? 'Needs more depth — review the manual and try again.'
+                    : 'That one needs another go. Re-read the section and give it a proper crack.'}
+                </p>
               </div>
-              <p className="text-sm mb-4" style={{ color: '#9898c0' }}>
-                {selfAssessModal.score >= 50
-                  ? 'Solid — you covered the key concepts.'
-                  : selfAssessModal.score >= 30
-                  ? 'Getting there — a few things to tighten up.'
-                  : selfAssessModal.score >= 20
-                  ? 'Needs more depth — review the manual and try again.'
-                  : 'That one needs another go. Re-read the section and give it a proper crack.'}
-              </p>
               {/* Keywords */}
               {selfAssessModal.hits.length > 0 && (
-                <div className="mb-2">
+                <div className="mb-2 text-center">
                   <div className="text-[9px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#2ecc71' }}>Covered ✓</div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 justify-center">
                     {selfAssessModal.hits.map(k => (
                       <span key={k} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.25)' }}>{k}</span>
                     ))}
@@ -622,9 +624,9 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                 </div>
               )}
               {selfAssessModal.misses.length > 0 && (
-                <div className="mb-5">
+                <div className="mb-5 text-center">
                   <div className="text-[9px] font-bold uppercase tracking-widest mb-1.5" style={{ color: '#e8c547' }}>Could add ↗</div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 justify-center">
                     {selfAssessModal.misses.map(k => (
                       <span key={k} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(232,197,71,0.08)', color: '#e8c547', border: '1px solid rgba(232,197,71,0.2)' }}>{k}</span>
                     ))}
