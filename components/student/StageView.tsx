@@ -606,7 +606,9 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                   ? 'Solid — you covered the key concepts.'
                   : selfAssessModal.score >= 30
                   ? 'Getting there — a few things to tighten up.'
-                  : 'Needs more depth — review the manual and try again.'}
+                  : selfAssessModal.score >= 20
+                  ? 'Needs more depth — review the manual and try again.'
+                  : 'That one needs another go. Re-read the section and give it a proper crack.'}
               </p>
               {/* Keywords */}
               {selfAssessModal.hits.length > 0 && (
@@ -636,6 +638,15 @@ export default function StageView({ stageIdx, userId, tasks, dayData, remarks, s
                     className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
                     style={{ background: '#e8c547', color: '#080810', letterSpacing: '0.06em' }}>
                     KEEP GOING →
+                  </button>
+                </div>
+              ) : selfAssessModal.score < 20 ? (
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => { setExpandedTasks(prev => { const n = new Set(prev); n.add(taskKey); return n }); setSelfAssessModal(null) }}
+                    className="w-full font-display text-2xl tracking-widest py-4 rounded-2xl active:scale-[0.98] transition-all"
+                    style={{ background: '#ff6b9d', color: '#080810', letterSpacing: '0.06em' }}>
+                    RESUBMIT ANSWER →
                   </button>
                 </div>
               ) : (
