@@ -681,7 +681,7 @@ export default function StageView({
           </button>
           <div className="flex-1 min-w-0">
             <div
-              className="text-[10px] font-bold uppercase tracking-widest"
+              className="text-xs font-bold uppercase tracking-widest"
               style={{ color: "#9898c0" }}
             >
               {stage.eyebrow}
@@ -701,7 +701,7 @@ export default function StageView({
               {overallPct()}%
             </div>
             <div
-              className="text-[9px] font-bold uppercase tracking-widest"
+              className="text-xs font-bold uppercase tracking-widest"
               style={{ color: "#9898c0" }}
             >
               {
@@ -729,13 +729,13 @@ export default function StageView({
       <div className="px-4 py-3" style={{ maxWidth: 480, margin: "0 auto" }}>
         <div className="flex items-center gap-2 mb-2">
           <span
-            className="text-[10px] font-bold uppercase tracking-widest"
-            style={{ color: "#9898c0" }}
+            className="text-xs font-bold uppercase tracking-widest"
+            style={{ color: "#7878a8" }}
           >
             Task {activeTaskFlat + 1} / {flatTasks.length}
           </span>
           <span
-            className="text-[10px] font-bold uppercase tracking-widest ml-auto"
+            className="text-xs font-bold uppercase tracking-widest ml-auto"
             style={{ color: colour }}
           >
             {day.title}
@@ -778,7 +778,7 @@ export default function StageView({
             }}
           >
             <div
-              className="text-[10px] font-bold uppercase tracking-widest mb-1"
+              className="text-xs font-bold uppercase tracking-widest mb-1"
               style={{ color: colour }}
             >
               Your Coach Says
@@ -828,10 +828,7 @@ export default function StageView({
                       ? "Manual Reference"
                       : "Read This First"}
                   </div>
-                  <div
-                    className="text-[10px] mt-0.5"
-                    style={{ color: "#9898c0" }}
-                  >
+                  <div className="text-xs mt-0.5" style={{ color: "#7878a8" }}>
                     {day.manualNote.match(/§[\d.]+(?:\s*\([^)]+\))?/)?.[0] ??
                       stage.ref}
                   </div>
@@ -840,7 +837,7 @@ export default function StageView({
               <div className="flex items-center gap-2 flex-shrink-0">
                 {dd?.manual_read_at && (
                   <span
-                    className="text-[9px] font-bold px-2 py-0.5 rounded"
+                    className="text-xs font-bold px-2 py-0.5 rounded"
                     style={{
                       background: "rgba(46,204,113,0.1)",
                       color: "#2ecc71",
@@ -918,13 +915,13 @@ export default function StageView({
                   </p>
                   {written && prog?.score !== null && (
                     <div
-                      className="text-[10px] mt-1 font-bold"
+                      className="text-xs mt-1.5 font-bold"
                       style={{
-                        color: (prog?.score ?? 0) >= 60 ? "#2ecc71" : "#e8c547",
+                        color: (prog?.score ?? 0) >= 30 ? "#2ecc71" : "#e8c547",
                       }}
                     >
                       Score: {prog?.score}%{" "}
-                      {(prog?.score ?? 0) >= 60 ? "✓" : "— tap to improve"}
+                      {(prog?.score ?? 0) >= 30 ? "✓" : "— tap to improve"}
                     </div>
                   )}
                 </div>
@@ -937,7 +934,7 @@ export default function StageView({
                         return n;
                       })
                     }
-                    className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded flex-shrink-0"
+                    className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded flex-shrink-0"
                     style={{
                       color: "#9898c0",
                       background: "rgba(255,255,255,0.05)",
@@ -1149,7 +1146,7 @@ export default function StageView({
                     YOUR TURN
                   </div>
                   <span
-                    className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto flex-shrink-0"
+                    className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto flex-shrink-0"
                     style={
                       written
                         ? {
@@ -1180,8 +1177,8 @@ export default function StageView({
                   )}
                 </p>
                 <div
-                  className="text-[10px] font-bold mt-1"
-                  style={{ color: "#9898c0" }}
+                  className="text-xs font-semibold mt-2"
+                  style={{ color: "#7878a8" }}
                 >
                   {activeTask.ref}
                 </div>
@@ -1254,8 +1251,8 @@ export default function StageView({
               >
                 DAY {dayNum} DONE ✓
               </div>
-              <p className="text-xs mb-4" style={{ color: "#9898c0" }}>
-                Log your video and reflection before moving on.
+              <p className="text-sm mb-4" style={{ color: "#c0c0d8" }}>
+                Log your video and add a quick reflection before moving on.
               </p>
             </div>
             <div className="px-4 pb-4 flex flex-col gap-4">
@@ -1404,7 +1401,7 @@ export default function StageView({
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <div
-                  className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                  className="text-xs font-bold uppercase tracking-widest mb-1"
                   style={{ color: "#9898c0" }}
                 >
                   Manual Reference
@@ -1470,8 +1467,8 @@ export default function StageView({
               {/* Score */}
               <div className="text-center mb-4">
                 <div
-                  className="text-[10px] font-bold uppercase tracking-widest mb-2"
-                  style={{ color: "#9898c0" }}
+                  className="text-xs font-bold uppercase tracking-widest mb-2"
+                  style={{ color: "#7878a8" }}
                 >
                   Self Assessment
                 </div>
@@ -1504,7 +1501,7 @@ export default function StageView({
               {selfAssessModal.hits.length > 0 && (
                 <div className="mb-2 text-center">
                   <div
-                    className="text-[9px] font-bold uppercase tracking-widest mb-1.5"
+                    className="text-xs font-bold uppercase tracking-widest mb-1.5"
                     style={{ color: "#2ecc71" }}
                   >
                     Covered ✓
@@ -1529,7 +1526,7 @@ export default function StageView({
               {selfAssessModal.misses.length > 0 && (
                 <div className="mb-5 text-center">
                   <div
-                    className="text-[9px] font-bold uppercase tracking-widest mb-1.5"
+                    className="text-xs font-bold uppercase tracking-widest mb-1.5"
                     style={{ color: "#e8c547" }}
                   >
                     Could add ↗
@@ -1682,8 +1679,8 @@ export default function StageView({
               ) : (
                 <>
                   <div
-                    className="text-[10px] font-bold uppercase tracking-widest mb-1"
-                    style={{ color: "#9898c0" }}
+                    className="text-xs font-bold uppercase tracking-widest mb-1"
+                    style={{ color: "#7878a8" }}
                   >
                     Stage {stageIdx + 1} · Day{" "}
                     {stageIdx * 10 + coachPrompt.di + 1}
@@ -1709,7 +1706,7 @@ export default function StageView({
                     tasks today. You can keep going now, or ping your coach to
                     check in on where you're at before you push on.
                   </p>
-                  <p className="text-xs mb-5" style={{ color: "#9898c0" }}>
+                  <p className="text-sm mb-5" style={{ color: "#c0c0d8" }}>
                     Want to finish the rest first? No pressure — your progress
                     is saved.
                   </p>
@@ -1800,7 +1797,7 @@ export default function StageView({
                   /* ── PHASE 1: CELEBRATE ── */
                   <div className="px-6">
                     <div
-                      className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                      className="text-xs font-bold uppercase tracking-widest mb-1"
                       style={{ color: colour }}
                     >
                       {stage.days[dayCompleteModal.di].title} · Complete
@@ -1873,7 +1870,7 @@ export default function StageView({
                   /* ── PHASE 2: STRETCH PROMPT ── */
                   <div className="px-6">
                     <div
-                      className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                      className="text-xs font-bold uppercase tracking-widest mb-1"
                       style={{ color: colour }}
                     >
                       Next up
@@ -1890,7 +1887,7 @@ export default function StageView({
                     </div>
                     <p
                       className="text-sm leading-relaxed mb-5"
-                      style={{ color: "#9898c0" }}
+                      style={{ color: "#c0c0d8" }}
                     >
                       {stretch.sub}
                     </p>
@@ -1904,7 +1901,7 @@ export default function StageView({
                       }}
                     >
                       <div
-                        className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                        className="text-xs font-bold uppercase tracking-widest mb-1"
                         style={{ color: colour }}
                       >
                         Day {nextDayNum}
