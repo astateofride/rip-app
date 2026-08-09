@@ -1002,7 +1002,7 @@ export default function StageView({
               </div>
               <div className="px-4 pb-4">
                 {(assessment
-                  ? assessment.score < 60
+                  ? assessment.score < 30
                   : (prog?.score ?? 100) < 60) && (
                   <div
                     className="mb-3 px-4 py-3 rounded-xl"
