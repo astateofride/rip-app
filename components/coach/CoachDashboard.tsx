@@ -660,7 +660,7 @@ export default function CoachDashboard({
           <span className="text-xl flex-shrink-0">🎉</span>
           <div className="flex-1 min-w-0">
             <div
-              className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
+              className="text-xs font-bold uppercase tracking-widest mb-0.5"
               style={{ color: "#4ecdc4" }}
             >
               New Student Joined
@@ -810,7 +810,7 @@ export default function CoachDashboard({
                 Sign Out
               </button>
               <p
-                className="text-[10px] uppercase tracking-widest mt-3"
+                className="text-xs uppercase tracking-widest mt-3"
                 style={{ color: "#3a3a5a" }}
               >
                 BETA · {process.env.NEXT_PUBLIC_GIT_HASH ?? "dev"}
@@ -990,7 +990,7 @@ export default function CoachDashboard({
                 >
                   ALL CLEAR
                 </div>
-                <p className="text-base mb-8" style={{ color: "#9898c0" }}>
+                <p className="text-base mb-8" style={{ color: "#c0c0d8" }}>
                   Nothing left in the queue. Your students are moving.
                 </p>
                 <button
@@ -1168,7 +1168,7 @@ export default function CoachDashboard({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div
-                      className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                      className="text-xs font-bold uppercase tracking-widest mb-1"
                       style={{ color: colour }}
                     >
                       STAGE {si + 1} · DAY {dayNum}
@@ -1185,7 +1185,7 @@ export default function CoachDashboard({
                     </div>
                     <div
                       className="text-sm font-semibold"
-                      style={{ color: "#9898c0" }}
+                      style={{ color: "#c0c0d8" }}
                     >
                       {qs.location ?? ""}
                     </div>
@@ -1228,7 +1228,7 @@ export default function CoachDashboard({
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span
-                      className="text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest"
+                      className="text-xs font-bold px-2 py-1 rounded-full uppercase tracking-widest"
                       style={{
                         background: "rgba(255,255,255,0.06)",
                         color: "#9898c0",
@@ -1237,7 +1237,7 @@ export default function CoachDashboard({
                       {completedTasks.length}/{day.tasks.length} tasks done
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest`}
+                      className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-widest`}
                       style={
                         dayDataRow?.manual_read_at
                           ? {
@@ -1259,7 +1259,7 @@ export default function CoachDashboard({
                     </span>
                     {existingRemark && (
                       <span
-                        className="text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest"
+                        className="text-xs font-bold px-2 py-1 rounded-full uppercase tracking-widest"
                         style={{
                           background: "rgba(46,204,113,0.1)",
                           color: "#2ecc71",
@@ -1289,7 +1289,7 @@ export default function CoachDashboard({
                         Written Answers
                       </div>
                       <span
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        className="text-xs font-bold px-2 py-0.5 rounded-full"
                         style={{
                           background: "rgba(232,197,71,0.15)",
                           color: "#e8c547",
@@ -1319,7 +1319,7 @@ export default function CoachDashboard({
                           >
                             <div className="flex items-center justify-between mb-1.5">
                               <span
-                                className="text-[10px] font-bold uppercase tracking-widest"
+                                className="text-xs font-bold uppercase tracking-widest"
                                 style={{ color: "#8888b0" }}
                               >
                                 Task {ti + 1} — Question
@@ -1356,7 +1356,7 @@ export default function CoachDashboard({
                           {/* Answer */}
                           <div className="px-4 py-3">
                             <div
-                              className="text-[10px] font-bold uppercase tracking-widest mb-1.5"
+                              className="text-xs font-bold uppercase tracking-widest mb-1.5"
                               style={{
                                 color: needsWork ? "#ff6b9d" : "#2ecc71",
                               }}
@@ -1397,7 +1397,7 @@ export default function CoachDashboard({
                     }}
                   >
                     <div
-                      className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                      className="text-xs font-bold uppercase tracking-widest mb-2"
                       style={{ color: "#4ecdc4" }}
                     >
                       ▶ VIDEO SUBMISSION
@@ -1424,8 +1424,8 @@ export default function CoachDashboard({
                     }}
                   >
                     <div
-                      className="text-[10px] font-bold uppercase tracking-widest mb-2"
-                      style={{ color: "#9898c0" }}
+                      className="text-xs font-bold uppercase tracking-widest mb-2"
+                      style={{ color: "#7878a8" }}
                     >
                       STUDENT REFLECTION
                     </div>
@@ -1464,7 +1464,7 @@ export default function CoachDashboard({
                           />
                           <p
                             className="text-sm leading-snug"
-                            style={{ color: "#9898c0" }}
+                            style={{ color: "#c0c0d8" }}
                           >
                             {task.text}
                           </p>
@@ -1581,7 +1581,7 @@ export default function CoachDashboard({
             <div>
               <div
                 className="text-xs font-bold uppercase tracking-widest mb-2"
-                style={{ color: "#9898c0" }}
+                style={{ color: "#7878a8" }}
               >
                 COACH DASHBOARD
               </div>
@@ -1609,7 +1609,7 @@ export default function CoachDashboard({
               </h1>
               <p
                 className="mt-3 text-sm font-semibold"
-                style={{ color: "#9898c0" }}
+                style={{ color: "#c0c0d8" }}
               >
                 {totalStudents} student{totalStudents !== 1 ? "s" : ""} ·{" "}
                 {stagesToSignOff > 0
@@ -1631,12 +1631,12 @@ export default function CoachDashboard({
               </div>
               <div
                 className="text-xs font-bold mt-1"
-                style={{ color: "#9898c0" }}
+                style={{ color: "#c0c0d8" }}
               >
                 {today.split(",")[0].toUpperCase()}
               </div>
               <span
-                className="inline-block mt-2 text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full"
+                className="inline-block mt-2 text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-full"
                 style={{ background: "#e8c547", color: "#080810" }}
               >
                 COACH
@@ -1666,8 +1666,8 @@ export default function CoachDashboard({
                   {s.value}
                 </div>
                 <div
-                  className="text-[9px] font-bold tracking-widest mt-1.5 text-center uppercase"
-                  style={{ color: "#8888b0" }}
+                  className="text-xs font-bold tracking-widest mt-1.5 text-center uppercase"
+                  style={{ color: "#9898c0" }}
                 >
                   {s.label}
                 </div>
@@ -1686,7 +1686,7 @@ export default function CoachDashboard({
             >
               <div className="flex items-center justify-between mb-2">
                 <div
-                  className="text-[10px] font-bold uppercase tracking-widest"
+                  className="text-xs font-bold uppercase tracking-widest"
                   style={{ color: "#8888b0" }}
                 >
                   ASSESSMENT RESPONSE SPEED
@@ -1724,8 +1724,8 @@ export default function CoachDashboard({
                 />
               </div>
               <div
-                className="flex justify-between text-[9px] uppercase tracking-widest"
-                style={{ color: "#60608a" }}
+                className="flex justify-between text-xs uppercase tracking-widest"
+                style={{ color: "#7878a8" }}
               >
                 <span>Slowest · 36h</span>
                 <span>
@@ -1752,7 +1752,7 @@ export default function CoachDashboard({
               </div>
               {allUnread.length > 0 && (
                 <span
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  className="text-xs font-bold px-2 py-0.5 rounded-full"
                   style={{ background: "#e8c547", color: "#080810" }}
                 >
                   {allUnread.length}
@@ -1828,7 +1828,7 @@ export default function CoachDashboard({
                           </div>
                           <div
                             className="text-sm truncate mt-0.5"
-                            style={{ color: "#9898c0" }}
+                            style={{ color: "#c0c0d8" }}
                           >
                             {lastUnread.text}
                           </div>
@@ -2051,14 +2051,14 @@ export default function CoachDashboard({
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <span
-                          className="text-[10px] font-bold uppercase tracking-widest"
+                          className="text-xs font-bold uppercase tracking-widest"
                           style={{ color: tagColour }}
                         >
                           {tagLabel}
                         </span>
                         <div className="flex items-center gap-2">
                           <span
-                            className="text-[10px]"
+                            className="text-xs"
                             style={{ color: "#7878a8" }}
                           >
                             {new Date(n.created_at).toLocaleDateString(
@@ -2071,7 +2071,7 @@ export default function CoachDashboard({
                           </span>
                           <button
                             onClick={() => deleteNote(n.id)}
-                            className="text-[10px] font-bold transition-opacity hover:opacity-100 opacity-40"
+                            className="text-xs font-bold transition-opacity hover:opacity-100 opacity-40"
                             style={{
                               color: "#ff6b9d",
                               background: "none",
@@ -2121,14 +2121,15 @@ export default function CoachDashboard({
                 className="w-full rounded-2xl active:scale-[0.98] transition-all overflow-hidden"
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(232,197,71,0.12) 0%, rgba(232,197,71,0.05) 100%)",
-                  border: "1px solid rgba(232,197,71,0.4)",
-                  boxShadow: "0 0 32px rgba(232,197,71,0.1)",
+                    "linear-gradient(135deg, rgba(232,197,71,0.16) 0%, rgba(232,197,71,0.07) 100%)",
+                  border: "1px solid rgba(232,197,71,0.55)",
+                  boxShadow:
+                    "0 0 48px rgba(232,197,71,0.18), inset 0 1px 0 rgba(232,197,71,0.2)",
                 }}
               >
                 <div className="px-5 py-5 text-left">
                   <div
-                    className="text-[10px] font-bold uppercase tracking-widest mb-2"
+                    className="text-xs font-bold uppercase tracking-widest mb-2"
                     style={{ color: "rgba(232,197,71,0.7)" }}
                   >
                     {reviewable.length} STUDENT
@@ -2137,14 +2138,12 @@ export default function CoachDashboard({
                   <div
                     className="font-display leading-none mb-3"
                     style={{
-                      fontSize: 36,
+                      fontSize: 42,
                       color: "#e8c547",
                       letterSpacing: "0.03em",
                     }}
                   >
-                    START
-                    <br />
-                    REVIEW →
+                    START REVIEW →
                   </div>
                   <div className="flex items-center gap-2">
                     <div
@@ -2182,7 +2181,7 @@ export default function CoachDashboard({
                   UNALLOCATED STUDENTS
                 </div>
                 <span
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  className="text-xs font-bold px-2 py-0.5 rounded-full"
                   style={{ background: "#4ecdc4", color: "#080810" }}
                 >
                   {localPending.length}
@@ -2265,7 +2264,7 @@ export default function CoachDashboard({
                 >
                   NO STUDENTS
                 </div>
-                <p className="text-sm" style={{ color: "#9898c0" }}>
+                <p className="text-sm" style={{ color: "#c0c0d8" }}>
                   Students link to you by entering your email during sign-up.
                 </p>
                 <div
@@ -2276,7 +2275,7 @@ export default function CoachDashboard({
                   }}
                 >
                   <div
-                    className="text-[10px] uppercase tracking-widest mb-1"
+                    className="text-xs uppercase tracking-widest mb-1"
                     style={{ color: "#7878a8" }}
                   >
                     Your coach email
@@ -2358,7 +2357,7 @@ export default function CoachDashboard({
                                 setStudentReviewSheet(s.id);
                                 setSheetNotes({});
                               }}
-                              className="text-[10px] font-bold px-2 py-1 rounded-full active:scale-95 transition-all flex-shrink-0"
+                              className="text-xs font-bold px-2 py-1 rounded-full active:scale-95 transition-all flex-shrink-0"
                               style={{
                                 background: "rgba(232,197,71,0.15)",
                                 color: "#e8c547",
@@ -2370,7 +2369,7 @@ export default function CoachDashboard({
                           )}
                           {unreadMsgs > 0 && (
                             <span
-                              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                              className="text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
                               style={{
                                 background: "#e8c547",
                                 color: "#080810",
@@ -2405,7 +2404,7 @@ export default function CoachDashboard({
                                 }}
                               >
                                 <div
-                                  className="text-[9px] font-bold uppercase tracking-widest mb-1"
+                                  className="text-xs font-bold uppercase tracking-widest mb-1"
                                   style={{ color: signed ? "#2ecc71" : c }}
                                 >
                                   {signed ? "✓ " : ""}
@@ -2440,7 +2439,7 @@ export default function CoachDashboard({
                           })}
                         </div>
                         <div
-                          className="text-[10px] mt-2 text-right"
+                          className="text-xs mt-2 text-right"
                           style={{ color: "#8888b0" }}
                         >
                           {timeAgo(sLastSession?.started_at)}
@@ -2760,7 +2759,7 @@ export default function CoachDashboard({
                         <div>
                           <div
                             className="text-sm font-bold uppercase tracking-widest mb-3"
-                            style={{ color: "#9898c0" }}
+                            style={{ color: "#c0c0d8" }}
                           >
                             TRAINING PROGRESS —{" "}
                             {totalAll
@@ -2794,7 +2793,7 @@ export default function CoachDashboard({
                                   <div className="flex-1 min-w-0">
                                     <div
                                       className="flex justify-between text-sm font-semibold mb-1.5"
-                                      style={{ color: "#9898c0" }}
+                                      style={{ color: "#c0c0d8" }}
                                     >
                                       <span className="truncate mr-2">
                                         {stageNames[si]}
@@ -3032,7 +3031,7 @@ export default function CoachDashboard({
                     {srs.name.split(" ")[0].toUpperCase()}
                   </div>
                   <div
-                    className="text-[10px] font-bold uppercase tracking-widest"
+                    className="text-xs font-bold uppercase tracking-widest"
                     style={{ color: "#e8c547" }}
                   >
                     {totalAnswers} answer{totalAnswers !== 1 ? "s" : ""} to
@@ -3059,7 +3058,7 @@ export default function CoachDashboard({
                     >
                       ALL CLEAR
                     </div>
-                    <p style={{ color: "#9898c0" }}>
+                    <p style={{ color: "#c0c0d8" }}>
                       Nothing pending for {srs.name.split(" ")[0]}.
                     </p>
                   </div>
@@ -3095,7 +3094,7 @@ export default function CoachDashboard({
                           ti,
                           task,
                           prog,
-                          needsWork: (prog.score ?? 0) < 60,
+                          needsWork: (prog.score ?? 0) < 30,
                         };
                       })
                       .filter(Boolean);
@@ -3110,7 +3109,7 @@ export default function CoachDashboard({
                           }}
                         >
                           <div
-                            className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                            className="text-xs font-bold uppercase tracking-widest mb-1"
                             style={{ color: colour }}
                           >
                             Stage {si + 1} · Day {dayNum}
@@ -3126,7 +3125,7 @@ export default function CoachDashboard({
                           </div>
                           <div className="flex gap-2 mt-2 flex-wrap">
                             <span
-                              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                              className="text-xs font-bold px-2 py-0.5 rounded-full"
                               style={
                                 dayDataRow?.manual_read_at
                                   ? {
@@ -3149,7 +3148,7 @@ export default function CoachDashboard({
                             </span>
                             {writtenAnswers.length > 0 && (
                               <span
-                                className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                className="text-xs font-bold px-2 py-0.5 rounded-full"
                                 style={{
                                   background: "rgba(232,197,71,0.12)",
                                   color: "#e8c547",
@@ -3184,7 +3183,7 @@ export default function CoachDashboard({
                               >
                                 <div className="flex items-center justify-between mb-1.5">
                                   <span
-                                    className="text-[10px] font-bold uppercase tracking-widest"
+                                    className="text-xs font-bold uppercase tracking-widest"
                                     style={{ color: "#8888b0" }}
                                   >
                                     Task {ti + 1}
@@ -3221,7 +3220,7 @@ export default function CoachDashboard({
                               </div>
                               <div className="px-4 py-3">
                                 <div
-                                  className="text-[10px] font-bold uppercase tracking-widest mb-1.5"
+                                  className="text-xs font-bold uppercase tracking-widest mb-1.5"
                                   style={{
                                     color: needsWork ? "#ff6b9d" : "#2ecc71",
                                   }}
@@ -3249,7 +3248,7 @@ export default function CoachDashboard({
                             }}
                           >
                             <div
-                              className="text-[10px] font-bold uppercase tracking-widest mb-1.5"
+                              className="text-xs font-bold uppercase tracking-widest mb-1.5"
                               style={{ color: "#4ecdc4" }}
                             >
                               ▶ VIDEO
@@ -3276,8 +3275,8 @@ export default function CoachDashboard({
                             }}
                           >
                             <div
-                              className="text-[10px] font-bold uppercase tracking-widest mb-1.5"
-                              style={{ color: "#9898c0" }}
+                              className="text-xs font-bold uppercase tracking-widest mb-1.5"
+                              style={{ color: "#7878a8" }}
                             >
                               REFLECTION
                             </div>
