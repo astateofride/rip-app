@@ -667,13 +667,14 @@ export default function StageView({
             onClick={() => (onBack ? onBack() : router.push("/pathway"))}
             style={{
               color: "#9898c0",
-              minWidth: 36,
-              minHeight: 36,
+              minWidth: 44,
+              minHeight: 44,
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               background: "none",
               border: "none",
-              fontSize: 20,
+              fontSize: 22,
               cursor: "pointer",
             }}
           >
@@ -934,10 +935,10 @@ export default function StageView({
                         return n;
                       })
                     }
-                    className="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded flex-shrink-0"
+                    className="text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-xl flex-shrink-0 active:scale-95 transition-all"
                     style={{
                       color: "#9898c0",
-                      background: "rgba(255,255,255,0.05)",
+                      background: "rgba(255,255,255,0.07)",
                     }}
                   >
                     edit
@@ -969,14 +970,14 @@ export default function StageView({
             >
               <div className="flex items-center gap-2 px-4 pt-4 pb-2">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
                   style={{ background: "#2ecc71", color: "#080810" }}
                 >
                   ✓
                 </div>
                 <p
-                  className="text-sm flex-1 leading-snug"
-                  style={{ color: "#9898c0" }}
+                  className="text-base flex-1 leading-snug"
+                  style={{ color: "#c0c0d8" }}
                 >
                   {activeTask.text}
                 </p>
@@ -988,10 +989,10 @@ export default function StageView({
                       return n;
                     })
                   }
-                  className="text-xs px-2 py-1 rounded flex-shrink-0"
+                  className="text-sm px-4 py-2.5 rounded-xl flex-shrink-0 active:scale-95 transition-all"
                   style={{
                     color: "#9898c0",
-                    background: "rgba(255,255,255,0.05)",
+                    background: "rgba(255,255,255,0.07)",
                   }}
                 >
                   ▲
@@ -1033,7 +1034,7 @@ export default function StageView({
                   id={`answer-${taskKey}`}
                   className="inp"
                   defaultValue={savedAnswer}
-                  style={{ minHeight: 100, fontSize: 15 }}
+                  style={{ minHeight: 100, fontSize: 16 }}
                 />
                 <button
                   onClick={() => {
@@ -1196,7 +1197,7 @@ export default function StageView({
                       id={`answer-${taskKey}`}
                       className="inp"
                       placeholder="Write your answer here — use your own words…"
-                      style={{ minHeight: 100, fontSize: 15 }}
+                      style={{ minHeight: 100, fontSize: 16 }}
                     />
                     <button
                       onClick={() => {
