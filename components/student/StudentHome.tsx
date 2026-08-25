@@ -495,7 +495,7 @@ export default function StudentHome({
           </div>
           {unreadFromCoach > 0 && (
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
               style={{ background: "#e8c547", color: "#0a0a12" }}
             >
               {unreadFromCoach}
