@@ -1,40 +1,77 @@
-import { createClient } from '@/lib/supabase/server'
-import { STAGES, STAGE_LINES } from '@/lib/stages'
-import StudentHome from '@/components/student/StudentHome'
-import type { TaskProgress, StageSignoff, Message, Profile, SessionLog } from '@/lib/types'
+import { createClient } from "@/lib/supabase/server";
+import { STAGES, STAGE_LINES } from "@/lib/stages";
+import StudentHome from "@/components/student/StudentHome";
+import type {
+  TaskProgress,
+  StageSignoff,
+  Message,
+  Profile,
+  SessionLog,
+} from "@/lib/types";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default async function PathwayPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
-  // Small delay to allow trigger to create profile on first login
-  await new Promise(r => setTimeout(r, 500))
+  console.log("User ID on server:", user.id);
 
-  console.log('User ID on server:', user.id)
+  // Retry up to 5 times — trigger may take a moment on first login
+  let profile = null;
+  for (let i = 0; i < 5; i++) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    if (data) {
+      profile = data;
+      break;
+    }
+    await new Promise((r) => setTimeout(r, 600));
+  }
 
   const [
-    { data: profile },
     { data: tasks },
     { data: signoffs },
     { data: messages },
     { data: sessions },
   ] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('task_progress').select('*').eq('student_id', user.id),
-    supabase.from('stage_signoffs').select('*').eq('student_id', user.id),
-    supabase.from('messages').select('*').eq('student_id', user.id).order('created_at'),
-    supabase.from('session_logs').select('*').eq('user_id', user.id).order('started_at', { ascending: false }).limit(1),
-  ])
+    supabase.from("task_progress").select("*").eq("student_id", user.id),
+    supabase.from("stage_signoffs").select("*").eq("student_id", user.id),
+    supabase
+      .from("messages")
+      .select("*")
+      .eq("student_id", user.id)
+      .order("created_at"),
+    supabase
+      .from("session_logs")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("started_at", { ascending: false })
+      .limit(1),
+  ]);
 
   if (!profile) {
     return (
-      <div style={{ background: '#0a0a12', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9898c0', fontSize: 14 }}>
+      <div
+        style={{
+          background: "#0a0a12",
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#9898c0",
+          fontSize: 14,
+        }}
+      >
         Setting up your profile…
       </div>
-    )
+    );
   }
 
   return (
@@ -46,5 +83,5 @@ export default async function PathwayPage() {
       lastSession={(sessions?.[0] ?? null) as SessionLog | null}
       userId={user.id}
     />
-  )
+  );
 }
