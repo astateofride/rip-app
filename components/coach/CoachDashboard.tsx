@@ -487,6 +487,15 @@ export default function CoachDashboard({
     setProfileSheet(studentId);
   }
 
+  async function archiveStudent(studentId: string) {
+    setLocalStudents((prev) => prev.filter((s) => s.id !== studentId));
+    setProfileSheet(null);
+    await supabase
+      .from("profiles")
+      .update({ archived: true })
+      .eq("id", studentId);
+  }
+
   async function saveEdit() {
     if (!profileSheet) return;
     setEditSaving(true);
@@ -2481,9 +2490,19 @@ export default function CoachDashboard({
                         <button
                           onClick={() => openProfile(s.id)}
                           className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
-                          style={{ color: "#9898c0" }}
+                          style={{
+                            color: "#9898c0",
+                            borderRight: "1px solid #1a1a2e",
+                          }}
                         >
                           👤 PROFILE
+                        </button>
+                        <button
+                          onClick={() => archiveStudent(s.id)}
+                          className="flex-1 py-2.5 text-xs font-bold uppercase tracking-widest active:bg-white/5 transition-all"
+                          style={{ color: "#7878a8" }}
+                        >
+                          ARCHIVE
                         </button>
                       </div>
                     </div>
@@ -2912,41 +2931,54 @@ export default function CoachDashboard({
                             );
                           });
                           return (
-                            <div className="flex gap-3 pb-2">
-                              <button
-                                onClick={() => {
-                                  setProfileSheet(null);
-                                  setSelectedStudentId(profileSheet);
-                                  setTab("messages");
-                                }}
-                                className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
-                                style={{
-                                  background: "rgba(232,197,71,0.08)",
-                                  border: "1px solid rgba(232,197,71,0.3)",
-                                  color: "#e8c547",
-                                  letterSpacing: "0.06em",
-                                }}
-                              >
-                                💬 MESSAGE
-                              </button>
-                              {profileToReview && (
+                            <div className="flex flex-col gap-3 pb-2">
+                              <div className="flex gap-3">
                                 <button
                                   onClick={() => {
                                     setProfileSheet(null);
-                                    setStudentReviewSheet(profileSheet);
-                                    setSheetNotes({});
+                                    setSelectedStudentId(profileSheet);
+                                    setTab("messages");
                                   }}
                                   className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
                                   style={{
                                     background: "rgba(232,197,71,0.08)",
-                                    border: "1px solid rgba(232,197,71,0.35)",
+                                    border: "1px solid rgba(232,197,71,0.3)",
                                     color: "#e8c547",
                                     letterSpacing: "0.06em",
                                   }}
                                 >
-                                  📋 REVIEW
+                                  💬 MESSAGE
                                 </button>
-                              )}
+                                {profileToReview && (
+                                  <button
+                                    onClick={() => {
+                                      setProfileSheet(null);
+                                      setStudentReviewSheet(profileSheet);
+                                      setSheetNotes({});
+                                    }}
+                                    className="flex-1 py-4 rounded-2xl font-display text-xl tracking-wide active:scale-[0.98] transition-all"
+                                    style={{
+                                      background: "rgba(232,197,71,0.08)",
+                                      border: "1px solid rgba(232,197,71,0.35)",
+                                      color: "#e8c547",
+                                      letterSpacing: "0.06em",
+                                    }}
+                                  >
+                                    📋 REVIEW
+                                  </button>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => archiveStudent(profileSheet)}
+                                className="w-full py-3 rounded-2xl text-sm font-bold uppercase tracking-widest active:scale-[0.98] transition-all"
+                                style={{
+                                  border: "1px solid rgba(255,255,255,0.07)",
+                                  color: "#7878a8",
+                                  background: "none",
+                                }}
+                              >
+                                Archive student
+                              </button>
                             </div>
                           );
                         })()}

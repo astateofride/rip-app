@@ -1,41 +1,53 @@
-import { createClient } from '@/lib/supabase/server'
-import CoachDashboard from '@/components/coach/CoachDashboard'
-import type { Profile, TaskProgress, DayData, CoachRemark, StageSignoff, Message, SessionLog, CoachNote } from '@/lib/types'
+import { createClient } from "@/lib/supabase/server";
+import CoachDashboard from "@/components/coach/CoachDashboard";
+import type {
+  Profile,
+  TaskProgress,
+  DayData,
+  CoachRemark,
+  StageSignoff,
+  Message,
+  SessionLog,
+  CoachNote,
+} from "@/lib/types";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default async function CoachPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
   const { data: coachProfile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-  // Get all students assigned to this coach
+  // Get all students assigned to this coach (excluding archived)
   const { data: students } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('coach_id', user.id)
-    .eq('role', 'student')
+    .from("profiles")
+    .select("*")
+    .eq("coach_id", user.id)
+    .eq("role", "student")
+    .neq("archived", true);
 
   // Get all students with no coach assigned yet (unallocated)
   const { data: pendingStudents } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', 'student')
-    .is('coach_id', null)
+    .from("profiles")
+    .select("*")
+    .eq("role", "student")
+    .is("coach_id", null);
 
   // Get all coaches (for flagging notes)
   const { data: allCoaches } = await supabase
-    .from('profiles')
-    .select('id, name, email')
-    .eq('role', 'coach')
+    .from("profiles")
+    .select("id, name, email")
+    .eq("role", "coach");
 
-  const studentIds = (students ?? []).map((s: Profile) => s.id)
+  const studentIds = (students ?? []).map((s: Profile) => s.id);
 
   const [
     { data: allTasks },
@@ -46,14 +58,36 @@ export default async function CoachPage() {
     { data: lastSessions },
     { data: coachNotes },
   ] = await Promise.all([
-    studentIds.length > 0 ? supabase.from('task_progress').select('*').in('student_id', studentIds) : Promise.resolve({ data: [] }),
-    studentIds.length > 0 ? supabase.from('day_data').select('*').in('student_id', studentIds) : Promise.resolve({ data: [] }),
-    supabase.from('coach_remarks').select('*').eq('coach_id', user.id),
-    studentIds.length > 0 ? supabase.from('stage_signoffs').select('*').in('student_id', studentIds) : Promise.resolve({ data: [] }),
-    studentIds.length > 0 ? supabase.from('messages').select('*').in('student_id', studentIds).order('created_at') : Promise.resolve({ data: [] }),
-    studentIds.length > 0 ? supabase.from('session_logs').select('*').in('user_id', studentIds).order('started_at', { ascending: false }) : Promise.resolve({ data: [] }),
-    supabase.from('coach_notes').select('*').eq('coach_id', user.id).order('created_at', { ascending: false }),
-  ])
+    studentIds.length > 0
+      ? supabase.from("task_progress").select("*").in("student_id", studentIds)
+      : Promise.resolve({ data: [] }),
+    studentIds.length > 0
+      ? supabase.from("day_data").select("*").in("student_id", studentIds)
+      : Promise.resolve({ data: [] }),
+    supabase.from("coach_remarks").select("*").eq("coach_id", user.id),
+    studentIds.length > 0
+      ? supabase.from("stage_signoffs").select("*").in("student_id", studentIds)
+      : Promise.resolve({ data: [] }),
+    studentIds.length > 0
+      ? supabase
+          .from("messages")
+          .select("*")
+          .in("student_id", studentIds)
+          .order("created_at")
+      : Promise.resolve({ data: [] }),
+    studentIds.length > 0
+      ? supabase
+          .from("session_logs")
+          .select("*")
+          .in("user_id", studentIds)
+          .order("started_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from("coach_notes")
+      .select("*")
+      .eq("coach_id", user.id)
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <CoachDashboard
@@ -70,5 +104,5 @@ export default async function CoachPage() {
       coachNotes={(coachNotes ?? []) as CoachNote[]}
       coachId={user.id}
     />
-  )
+  );
 }
