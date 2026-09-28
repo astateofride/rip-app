@@ -1127,10 +1127,43 @@ export default function StageView({
               className="rounded-2xl overflow-hidden"
               style={{
                 background: "#111120",
-                border: `2px solid ${colour}`,
-                boxShadow: `0 0 28px ${colour}18`,
+                border:
+                  prog?.coach_status === "denied"
+                    ? "2px solid rgba(255,107,157,0.6)"
+                    : `2px solid ${colour}`,
+                boxShadow:
+                  prog?.coach_status === "denied"
+                    ? "0 0 28px rgba(255,107,157,0.12)"
+                    : `0 0 28px ${colour}18`,
               }}
             >
+              {prog?.coach_status === "denied" && (
+                <div
+                  className="px-4 py-3 flex items-start gap-3"
+                  style={{
+                    background: "rgba(255,107,157,0.08)",
+                    borderBottom: "1px solid rgba(255,107,157,0.2)",
+                  }}
+                >
+                  <span className="text-lg flex-shrink-0">✕</span>
+                  <div>
+                    <div
+                      className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "#ff6b9d" }}
+                    >
+                      Answer not accepted
+                    </div>
+                    <p
+                      className="text-sm leading-snug"
+                      style={{ color: "#c0c0d8" }}
+                    >
+                      {prog.denial_reason
+                        ? `Your coach flagged this as: ${prog.denial_reason}. Please rewrite your answer below.`
+                        : "Your coach has asked you to rewrite this answer. Have another go below."}
+                    </p>
+                  </div>
+                </div>
+              )}
               <div
                 className="px-4 pt-4 pb-3"
                 style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
@@ -1139,12 +1172,20 @@ export default function StageView({
                   <div
                     className="text-xs font-bold px-3 py-1 rounded-full"
                     style={{
-                      background: colour,
-                      color: "#080810",
+                      background:
+                        prog?.coach_status === "denied"
+                          ? "rgba(255,107,157,0.15)"
+                          : colour,
+                      color:
+                        prog?.coach_status === "denied" ? "#ff6b9d" : "#080810",
                       letterSpacing: "0.08em",
+                      border:
+                        prog?.coach_status === "denied"
+                          ? "1px solid rgba(255,107,157,0.4)"
+                          : "none",
                     }}
                   >
-                    YOUR TURN
+                    {prog?.coach_status === "denied" ? "RESUBMIT" : "YOUR TURN"}
                   </div>
                   <span
                     className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded ml-auto flex-shrink-0"

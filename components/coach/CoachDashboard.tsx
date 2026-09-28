@@ -138,6 +138,14 @@ export default function CoachDashboard({
     null,
   );
   const [sheetNotes, setSheetNotes] = useState<Record<string, string>>({});
+  // taskKey → 'approved' | 'denied' | null (pending)
+  const [taskReviews, setTaskReviews] = useState<
+    Record<string, "approved" | "denied">
+  >({});
+  // taskKey → denial reason text
+  const [denialReasons, setDenialReasons] = useState<Record<string, string>>(
+    {},
+  );
   const [newStudentToast, setNewStudentToast] = useState<string | null>(null);
   const [localPending, setLocalPending] = useState<Profile[]>(pendingStudents);
   const [localNotes, setLocalNotes] = useState<CoachNote[]>(initialNotes);
@@ -329,8 +337,53 @@ export default function CoachDashboard({
       const [siStr, diStr] = key.split("-");
       await saveRemark(studentId, Number(siStr), Number(diStr), remark);
     }
+    // Persist coach approve/deny decisions
+    for (const [taskKey, status] of Object.entries(taskReviews)) {
+      const [siStr, diStr, tiStr] = taskKey.split("-");
+      const denial_reason =
+        status === "denied" ? denialReasons[taskKey]?.trim() || null : null;
+      const prog = localTasks.find(
+        (t) =>
+          t.student_id === studentId &&
+          t.stage_idx === Number(siStr) &&
+          t.day_idx === Number(diStr) &&
+          t.task_idx === Number(tiStr),
+      );
+      if (!prog) continue;
+      await supabase
+        .from("task_progress")
+        .update({
+          coach_status: status,
+          denial_reason,
+          // Denied answers reset completed so student must resubmit
+          ...(status === "denied"
+            ? { completed: false, answer: null, score: null }
+            : {}),
+        })
+        .eq("id", prog.id);
+    }
+    setLocalTasks((prev) =>
+      prev.map((t) => {
+        if (t.student_id !== studentId) return t;
+        const key = `${t.stage_idx}-${t.day_idx}-${t.task_idx}`;
+        const status = taskReviews[key];
+        if (!status) return t;
+        if (status === "denied")
+          return {
+            ...t,
+            coach_status: "denied",
+            denial_reason: denialReasons[key] || null,
+            completed: false,
+            answer: null,
+            score: null,
+          };
+        return { ...t, coach_status: "approved" };
+      }),
+    );
     setStudentReviewSheet(null);
     setSheetNotes({});
+    setTaskReviews({});
+    setDenialReasons({});
   }
 
   async function confirmSignoff() {
@@ -3260,11 +3313,207 @@ export default function CoachDashboard({
                                   Student's Answer
                                 </div>
                                 <p
-                                  className="text-base leading-relaxed"
+                                  className="text-base leading-relaxed mb-4"
                                   style={{ color: "#f0f0eb" }}
                                 >
                                   {prog.answer}
                                 </p>
+                                {/* Approve / Deny */}
+                                {(() => {
+                                  const taskKey = `${si}-${di}-${ti}`;
+                                  const decision =
+                                    taskReviews[taskKey] ?? prog.coach_status;
+                                  if (decision === "approved") {
+                                    return (
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className="flex-1 flex items-center gap-2 px-4 py-3 rounded-xl"
+                                          style={{
+                                            background: "rgba(46,204,113,0.1)",
+                                            border:
+                                              "1px solid rgba(46,204,113,0.3)",
+                                          }}
+                                        >
+                                          <span style={{ color: "#2ecc71" }}>
+                                            ✓
+                                          </span>
+                                          <span
+                                            className="text-sm font-bold"
+                                            style={{ color: "#2ecc71" }}
+                                          >
+                                            Approved
+                                          </span>
+                                        </div>
+                                        <button
+                                          onClick={() =>
+                                            setTaskReviews((p) => {
+                                              const n = { ...p };
+                                              delete n[taskKey];
+                                              return n;
+                                            })
+                                          }
+                                          className="px-3 py-3 rounded-xl text-xs font-bold"
+                                          style={{
+                                            color: "#7878a8",
+                                            background:
+                                              "rgba(255,255,255,0.05)",
+                                          }}
+                                        >
+                                          undo
+                                        </button>
+                                      </div>
+                                    );
+                                  }
+                                  if (decision === "denied") {
+                                    return (
+                                      <div className="flex flex-col gap-2">
+                                        <div
+                                          className="flex items-center gap-2 px-4 py-3 rounded-xl"
+                                          style={{
+                                            background: "rgba(255,107,157,0.1)",
+                                            border:
+                                              "1px solid rgba(255,107,157,0.3)",
+                                          }}
+                                        >
+                                          <span style={{ color: "#ff6b9d" }}>
+                                            ✕
+                                          </span>
+                                          <span
+                                            className="text-sm font-bold"
+                                            style={{ color: "#ff6b9d" }}
+                                          >
+                                            Denied
+                                          </span>
+                                          {denialReasons[taskKey] && (
+                                            <span
+                                              className="text-xs ml-1"
+                                              style={{ color: "#c0c0d8" }}
+                                            >
+                                              — {denialReasons[taskKey]}
+                                            </span>
+                                          )}
+                                          <button
+                                            onClick={() =>
+                                              setTaskReviews((p) => {
+                                                const n = { ...p };
+                                                delete n[taskKey];
+                                                return n;
+                                              })
+                                            }
+                                            className="ml-auto text-xs font-bold"
+                                            style={{ color: "#7878a8" }}
+                                          >
+                                            undo
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <div className="flex flex-col gap-2">
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() =>
+                                            setTaskReviews((p) => ({
+                                              ...p,
+                                              [taskKey]: "approved",
+                                            }))
+                                          }
+                                          className="flex-1 py-3 rounded-xl text-sm font-bold uppercase tracking-widest active:scale-95 transition-all"
+                                          style={{
+                                            background: "rgba(46,204,113,0.12)",
+                                            border:
+                                              "1px solid rgba(46,204,113,0.35)",
+                                            color: "#2ecc71",
+                                          }}
+                                        >
+                                          ✓ Approve
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            setTaskReviews((p) => ({
+                                              ...p,
+                                              [taskKey]: "denied",
+                                            }))
+                                          }
+                                          className="flex-1 py-3 rounded-xl text-sm font-bold uppercase tracking-widest active:scale-95 transition-all"
+                                          style={{
+                                            background: "rgba(255,107,157,0.1)",
+                                            border:
+                                              "1px solid rgba(255,107,157,0.3)",
+                                            color: "#ff6b9d",
+                                          }}
+                                        >
+                                          ✕ Deny
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                                {/* Denial reason input — shown when denied and no reason yet */}
+                                {(() => {
+                                  const taskKey = `${si}-${di}-${ti}`;
+                                  const decision = taskReviews[taskKey];
+                                  if (decision !== "denied") return null;
+                                  const PRESETS = [
+                                    "AI-generated",
+                                    "Too brief",
+                                    "Off topic",
+                                    "Copied from manual",
+                                  ];
+                                  return (
+                                    <div className="mt-2 flex flex-col gap-2">
+                                      <div
+                                        className="text-xs font-bold uppercase tracking-widest"
+                                        style={{ color: "#ff6b9d" }}
+                                      >
+                                        Reason for denial
+                                      </div>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {PRESETS.map((p) => (
+                                          <button
+                                            key={p}
+                                            onClick={() =>
+                                              setDenialReasons((prev) => ({
+                                                ...prev,
+                                                [taskKey]: p,
+                                              }))
+                                            }
+                                            className="text-xs font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all"
+                                            style={
+                                              denialReasons[taskKey] === p
+                                                ? {
+                                                    background: "#ff6b9d",
+                                                    color: "#080810",
+                                                  }
+                                                : {
+                                                    background:
+                                                      "rgba(255,107,157,0.1)",
+                                                    border:
+                                                      "1px solid rgba(255,107,157,0.25)",
+                                                    color: "#ff6b9d",
+                                                  }
+                                            }
+                                          >
+                                            {p}
+                                          </button>
+                                        ))}
+                                      </div>
+                                      <input
+                                        className="inp"
+                                        placeholder="Or type a custom reason…"
+                                        value={denialReasons[taskKey] ?? ""}
+                                        onChange={(e) =>
+                                          setDenialReasons((prev) => ({
+                                            ...prev,
+                                            [taskKey]: e.target.value,
+                                          }))
+                                        }
+                                        style={{ fontSize: 16 }}
+                                      />
+                                    </div>
+                                  );
+                                })()}
                               </div>
                             </div>
                           );
