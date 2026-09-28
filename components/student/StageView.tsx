@@ -460,6 +460,8 @@ export default function StageView({
           completed_at: new Date().toISOString(),
           answer,
           score: result.score,
+          coach_status: null,
+          denial_reason: null,
         },
       ];
     });
@@ -550,6 +552,8 @@ export default function StageView({
           completed_at: newCompleted ? new Date().toISOString() : null,
           answer: null,
           score: null,
+          coach_status: null,
+          denial_reason: null,
         },
       ];
       updated = next;

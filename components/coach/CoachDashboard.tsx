@@ -446,6 +446,8 @@ export default function CoachDashboard({
           completed_at: new Date().toISOString(),
           answer: null,
           score: null,
+          coach_status: null,
+          denial_reason: null,
         },
       ];
     });
