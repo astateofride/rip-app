@@ -34,12 +34,13 @@ export default async function CoachPage() {
     .eq("role", "student")
     .neq("archived", true);
 
-  // Get all students with no coach assigned yet (unallocated)
+  // Get all students with no coach assigned yet (unallocated), excluding archived
   const { data: pendingStudents } = await supabase
     .from("profiles")
     .select("*")
     .eq("role", "student")
-    .is("coach_id", null);
+    .is("coach_id", null)
+    .neq("archived", true);
 
   // Get all coaches (for flagging notes)
   const { data: allCoaches } = await supabase
