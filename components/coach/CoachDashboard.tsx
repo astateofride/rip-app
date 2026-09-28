@@ -1119,19 +1119,21 @@ export default function CoachDashboard({
                     t.completed,
                 ),
             );
-          const writtenAnswers = day.tasks
-            .map((task, ti) => {
-              const prog = localTasks.find(
-                (t) =>
-                  t.student_id === qs.id &&
-                  t.stage_idx === si &&
-                  t.day_idx === di &&
-                  t.task_idx === ti,
-              );
-              if (!prog?.answer) return null;
-              return { ti, task, prog, needsWork: (prog.score ?? 0) < 60 };
-            })
-            .filter(Boolean);
+          const writtenAnswers = day.tasks.map((task, ti) => {
+            const prog = localTasks.find(
+              (t) =>
+                t.student_id === qs.id &&
+                t.stage_idx === si &&
+                t.day_idx === di &&
+                t.task_idx === ti,
+            );
+            return {
+              ti,
+              task,
+              prog: prog ?? null,
+              needsWork: (prog?.score ?? 0) < 30,
+            };
+          });
           const { done: stageDone, total: stageTotal } = countTasks(qs.id, si);
           const stageComplete =
             stageDone === stageTotal &&
@@ -1142,6 +1144,63 @@ export default function CoachDashboard({
             const key = `${qs.id}-${si}-${di}`;
             setSaving(key);
             await saveRemark(qs.id, si, di, queueNote);
+            // Persist per-task reviews and notes for this day
+            for (let ti = 0; ti < day.tasks.length; ti++) {
+              const taskKey = `${si}-${di}-${ti}`;
+              const status = taskReviews[taskKey];
+              const coach_note = taskNotes[taskKey]?.trim() || null;
+              if (!status && !coach_note) continue;
+              const prog = localTasks.find(
+                (t) =>
+                  t.student_id === qs.id &&
+                  t.stage_idx === si &&
+                  t.day_idx === di &&
+                  t.task_idx === ti,
+              );
+              if (!prog) continue;
+              const denial_reason =
+                status === "denied"
+                  ? denialReasons[taskKey]?.trim() || null
+                  : null;
+              await supabase
+                .from("task_progress")
+                .update({
+                  ...(status ? { coach_status: status, denial_reason } : {}),
+                  ...(coach_note !== null ? { coach_note } : {}),
+                  ...(status === "denied"
+                    ? { completed: false, answer: null, score: null }
+                    : {}),
+                })
+                .eq("id", prog.id);
+            }
+            setLocalTasks((prev) =>
+              prev.map((t) => {
+                if (
+                  t.student_id !== qs.id ||
+                  t.stage_idx !== si ||
+                  t.day_idx !== di
+                )
+                  return t;
+                const tk = `${t.stage_idx}-${t.day_idx}-${t.task_idx}`;
+                const status = taskReviews[tk];
+                const note = taskNotes[tk]?.trim() || null;
+                const updated = {
+                  ...t,
+                  ...(note !== null ? { coach_note: note } : {}),
+                };
+                if (!status) return updated;
+                if (status === "denied")
+                  return {
+                    ...updated,
+                    coach_status: "denied",
+                    denial_reason: denialReasons[tk] || null,
+                    completed: false,
+                    answer: null,
+                    score: null,
+                  };
+                return { ...updated, coach_status: "approved" };
+              }),
+            );
             setSaving(null);
             const next = queueIdx + 1;
             setQueueIdx(next);
@@ -1351,120 +1410,300 @@ export default function CoachDashboard({
                   </div>
                 </div>
 
-                {/* Written answers — main content */}
-                {writtenAnswers.length > 0 ? (
-                  <div className="flex flex-col gap-3">
-                    <div
-                      className="flex items-center gap-2"
-                      style={{
-                        paddingLeft: 4,
-                        borderLeft: "3px solid #e8c547",
-                      }}
-                    >
+                {/* All tasks — mark each one */}
+                <div className="flex flex-col gap-3">
+                  {writtenAnswers.map(({ ti, task, prog, needsWork }) => {
+                    const taskKey = `${si}-${di}-${ti}`;
+                    const hasAnswer = !!prog?.answer;
+                    const decision = taskReviews[taskKey] ?? prog?.coach_status;
+                    const borderCol = !prog?.completed
+                      ? "rgba(255,255,255,0.08)"
+                      : decision === "denied"
+                        ? "rgba(255,107,157,0.35)"
+                        : decision === "approved"
+                          ? "rgba(46,204,113,0.35)"
+                          : needsWork && hasAnswer
+                            ? "rgba(255,107,157,0.25)"
+                            : "rgba(46,204,113,0.2)";
+                    const PRESETS = [
+                      "AI-generated",
+                      "Too brief",
+                      "Off topic",
+                      "Copied from manual",
+                    ];
+                    return (
                       <div
-                        className="text-sm font-bold uppercase tracking-widest pl-2"
-                        style={{ color: "#f0f0eb" }}
-                      >
-                        Written Answers
-                      </div>
-                      <span
-                        className="text-xs font-bold px-2 py-0.5 rounded-full"
+                        key={ti}
+                        className="rounded-2xl overflow-hidden"
                         style={{
-                          background: "rgba(232,197,71,0.15)",
-                          color: "#e8c547",
+                          background: "#0c0c18",
+                          border: `1px solid ${borderCol}`,
                         }}
                       >
-                        {writtenAnswers.length}
-                      </span>
-                    </div>
-                    {writtenAnswers.map((item) => {
-                      if (!item) return null;
-                      const { ti, task, prog, needsWork } = item;
-                      return (
+                        {/* Header */}
                         <div
-                          key={ti}
-                          className="rounded-2xl overflow-hidden"
+                          className="px-4 pt-3 pb-2"
                           style={{
-                            background: "#0c0c18",
-                            border: `1px solid ${needsWork ? "rgba(255,107,157,0.35)" : "rgba(46,204,113,0.25)"}`,
+                            borderBottom: "1px solid rgba(255,255,255,0.05)",
                           }}
                         >
-                          {/* Question */}
-                          <div
-                            className="px-4 pt-3 pb-2"
-                            style={{
-                              borderBottom: `1px solid ${needsWork ? "rgba(255,107,157,0.12)" : "rgba(46,204,113,0.1)"}`,
-                            }}
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span
-                                className="text-xs font-bold uppercase tracking-widest"
-                                style={{ color: "#8888b0" }}
-                              >
-                                Task {ti + 1} — Question
-                              </span>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span
+                              className="text-xs font-bold uppercase tracking-widest"
+                              style={{ color: "#8888b0" }}
+                            >
+                              Task {ti + 1}
+                            </span>
+                            {prog?.completed ? (
                               <span
                                 className="text-xs font-bold px-2 py-0.5 rounded-full"
                                 style={
-                                  needsWork
-                                    ? {
-                                        background: "rgba(255,107,157,0.15)",
-                                        color: "#ff6b9d",
-                                        border:
-                                          "1px solid rgba(255,107,157,0.3)",
-                                      }
+                                  hasAnswer
+                                    ? needsWork
+                                      ? {
+                                          background: "rgba(255,107,157,0.15)",
+                                          color: "#ff6b9d",
+                                          border:
+                                            "1px solid rgba(255,107,157,0.3)",
+                                        }
+                                      : {
+                                          background: "rgba(46,204,113,0.12)",
+                                          color: "#2ecc71",
+                                          border:
+                                            "1px solid rgba(46,204,113,0.3)",
+                                        }
                                     : {
-                                        background: "rgba(46,204,113,0.12)",
+                                        background: "rgba(46,204,113,0.1)",
                                         color: "#2ecc71",
                                         border:
-                                          "1px solid rgba(46,204,113,0.3)",
+                                          "1px solid rgba(46,204,113,0.2)",
                                       }
                                 }
                               >
-                                {prog.score ?? 0}%{" "}
-                                {needsWork ? "· needs work" : "· passed"}
+                                {hasAnswer
+                                  ? `${prog.score ?? 0}% · ${needsWork ? "needs work" : "passed"}`
+                                  : "✓ done"}
                               </span>
-                            </div>
-                            <p
-                              className="text-sm leading-snug font-medium"
-                              style={{ color: "#c0c0d8" }}
-                            >
-                              {task.text}
-                            </p>
+                            ) : (
+                              <span
+                                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                                style={{
+                                  background: "rgba(255,255,255,0.04)",
+                                  color: "#5a5a7a",
+                                  border: "1px solid rgba(255,255,255,0.06)",
+                                }}
+                              >
+                                not done
+                              </span>
+                            )}
                           </div>
-                          {/* Answer */}
-                          <div className="px-4 py-3">
+                          <p
+                            className="text-sm leading-snug font-medium"
+                            style={{ color: "#c0c0d8" }}
+                          >
+                            {task.text}
+                          </p>
+                        </div>
+                        <div className="px-4 py-3 flex flex-col gap-3">
+                          {/* Student answer */}
+                          {hasAnswer && (
+                            <>
+                              <div
+                                className="text-xs font-bold uppercase tracking-widest"
+                                style={{
+                                  color: needsWork ? "#ff6b9d" : "#2ecc71",
+                                }}
+                              >
+                                Student's Answer
+                              </div>
+                              <p
+                                className="text-base leading-relaxed"
+                                style={{ color: "#f0f0eb" }}
+                              >
+                                {prog!.answer}
+                              </p>
+                            </>
+                          )}
+                          {/* Coach note */}
+                          <div>
                             <div
                               className="text-xs font-bold uppercase tracking-widest mb-1.5"
-                              style={{
-                                color: needsWork ? "#ff6b9d" : "#2ecc71",
-                              }}
+                              style={{ color: "#7878a8" }}
                             >
-                              Student's Answer
+                              Coach note
                             </div>
-                            <p
-                              className="text-base leading-relaxed"
-                              style={{ color: "#f0f0eb" }}
-                            >
-                              {prog.answer}
-                            </p>
+                            <textarea
+                              className="inp w-full resize-none"
+                              rows={2}
+                              placeholder="Add a note for this task…"
+                              value={
+                                taskNotes[taskKey] ?? prog?.coach_note ?? ""
+                              }
+                              onChange={(e) =>
+                                setTaskNotes((prev) => ({
+                                  ...prev,
+                                  [taskKey]: e.target.value,
+                                }))
+                              }
+                              style={{ fontSize: 16 }}
+                            />
                           </div>
+                          {/* Approve / Try Again */}
+                          {decision === "approved" ? (
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="flex-1 flex items-center gap-2 px-4 py-3 rounded-xl"
+                                style={{
+                                  background: "rgba(46,204,113,0.1)",
+                                  border: "1px solid rgba(46,204,113,0.3)",
+                                }}
+                              >
+                                <span style={{ color: "#2ecc71" }}>✓</span>
+                                <span
+                                  className="text-sm font-bold"
+                                  style={{ color: "#2ecc71" }}
+                                >
+                                  Approved
+                                </span>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  setTaskReviews((p) => {
+                                    const n = { ...p };
+                                    delete n[taskKey];
+                                    return n;
+                                  })
+                                }
+                                className="px-3 py-3 rounded-xl text-xs font-bold"
+                                style={{
+                                  color: "#7878a8",
+                                  background: "rgba(255,255,255,0.05)",
+                                }}
+                              >
+                                undo
+                              </button>
+                            </div>
+                          ) : decision === "denied" ? (
+                            <div className="flex flex-col gap-2">
+                              <div
+                                className="flex items-center gap-2 px-4 py-3 rounded-xl"
+                                style={{
+                                  background: "rgba(255,107,157,0.1)",
+                                  border: "1px solid rgba(255,107,157,0.3)",
+                                }}
+                              >
+                                <span style={{ color: "#ff6b9d" }}>↩</span>
+                                <span
+                                  className="text-sm font-bold"
+                                  style={{ color: "#ff6b9d" }}
+                                >
+                                  Try Again
+                                </span>
+                                {denialReasons[taskKey] && (
+                                  <span
+                                    className="text-xs ml-1"
+                                    style={{ color: "#c0c0d8" }}
+                                  >
+                                    — {denialReasons[taskKey]}
+                                  </span>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    setTaskReviews((p) => {
+                                      const n = { ...p };
+                                      delete n[taskKey];
+                                      return n;
+                                    })
+                                  }
+                                  className="ml-auto text-xs font-bold"
+                                  style={{ color: "#7878a8" }}
+                                >
+                                  undo
+                                </button>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {PRESETS.map((p) => (
+                                  <button
+                                    key={p}
+                                    onClick={() =>
+                                      setDenialReasons((prev) => ({
+                                        ...prev,
+                                        [taskKey]: p,
+                                      }))
+                                    }
+                                    className="text-xs font-bold px-3 py-1.5 rounded-full active:scale-95 transition-all"
+                                    style={
+                                      denialReasons[taskKey] === p
+                                        ? {
+                                            background: "#ff6b9d",
+                                            color: "#080810",
+                                          }
+                                        : {
+                                            background: "rgba(255,107,157,0.1)",
+                                            border:
+                                              "1px solid rgba(255,107,157,0.25)",
+                                            color: "#ff6b9d",
+                                          }
+                                    }
+                                  >
+                                    {p}
+                                  </button>
+                                ))}
+                              </div>
+                              <input
+                                className="inp"
+                                placeholder="Or type a custom reason…"
+                                value={denialReasons[taskKey] ?? ""}
+                                onChange={(e) =>
+                                  setDenialReasons((prev) => ({
+                                    ...prev,
+                                    [taskKey]: e.target.value,
+                                  }))
+                                }
+                                style={{ fontSize: 16 }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  setTaskReviews((p) => ({
+                                    ...p,
+                                    [taskKey]: "approved",
+                                  }))
+                                }
+                                className="flex-1 py-3 rounded-xl text-sm font-bold uppercase tracking-widest active:scale-95 transition-all"
+                                style={{
+                                  background: "rgba(46,204,113,0.12)",
+                                  border: "1px solid rgba(46,204,113,0.35)",
+                                  color: "#2ecc71",
+                                }}
+                              >
+                                ✓ Approve
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setTaskReviews((p) => ({
+                                    ...p,
+                                    [taskKey]: "denied",
+                                  }))
+                                }
+                                className="flex-1 py-3 rounded-xl text-sm font-bold uppercase tracking-widest active:scale-95 transition-all"
+                                style={{
+                                  background: "rgba(255,107,157,0.1)",
+                                  border: "1px solid rgba(255,107,157,0.3)",
+                                  color: "#ff6b9d",
+                                }}
+                              >
+                                ↩ Try Again
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div
-                    className="rounded-xl px-4 py-3 text-sm"
-                    style={{
-                      background: "#0c0c18",
-                      border: "1px solid rgba(255,255,255,0.05)",
-                      color: "#5a5a7a",
-                    }}
-                  >
-                    No written answers for this day
-                  </div>
-                )}
+                      </div>
+                    );
+                  })}
+                </div>
 
                 {/* Video submission */}
                 {dayDataRow?.video_url && (
