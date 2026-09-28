@@ -3182,24 +3182,21 @@ export default function CoachDashboard({
                         r.stage_idx === si &&
                         r.day_idx === di,
                     );
-                    const writtenAnswers = day.tasks
-                      .map((task, ti) => {
-                        const prog = localTasks.find(
-                          (t) =>
-                            t.student_id === srs.id &&
-                            t.stage_idx === si &&
-                            t.day_idx === di &&
-                            t.task_idx === ti,
-                        );
-                        if (!prog?.answer) return null;
-                        return {
-                          ti,
-                          task,
-                          prog,
-                          needsWork: (prog.score ?? 0) < 30,
-                        };
-                      })
-                      .filter(Boolean);
+                    const writtenAnswers = day.tasks.map((task, ti) => {
+                      const prog = localTasks.find(
+                        (t) =>
+                          t.student_id === srs.id &&
+                          t.stage_idx === si &&
+                          t.day_idx === di &&
+                          t.task_idx === ti,
+                      );
+                      return {
+                        ti,
+                        task,
+                        prog: prog ?? null,
+                        needsWork: (prog?.score ?? 0) < 30,
+                      };
+                    });
                     return (
                       <div key={`${si}-${di}`} className="flex flex-col gap-3">
                         {/* Day header */}
@@ -3248,7 +3245,8 @@ export default function CoachDashboard({
                                 ? "Manual read ✓"
                                 : "NOT read"}
                             </span>
-                            {writtenAnswers.length > 0 && (
+                            {writtenAnswers.filter((w) => w.prog?.answer)
+                              .length > 0 && (
                               <span
                                 className="text-xs font-bold px-2 py-0.5 rounded-full"
                                 style={{
@@ -3257,30 +3255,50 @@ export default function CoachDashboard({
                                   border: "1px solid rgba(232,197,71,0.3)",
                                 }}
                               >
-                                {writtenAnswers.length} written answer
-                                {writtenAnswers.length !== 1 ? "s" : ""}
+                                {
+                                  writtenAnswers.filter((w) => w.prog?.answer)
+                                    .length
+                                }{" "}
+                                written answer
+                                {writtenAnswers.filter((w) => w.prog?.answer)
+                                  .length !== 1
+                                  ? "s"
+                                  : ""}
                               </span>
                             )}
                           </div>
                         </div>
 
-                        {/* Written answers */}
+                        {/* All tasks */}
                         {writtenAnswers.map((item) => {
-                          if (!item) return null;
                           const { ti, task, prog, needsWork } = item;
+                          const hasAnswer = !!prog?.answer;
+                          const taskKey = `${si}-${di}-${ti}`;
+                          const decision =
+                            taskReviews[taskKey] ?? prog?.coach_status;
+                          const borderCol = !prog?.completed
+                            ? "rgba(255,255,255,0.08)"
+                            : decision === "denied"
+                              ? "rgba(255,107,157,0.35)"
+                              : decision === "approved"
+                                ? "rgba(46,204,113,0.35)"
+                                : needsWork && hasAnswer
+                                  ? "rgba(255,107,157,0.25)"
+                                  : "rgba(46,204,113,0.2)";
                           return (
                             <div
                               key={ti}
                               className="rounded-2xl overflow-hidden"
                               style={{
                                 background: "#0c0c18",
-                                border: `1px solid ${needsWork ? "rgba(255,107,157,0.35)" : "rgba(46,204,113,0.25)"}`,
+                                border: `1px solid ${borderCol}`,
                               }}
                             >
                               <div
                                 className="px-4 pt-3 pb-2"
                                 style={{
-                                  borderBottom: `1px solid ${needsWork ? "rgba(255,107,157,0.1)" : "rgba(46,204,113,0.08)"}`,
+                                  borderBottom:
+                                    "1px solid rgba(255,255,255,0.05)",
                                 }}
                               >
                                 <div className="flex items-center justify-between mb-1.5">
@@ -3290,28 +3308,52 @@ export default function CoachDashboard({
                                   >
                                     Task {ti + 1}
                                   </span>
-                                  <span
-                                    className="text-xs font-bold px-2 py-0.5 rounded-full"
-                                    style={
-                                      needsWork
-                                        ? {
-                                            background:
-                                              "rgba(255,107,157,0.15)",
-                                            color: "#ff6b9d",
-                                            border:
-                                              "1px solid rgba(255,107,157,0.3)",
-                                          }
-                                        : {
-                                            background: "rgba(46,204,113,0.12)",
-                                            color: "#2ecc71",
-                                            border:
-                                              "1px solid rgba(46,204,113,0.3)",
-                                          }
-                                    }
-                                  >
-                                    {prog.score ?? 0}%{" "}
-                                    {needsWork ? "· needs work" : "· passed"}
-                                  </span>
+                                  {prog?.completed ? (
+                                    <span
+                                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                                      style={
+                                        hasAnswer
+                                          ? needsWork
+                                            ? {
+                                                background:
+                                                  "rgba(255,107,157,0.15)",
+                                                color: "#ff6b9d",
+                                                border:
+                                                  "1px solid rgba(255,107,157,0.3)",
+                                              }
+                                            : {
+                                                background:
+                                                  "rgba(46,204,113,0.12)",
+                                                color: "#2ecc71",
+                                                border:
+                                                  "1px solid rgba(46,204,113,0.3)",
+                                              }
+                                          : {
+                                              background:
+                                                "rgba(46,204,113,0.1)",
+                                              color: "#2ecc71",
+                                              border:
+                                                "1px solid rgba(46,204,113,0.2)",
+                                            }
+                                      }
+                                    >
+                                      {hasAnswer
+                                        ? `${prog.score ?? 0}% · ${needsWork ? "needs work" : "passed"}`
+                                        : "✓ done"}
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                                      style={{
+                                        background: "rgba(255,255,255,0.04)",
+                                        color: "#5a5a7a",
+                                        border:
+                                          "1px solid rgba(255,255,255,0.06)",
+                                      }}
+                                    >
+                                      not done
+                                    </span>
+                                  )}
                                 </div>
                                 <p
                                   className="text-sm leading-snug font-medium"
@@ -3321,25 +3363,33 @@ export default function CoachDashboard({
                                 </p>
                               </div>
                               <div className="px-4 py-3">
-                                <div
-                                  className="text-xs font-bold uppercase tracking-widest mb-1.5"
-                                  style={{
-                                    color: needsWork ? "#ff6b9d" : "#2ecc71",
-                                  }}
-                                >
-                                  Student's Answer
-                                </div>
-                                <p
-                                  className="text-base leading-relaxed mb-4"
-                                  style={{ color: "#f0f0eb" }}
-                                >
-                                  {prog.answer}
-                                </p>
+                                {hasAnswer && (
+                                  <>
+                                    <div
+                                      className="text-xs font-bold uppercase tracking-widest mb-1.5"
+                                      style={{
+                                        color: needsWork
+                                          ? "#ff6b9d"
+                                          : "#2ecc71",
+                                      }}
+                                    >
+                                      Student's Answer
+                                    </div>
+                                    <p
+                                      className="text-base leading-relaxed mb-4"
+                                      style={{ color: "#f0f0eb" }}
+                                    >
+                                      {prog!.answer}
+                                    </p>
+                                  </>
+                                )}
                                 {/* Coach note — always visible */}
                                 {(() => {
                                   const taskKey = `${si}-${di}-${ti}`;
                                   const note =
-                                    taskNotes[taskKey] ?? prog.coach_note ?? "";
+                                    taskNotes[taskKey] ??
+                                    prog?.coach_note ??
+                                    "";
                                   return (
                                     <div className="mb-3">
                                       <div
@@ -3368,7 +3418,7 @@ export default function CoachDashboard({
                                 {(() => {
                                   const taskKey = `${si}-${di}-${ti}`;
                                   const decision =
-                                    taskReviews[taskKey] ?? prog.coach_status;
+                                    taskReviews[taskKey] ?? prog?.coach_status;
                                   if (decision === "approved") {
                                     return (
                                       <div className="flex items-center gap-2">
