@@ -146,6 +146,8 @@ export default function CoachDashboard({
   const [denialReasons, setDenialReasons] = useState<Record<string, string>>(
     {},
   );
+  // taskKey → coach note text
+  const [taskNotes, setTaskNotes] = useState<Record<string, string>>({});
   const [newStudentToast, setNewStudentToast] = useState<string | null>(null);
   const [localPending, setLocalPending] = useState<Profile[]>(pendingStudents);
   const [localNotes, setLocalNotes] = useState<CoachNote[]>(initialNotes);
@@ -337,11 +339,17 @@ export default function CoachDashboard({
       const [siStr, diStr] = key.split("-");
       await saveRemark(studentId, Number(siStr), Number(diStr), remark);
     }
-    // Persist coach approve/deny decisions
-    for (const [taskKey, status] of Object.entries(taskReviews)) {
+    // Persist coach approve/deny decisions and notes
+    const allTaskKeys = new Set([
+      ...Object.keys(taskReviews),
+      ...Object.keys(taskNotes),
+    ]);
+    for (const taskKey of allTaskKeys) {
       const [siStr, diStr, tiStr] = taskKey.split("-");
+      const status = taskReviews[taskKey];
       const denial_reason =
         status === "denied" ? denialReasons[taskKey]?.trim() || null : null;
+      const coach_note = taskNotes[taskKey]?.trim() || null;
       const prog = localTasks.find(
         (t) =>
           t.student_id === studentId &&
@@ -353,8 +361,8 @@ export default function CoachDashboard({
       await supabase
         .from("task_progress")
         .update({
-          coach_status: status,
-          denial_reason,
+          ...(status ? { coach_status: status, denial_reason } : {}),
+          coach_note,
           // Denied answers reset completed so student must resubmit
           ...(status === "denied"
             ? { completed: false, answer: null, score: null }
@@ -367,23 +375,29 @@ export default function CoachDashboard({
         if (t.student_id !== studentId) return t;
         const key = `${t.stage_idx}-${t.day_idx}-${t.task_idx}`;
         const status = taskReviews[key];
-        if (!status) return t;
+        const note = taskNotes[key]?.trim() || null;
+        const updated = {
+          ...t,
+          ...(note !== null ? { coach_note: note } : {}),
+        };
+        if (!status) return updated;
         if (status === "denied")
           return {
-            ...t,
+            ...updated,
             coach_status: "denied",
             denial_reason: denialReasons[key] || null,
             completed: false,
             answer: null,
             score: null,
           };
-        return { ...t, coach_status: "approved" };
+        return { ...updated, coach_status: "approved" };
       }),
     );
     setStudentReviewSheet(null);
     setSheetNotes({});
     setTaskReviews({});
     setDenialReasons({});
+    setTaskNotes({});
   }
 
   async function confirmSignoff() {
@@ -448,6 +462,7 @@ export default function CoachDashboard({
           score: null,
           coach_status: null,
           denial_reason: null,
+          coach_note: null,
         },
       ];
     });
@@ -3320,7 +3335,36 @@ export default function CoachDashboard({
                                 >
                                   {prog.answer}
                                 </p>
-                                {/* Approve / Deny */}
+                                {/* Coach note — always visible */}
+                                {(() => {
+                                  const taskKey = `${si}-${di}-${ti}`;
+                                  const note =
+                                    taskNotes[taskKey] ?? prog.coach_note ?? "";
+                                  return (
+                                    <div className="mb-3">
+                                      <div
+                                        className="text-xs font-bold uppercase tracking-widest mb-1.5"
+                                        style={{ color: "#7878a8" }}
+                                      >
+                                        Coach note
+                                      </div>
+                                      <textarea
+                                        className="inp w-full resize-none"
+                                        rows={2}
+                                        placeholder="Add a note for this task…"
+                                        value={note}
+                                        onChange={(e) =>
+                                          setTaskNotes((prev) => ({
+                                            ...prev,
+                                            [taskKey]: e.target.value,
+                                          }))
+                                        }
+                                        style={{ fontSize: 16 }}
+                                      />
+                                    </div>
+                                  );
+                                })()}
+                                {/* Approve / Try Again */}
                                 {(() => {
                                   const taskKey = `${si}-${di}-${ti}`;
                                   const decision =
@@ -3378,13 +3422,13 @@ export default function CoachDashboard({
                                           }}
                                         >
                                           <span style={{ color: "#ff6b9d" }}>
-                                            ✕
+                                            ↩
                                           </span>
                                           <span
                                             className="text-sm font-bold"
                                             style={{ color: "#ff6b9d" }}
                                           >
-                                            Denied
+                                            Try Again
                                           </span>
                                           {denialReasons[taskKey] && (
                                             <span
@@ -3446,13 +3490,13 @@ export default function CoachDashboard({
                                             color: "#ff6b9d",
                                           }}
                                         >
-                                          ✕ Deny
+                                          ↩ Try Again
                                         </button>
                                       </div>
                                     </div>
                                   );
                                 })()}
-                                {/* Denial reason input — shown when denied and no reason yet */}
+                                {/* Reason — shown when Try Again selected */}
                                 {(() => {
                                   const taskKey = `${si}-${di}-${ti}`;
                                   const decision = taskReviews[taskKey];
@@ -3469,7 +3513,7 @@ export default function CoachDashboard({
                                         className="text-xs font-bold uppercase tracking-widest"
                                         style={{ color: "#ff6b9d" }}
                                       >
-                                        Reason for denial
+                                        Reason
                                       </div>
                                       <div className="flex flex-wrap gap-1.5">
                                         {PRESETS.map((p) => (
