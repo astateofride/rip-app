@@ -462,6 +462,7 @@ export default function StageView({
           score: result.score,
           coach_status: null,
           denial_reason: null,
+          coach_note: null,
         },
       ];
     });
@@ -554,6 +555,7 @@ export default function StageView({
           score: null,
           coach_status: null,
           denial_reason: null,
+          coach_note: null,
         },
       ];
       updated = next;
@@ -1149,13 +1151,13 @@ export default function StageView({
                     borderBottom: "1px solid rgba(255,107,157,0.2)",
                   }}
                 >
-                  <span className="text-lg flex-shrink-0">✕</span>
+                  <span className="text-lg flex-shrink-0">↩</span>
                   <div>
                     <div
                       className="text-xs font-bold uppercase tracking-widest mb-0.5"
                       style={{ color: "#ff6b9d" }}
                     >
-                      Answer not accepted
+                      Try again
                     </div>
                     <p
                       className="text-sm leading-snug"
@@ -1164,6 +1166,36 @@ export default function StageView({
                       {prog.denial_reason
                         ? `Your coach flagged this as: ${prog.denial_reason}. Please rewrite your answer below.`
                         : "Your coach has asked you to rewrite this answer. Have another go below."}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {prog?.coach_note && (
+                <div
+                  className="px-4 py-3 flex items-start gap-3"
+                  style={{
+                    background: "rgba(232,197,71,0.06)",
+                    borderBottom: "1px solid rgba(232,197,71,0.15)",
+                  }}
+                >
+                  <span
+                    className="text-base flex-shrink-0"
+                    style={{ color: "#e8c547" }}
+                  >
+                    ✎
+                  </span>
+                  <div>
+                    <div
+                      className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                      style={{ color: "#e8c547" }}
+                    >
+                      Coach note
+                    </div>
+                    <p
+                      className="text-sm leading-snug"
+                      style={{ color: "#c0c0d8" }}
+                    >
+                      {prog.coach_note}
                     </p>
                   </div>
                 </div>

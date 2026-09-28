@@ -24,6 +24,7 @@ export interface TaskProgress {
   score: number | null;
   coach_status: "approved" | "denied" | null;
   denial_reason: string | null;
+  coach_note: string | null;
 }
 
 export interface DayData {
