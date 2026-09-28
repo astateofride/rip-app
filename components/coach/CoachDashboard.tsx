@@ -3306,9 +3306,20 @@ export default function CoachDashboard({
         (() => {
           const srs = localStudents.find((s) => s.id === studentReviewSheet)!;
           if (!srs) return null;
-          const pendingDays: { si: number; di: number }[] = [];
+          const allActivityDays: {
+            si: number;
+            di: number;
+            pending: boolean;
+          }[] = [];
           for (let si = 0; si < 3; si++) {
             for (let di = 0; di < STAGES[si].days.length; di++) {
+              const hasActivity = localTasks.some(
+                (t) =>
+                  t.student_id === srs.id &&
+                  t.stage_idx === si &&
+                  t.day_idx === di,
+              );
+              if (!hasActivity) continue;
               const hasCompleted = localTasks.some(
                 (t) =>
                   t.student_id === srs.id &&
@@ -3322,10 +3333,12 @@ export default function CoachDashboard({
                   r.stage_idx === si &&
                   r.day_idx === di,
               );
-              if (hasCompleted && !alreadyReviewed && !getSignoff(srs.id, si))
-                pendingDays.push({ si, di });
+              const pending =
+                hasCompleted && !alreadyReviewed && !getSignoff(srs.id, si);
+              allActivityDays.push({ si, di, pending });
             }
           }
+          const pendingDays = allActivityDays.filter((d) => d.pending);
           const totalAnswers = pendingDays.reduce(
             (acc, { si, di }) =>
               acc +
@@ -3375,8 +3388,9 @@ export default function CoachDashboard({
                     className="text-xs font-bold uppercase tracking-widest"
                     style={{ color: "#e8c547" }}
                   >
-                    {totalAnswers} answer{totalAnswers !== 1 ? "s" : ""} to
-                    review
+                    {pendingDays.length > 0
+                      ? `${totalAnswers} answer${totalAnswers !== 1 ? "s" : ""} to review`
+                      : `${allActivityDays.length} day${allActivityDays.length !== 1 ? "s" : ""} · all reviewed`}
                   </div>
                 </div>
                 <button
@@ -3391,20 +3405,14 @@ export default function CoachDashboard({
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-6 pb-8">
-                {pendingDays.length === 0 ? (
+                {allActivityDays.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
-                    <div
-                      className="font-display text-4xl mb-3"
-                      style={{ color: "#2ecc71" }}
-                    >
-                      ALL CLEAR
-                    </div>
-                    <p style={{ color: "#c0c0d8" }}>
-                      Nothing pending for {srs.name.split(" ")[0]}.
+                    <p style={{ color: "#7878a8" }}>
+                      {srs.name.split(" ")[0]} hasn't started any work yet.
                     </p>
                   </div>
                 ) : (
-                  pendingDays.map(({ si, di }) => {
+                  allActivityDays.map(({ si, di, pending }) => {
                     const day = STAGES[si].days[di];
                     const dayNum = String(si * 10 + di + 1).padStart(2, "0");
                     const colour = colours[si];
@@ -3503,6 +3511,18 @@ export default function CoachDashboard({
                                   .length !== 1
                                   ? "s"
                                   : ""}
+                              </span>
+                            )}
+                            {!pending && (
+                              <span
+                                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                                style={{
+                                  background: "rgba(46,204,113,0.1)",
+                                  color: "#2ecc71",
+                                  border: "1px solid rgba(46,204,113,0.25)",
+                                }}
+                              >
+                                ✓ reviewed
                               </span>
                             )}
                           </div>
